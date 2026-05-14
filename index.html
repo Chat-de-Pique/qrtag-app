@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+  <meta name="theme-color" content="#667eea">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="manifest.json">
+  <title>QRTag</title>
+  <style>
+    :root{--accent:#667eea;--accent2:#764ba2;--radius:14px;--shadow:0 4px 20px rgba(0,0,0,.10);}
+    *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+    body{font-family:system-ui,-apple-system,sans-serif;background:#f6f6f9;color:#1a1a1a;overscroll-behavior:none;}
+    .screen{display:none;min-height:100vh;flex-direction:column;}
+    .screen.active{display:flex;}
+    /* ── Splash ── */
+    #s-splash{align-items:center;justify-content:center;background:linear-gradient(135deg,#667eea,#764ba2);}
+    .splash-logo{font-size:64px;margin-bottom:12px;}
+    .splash-title{color:#fff;font-size:28px;font-weight:900;letter-spacing:-1px;}
+    .splash-sub{color:rgba(255,255,255,.7);font-size:14px;margin-top:4px;}
+    /* ── Auth ── */
+    #s-auth{align-items:center;justify-content:center;background:linear-gradient(135deg,#667eea,#764ba2);padding:20px;}
+    .auth-card{background:#fff;border-radius:24px;padding:28px 24px;width:100%;max-width:380px;box-shadow:0 24px 64px rgba(0,0,0,.22);}
+    .auth-logo{text-align:center;margin-bottom:20px;}
+    .auth-logo .icon{font-size:44px;}
+    .auth-logo h1{font-size:26px;font-weight:900;letter-spacing:-1px;margin:4px 0 2px;}
+    .auth-logo p{color:#999;font-size:13px;}
+    .tab-toggle{display:flex;background:#f4f4f5;border-radius:12px;padding:4px;margin-bottom:20px;}
+    .tab-toggle button{flex:1;padding:9px 0;border:none;border-radius:9px;cursor:pointer;font-weight:700;font-size:13px;transition:all .2s;}
+    .tab-toggle button.active{background:#fff;color:var(--accent);box-shadow:0 2px 8px rgba(0,0,0,.10);}
+    .tab-toggle button:not(.active){background:transparent;color:#999;}
+    label{font-size:12px;font-weight:700;color:#555;display:block;margin-bottom:4px;}
+    input[type=text],input[type=email],input[type=password],textarea{width:100%;padding:11px 13px;border:1.5px solid #e4e4e7;border-radius:10px;font-size:14px;outline:none;font-family:inherit;transition:border .2s;margin-bottom:10px;}
+    input:focus,textarea:focus{border-color:var(--accent);}
+    textarea{resize:none;}
+    .btn{display:block;width:100%;padding:13px 0;border:none;border-radius:13px;font-size:15px;font-weight:800;cursor:pointer;text-align:center;text-decoration:none;transition:opacity .2s;}
+    .btn-primary{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;}
+    .btn-secondary{background:#f4f4f5;color:#555;border:1px solid #e4e4e7;}
+    .btn:disabled{opacity:.6;cursor:default;}
+    .error{background:#fef2f2;color:#dc2626;padding:10px 13px;border-radius:9px;font-size:13px;margin-bottom:12px;border:1px solid #fecaca;}
+    .success{background:#f0fdf4;color:#16a34a;padding:10px 13px;border-radius:9px;font-size:13px;margin-bottom:12px;border:1px solid #86efac;}
+    /* ── Dashboard ── */
+    #s-dashboard{background:#f6f6f9;}
+    .dash-header{background:linear-gradient(135deg,#667eea,#764ba2);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+    .dash-header-info small{color:rgba(255,255,255,.7);font-size:11px;font-weight:600;letter-spacing:.4px;display:block;}
+    .dash-header-info strong{color:#fff;font-size:17px;font-weight:900;}
+    .dash-header-btns{display:flex;gap:8px;}
+    .header-btn{padding:8px 12px;background:rgba(255,255,255,.2);color:#fff;border:none;border-radius:10px;font-size:13px;cursor:pointer;font-weight:700;}
+    .tabs-bar{display:flex;background:#fff;border-bottom:1px solid #e8e8ec;flex-shrink:0;}
+    .tabs-bar button{flex:1;padding:12px 4px;border:none;border-bottom:2.5px solid transparent;background:none;font-size:12px;font-weight:700;color:#aaa;cursor:pointer;letter-spacing:.2px;transition:all .2s;}
+    .tabs-bar button.active{color:var(--accent);border-bottom-color:var(--accent);}
+    .tab-content{flex:1;overflow-y:auto;padding:16px;}
+    .tab-pane{display:none;}
+    .tab-pane.active{display:block;}
+    /* ── Cards ── */
+    .card{background:#fff;border-radius:var(--radius);padding:16px;margin-bottom:14px;box-shadow:var(--shadow);}
+    .card h3{font-size:15px;font-weight:800;margin-bottom:12px;}
+    /* ── Blocks ── */
+    .block-item{background:#fff;border-radius:var(--radius);padding:14px;margin-bottom:10px;box-shadow:var(--shadow);}
+    .block-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+    .block-type{font-size:13px;font-weight:700;color:var(--accent);}
+    .block-del{background:#fef2f2;color:#dc2626;border:none;border-radius:8px;padding:5px 10px;cursor:pointer;font-size:12px;font-weight:600;}
+    .add-block-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
+    .add-block-btn{padding:14px 8px;background:#f8f8fa;border:1.5px solid #e4e4e7;border-radius:12px;cursor:pointer;text-align:center;font-size:13px;font-weight:700;line-height:1.5;}
+    .add-block-btn span{display:block;font-size:22px;margin-bottom:4px;}
+    /* ── Templates ── */
+    .tpl-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+    .tpl-btn{padding:18px 8px;border-radius:14px;cursor:pointer;text-align:center;border:2.5px solid transparent;transition:all .15s;}
+    .tpl-btn.active{border-color:var(--accent);box-shadow:0 0 0 3px rgba(99,102,241,.2);}
+    .tpl-btn .tpl-name{font-size:12px;font-weight:700;margin-top:4px;}
+    .tpl-btn .tpl-check{font-size:11px;margin-top:2px;}
+    /* ── Fonts ── */
+    .font-list{display:flex;flex-direction:column;gap:8px;}
+    .font-btn{padding:12px 14px;border-radius:11px;cursor:pointer;text-align:left;font-size:14px;border:2px solid transparent;transition:all .15s;background:#f8f8fa;}
+    .font-btn.active{background:#f0f0ff;border-color:var(--accent);color:var(--accent);font-weight:700;}
+    /* ── Color row ── */
+    .color-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+    .color-row-info div{font-size:13px;font-weight:600;}
+    .color-row-info small{font-size:11px;color:#aaa;}
+    input[type=color]{width:42px;height:38px;border:2px solid #e4e4e7;border-radius:10px;cursor:pointer;padding:2px;background:none;}
+    /* ── QR ── */
+    .qr-box{background:#f8f8fa;border-radius:18px;padding:20px;display:inline-block;border:1px solid #e4e4e7;margin-bottom:14px;}
+    #qr-canvas-container canvas{display:block;}
+    .qr-url{background:#f4f4f5;border-radius:10px;padding:11px 13px;font-size:12px;color:var(--accent);word-break:break-all;font-family:monospace;margin-bottom:8px;}
+    /* ── Footer ── */
+    .app-footer{padding:11px 18px;background:#fff;border-top:1px solid #e8e8ec;text-align:center;flex-shrink:0;}
+    .app-footer span,.app-footer button{font-size:11px;color:#ccc;}
+    .app-footer button{background:none;border:none;cursor:pointer;text-decoration:underline;}
+    /* ── Toast ── */
+    #toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);background:#1a1a1a;color:#fff;padding:10px 20px;border-radius:30px;font-size:13px;font-weight:600;opacity:0;transition:all .3s;z-index:999;pointer-events:none;white-space:nowrap;}
+    #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+    /* ── Public profile ── */
+    #s-public{min-height:100vh;}
+    .pub-back{position:sticky;top:0;padding:10px 16px;background:rgba(0,0,0,.12);backdrop-filter:blur(8px);z-index:10;}
+    .pub-back button{background:rgba(255,255,255,.22);border:none;border-radius:9px;padding:7px 14px;cursor:pointer;font-size:13px;font-weight:700;}
+    .pub-container{max-width:480px;margin:0 auto;padding:32px 18px 28px;}
+    .pub-avatar{width:88px;height:88px;border-radius:50%;object-fit:cover;display:block;margin:0 auto 12px;border:3px solid #fff;}
+    .pub-avatar-placeholder{width:80px;height:80px;border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:800;color:#fff;}
+    .pub-name{text-align:center;font-size:24px;font-weight:900;margin-bottom:6px;}
+    .pub-bio{text-align:center;font-size:14px;opacity:.75;margin-bottom:24px;line-height:1.5;}
+    .pub-block{margin-bottom:12px;}
+    .pub-text{border-radius:16px;padding:16px 18px;}
+    .pub-text p{font-size:15px;line-height:1.7;white-space:pre-wrap;}
+    .pub-link{display:block;border-radius:14px;padding:15px 20px;text-align:center;text-decoration:none;font-size:15px;font-weight:800;}
+    .pub-photo{border-radius:16px;overflow:hidden;}
+    .pub-photo img{width:100%;display:block;}
+    .pub-video{border-radius:16px;overflow:hidden;position:relative;padding-top:56.25%;}
+    .pub-video iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none;}
+    .pub-empty{text-align:center;padding:50px 0;opacity:.4;font-size:15px;}
+    .pub-empty .pub-empty-icon{font-size:44px;margin-bottom:8px;}
+    .pub-footer{text-align:center;padding:16px 20px;font-size:11px;opacity:.35;}
+    /* ── Legal ── */
+    #s-legal{background:#f6f6f9;padding:20px;}
+    .legal-card{background:#fff;border-radius:18px;padding:24px;box-shadow:var(--shadow);}
+    .legal-section{margin-bottom:18px;padding-bottom:18px;border-bottom:1px solid #f0f0f0;}
+    .legal-section:last-child{border-bottom:none;margin-bottom:0;}
+    .legal-section h3{font-size:13px;font-weight:800;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;}
+    .legal-section p{font-size:13px;color:#555;line-height:1.65;}
+    /* ── Config alert ── */
+    .config-banner{background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:14px;margin-bottom:16px;font-size:13px;color:#92400e;line-height:1.5;}
+    .config-banner strong{display:block;margin-bottom:4px;}
+  </style>
+</head>
+<body>
+
+<!-- ═══ SPLASH ═══ -->
+<div id="s-splash" class="screen active">
+  <div class="splash-logo">🏷️</div>
+  <div class="splash-title">QRTag</div>
+  <div class="splash-sub">Chargement…</div>
+</div>
+
+<!-- ═══ AUTH ═══ -->
+<div id="s-auth" class="screen">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="icon">🏷️</div>
+      <h1>QRTag</h1>
+      <p>Ton message sur ton t-shirt</p>
+    </div>
+    <div class="tab-toggle">
+      <button id="btn-to-login" class="active" onclick="switchAuthMode('login')">Connexion</button>
+      <button id="btn-to-register" onclick="switchAuthMode('register')">Inscription</button>
+    </div>
+    <div id="auth-register-fields" style="display:none">
+      <label>Nom d'utilisateur</label>
+      <input type="text" id="auth-username" placeholder="monpseudo" autocomplete="off">
+    </div>
+    <label>Email</label>
+    <input type="email" id="auth-email" placeholder="toi@email.com" autocomplete="email">
+    <label>Mot de passe</label>
+    <input type="password" id="auth-pw" placeholder="••••••••" autocomplete="current-password">
+    <div id="auth-error" style="display:none" class="error"></div>
+    <button class="btn btn-primary" id="auth-submit" onclick="handleAuth()">Se connecter</button>
+  </div>
+</div>
+
+<!-- ═══ DASHBOARD ═══ -->
+<div id="s-dashboard" class="screen">
+  <div class="dash-header">
+    <div class="dash-header-info">
+      <small>CONNECTÉ EN TANT QUE</small>
+      <strong id="dash-username">@user</strong>
+    </div>
+    <div class="dash-header-btns">
+      <button class="header-btn" onclick="showPublicPreview()">👁 Aperçu</button>
+      <button class="header-btn" onclick="handleLogout()">↩</button>
+    </div>
+  </div>
+  <div class="tabs-bar">
+    <button class="active" onclick="switchTab('content')">📝 Contenu</button>
+    <button onclick="switchTab('style')">🎨 Style</button>
+    <button onclick="switchTab('qr')">📲 QR Code</button>
+  </div>
+  <div class="tab-content">
+    <!-- TAB CONTENT -->
+    <div id="tab-content" class="tab-pane active">
+      <div id="flash-saved" style="display:none" class="success">✅ Sauvegardé automatiquement</div>
+      <!-- Profile info -->
+      <div class="card">
+        <h3>👤 Profil</h3>
+        <label>Nom affiché</label>
+        <input type="text" id="p-displayname" placeholder="Ton prénom, pseudo…" oninput="scheduleAutoSave()">
+        <label>Bio / Tagline</label>
+        <textarea id="p-bio" placeholder="Une courte phrase qui te décrit…" rows="2" oninput="scheduleAutoSave()"></textarea>
+        <label>Photo de profil (colle une URL d'image)</label>
+        <input type="text" id="p-avatar" placeholder="https://…/photo.jpg" oninput="scheduleAutoSave()">
+      </div>
+      <!-- Blocks list -->
+      <div>
+        <h3 style="font-size:15px;font-weight:800;margin-bottom:12px;">📦 Blocs de contenu</h3>
+        <div id="blocks-list"></div>
+      </div>
+      <!-- Add block -->
+      <div id="add-block-panel" style="display:none" class="card">
+        <p style="font-weight:700;font-size:14px;margin-bottom:12px;">Quel type de bloc ?</p>
+        <div class="add-block-grid">
+          <button class="add-block-btn" onclick="addBlock('text')"><span>📝</span>Message texte</button>
+          <button class="add-block-btn" onclick="addBlock('link')"><span>🔗</span>Lien cliquable</button>
+          <button class="add-block-btn" onclick="addBlock('photo')"><span>🖼️</span>Photo (URL)</button>
+          <button class="add-block-btn" onclick="addBlock('video')"><span>🎥</span>Vidéo YouTube</button>
+        </div>
+        <button class="btn btn-secondary" style="margin-top:10px" onclick="toggleAddPanel(false)">Annuler</button>
+      </div>
+      <button id="btn-add-block" class="btn btn-primary" onclick="toggleAddPanel(true)">+ Ajouter un bloc</button>
+    </div>
+
+    <!-- TAB STYLE -->
+    <div id="tab-style" class="tab-pane">
+      <div class="card">
+        <h3>🎨 Template</h3>
+        <div class="tpl-grid" id="tpl-grid"></div>
+      </div>
+      <div class="card">
+        <h3>🔤 Police de caractères</h3>
+        <div class="font-list" id="font-list"></div>
+      </div>
+      <div class="card">
+        <h3>🖌️ Couleurs personnalisées</h3>
+        <div class="color-row">
+          <div class="color-row-info"><div>Couleur principale</div><small>Boutons, liens</small></div>
+          <input type="color" id="c-primary" oninput="onColorChange('primaryColor',this.value)">
+        </div>
+        <div class="color-row">
+          <div class="color-row-info"><div>Fond de page</div><small>Arrière-plan</small></div>
+          <input type="color" id="c-bg" oninput="onColorChange('bgColor',this.value)">
+        </div>
+        <div class="color-row">
+          <div class="color-row-info"><div>Texte</div><small>Couleur du texte</small></div>
+          <input type="color" id="c-text" oninput="onColorChange('textColor',this.value)">
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB QR -->
+    <div id="tab-qr" class="tab-pane">
+      <div class="card" style="text-align:center">
+        <h3>📲 Ton QR Code unique</h3>
+        <div class="qr-box">
+          <div id="qr-canvas-container"></div>
+        </div>
+        <div style="background:#fffbeb;border-radius:10px;padding:10px 13px;font-size:12px;color:#92400e;margin-bottom:14px;border:1px solid #fde68a;text-align:left;">
+          🖨️ <strong>Ce QR code est permanent</strong> — même si tu changes ton contenu, il reste identique. Imprime-le sur ton t-shirt en toute confiance !
+        </div>
+        <button class="btn btn-primary" id="btn-download-qr" onclick="downloadQR()">⬇️ Télécharger le QR Code</button>
+        <p style="font-size:11px;color:#bbb;margin-top:8px;">Format PNG haute résolution</p>
+      </div>
+      <div class="card">
+        <h3>🔗 Lien de ta page publique</h3>
+        <div class="qr-url" id="qr-url-display"></div>
+        <button class="btn btn-secondary" onclick="copyLink()">📋 Copier le lien</button>
+        <p style="font-size:12px;color:#bbb;margin-top:10px;line-height:1.5;">Quand quelqu'un scanne ton t-shirt, il voit ta page telle que tu l'as configurée — modifiable à tout moment.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="app-footer">
+    <span>© 2025 QRTag &nbsp;·&nbsp;</span>
+    <button onclick="showScreen('legal')">Mentions légales</button>
+    <span>&nbsp;·&nbsp; contact@qrtag.app</span>
+  </div>
+</div>
+
+<!-- ═══ PUBLIC PROFILE ═══ -->
+<div id="s-public" class="screen">
+  <div id="pub-back-bar" style="display:none" class="pub-back">
+    <button id="pub-back-btn" style="color:#1a1a1a">← Retour à l'éditeur</button>
+  </div>
+  <div id="pub-content"></div>
+</div>
+
+<!-- ═══ LEGAL ═══ -->
+<div id="s-legal" class="screen">
+  <div style="padding:20px;max-width:520px;margin:0 auto;width:100%;">
+    <button class="btn btn-secondary" style="width:auto;padding:9px 18px;margin-bottom:16px;" onclick="showScreen('dashboard')">← Retour</button>
+    <div class="legal-card">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
+        <span style="font-size:32px">📄</span>
+        <div><h2 style="font-size:20px;font-weight:900;">Mentions légales</h2><small style="color:#aaa;">Dernière mise à jour : janvier 2025</small></div>
+      </div>
+      <div class="legal-section"><h3>Éditeur</h3><p>QRTag est une application indépendante éditée à titre personnel. Contact : contact@qrtag.app</p></div>
+      <div class="legal-section"><h3>Hébergement</h3><p>L'application est hébergée via Netlify (netlify.com). Les données utilisateurs sont stockées sur Firebase (Google), conformément à leurs conditions d'utilisation.</p></div>
+      <div class="legal-section"><h3>Données personnelles (RGPD)</h3><p>Conformément au RGPD (UE 2016/679), vous disposez d'un droit d'accès, de rectification et de suppression de vos données personnelles (email, contenu de page). Pour l'exercer : contact@qrtag.app. Aucune donnée n'est transmise à des tiers à des fins commerciales.</p></div>
+      <div class="legal-section"><h3>Contenu utilisateur</h3><p>L'utilisateur s'engage à ne pas publier de contenu illégal, diffamatoire ou portant atteinte aux droits de tiers. QRTag se réserve le droit de suspendre tout compte enfreignant ces conditions.</p></div>
+      <div class="legal-section"><h3>Cookies &amp; Stockage local</h3><p>L'application utilise exclusivement Firebase Auth pour maintenir la session. Aucun cookie publicitaire ou de traçage n'est utilisé.</p></div>
+      <div class="legal-section"><h3>Limitation de responsabilité</h3><p>QRTag ne saurait être tenu responsable des contenus publiés par les utilisateurs, ni des dommages directs ou indirects liés à l'utilisation de l'application.</p></div>
+      <p style="text-align:center;font-size:11px;color:#ccc;margin-top:8px;">© 2025 QRTag — Tous droits réservés</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ TOAST ═══ -->
+<div id="toast"></div>
+
+<!-- ═══ SCRIPTS ═══ -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script type="module">
+
+/* ════════════════════════════════════════════════
+   🔧 CONFIGURATION FIREBASE
+   Remplace ces valeurs par celles de ton projet Firebase
+   ════════════════════════════════════════════════ */
+import { initializeApp }                    from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+import { getAuth, createUserWithEmailAndPassword,
+         signInWithEmailAndPassword, signOut,
+         onAuthStateChanged }               from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+import { getFirestore, doc, setDoc,
+         getDoc }                           from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+const firebaseConfig = {
+  apiKey:            "AIzaSyAJXkf2hztEQ_rb-u1iISHl5zwzwuwQS5E",
+  authDomain:        "qrtag-6e1f7.firebaseapp.com",
+  projectId:         "qrtag-6e1f7",
+  storageBucket:     "qrtag-6e1f7.firebasestorage.app",
+  messagingSenderId: "901346334115",
+  appId:             "1:901346334115:web:a91feef09e591721637616"
+};
+
+/* ═══ INIT ═══ */
+const app  = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db   = getFirestore(app);
+
+/* ═══ CONSTANTES ═══ */
+const TEMPLATES = {
+  minimal:  { name:'Minimal',  emoji:'⬜', bg:'#ffffff', bg2:null,      text:'#1a1a1a', accent:'#6366f1', card:'#f4f4f5' },
+  bold:     { name:'Bold',     emoji:'⬛', bg:'#18181b', bg2:null,      text:'#fafafa',  accent:'#f43f5e', card:'#27272a' },
+  gradient: { name:'Gradient', emoji:'🌈', bg:'#667eea', bg2:'#764ba2', text:'#ffffff',  accent:'#fbbf24', card:'rgba(255,255,255,.18)' },
+  nature:   { name:'Nature',   emoji:'🌿', bg:'#f0fdf4', bg2:null,      text:'#166534',  accent:'#16a34a', card:'#dcfce7' },
+  neon:     { name:'Neon',     emoji:'💜', bg:'#09090b', bg2:null,      text:'#e4e4e7',  accent:'#a855f7', card:'#18181b' },
+};
+const FONTS = [
+  { id:'sans',  name:'Moderne',   css:'system-ui,-apple-system,sans-serif', preview:'Voici un aperçu du texte' },
+  { id:'serif', name:'Classique', css:'Georgia,serif',                      preview:'Voici un aperçu du texte' },
+  { id:'mono',  name:'Tech',      css:"'Courier New',monospace",            preview:'Voici un aperçu du texte' },
+  { id:'round', name:'Doux',      css:'Verdana,sans-serif',                 preview:'Voici un aperçu du texte' },
+];
+
+const DEFAULT_PROFILE = {
+  displayName:'', bio:'', avatar:'',
+  template:'minimal', font:'sans',
+  primaryColor:'#6366f1', bgColor:'#ffffff', textColor:'#1a1a1a',
+  blocks:[]
+};
+
+/* ═══ STATE ═══ */
+let STATE = { user:null, profile:null, activeTab:'content', saveTimer:null, qrObj:null };
+
+/* ═══ UTILITIES ═══ */
+const uid = () => Math.random().toString(36).substr(2,9);
+const $   = id => document.getElementById(id);
+
+window.showScreen = function(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  $('s-'+name).classList.add('active');
+  if (name === 'dashboard') refreshDashboard();
+  if (name === 'qr') setTimeout(refreshQR, 100);
+};
+
+function showToast(msg) {
+  const t = $('toast'); t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+function showFlash() {
+  const f = $('flash-saved'); f.style.display = 'block';
+  setTimeout(() => f.style.display = 'none', 1800);
+}
+
+/* ═══ AUTH ═══ */
+let authMode = 'login';
+
+window.switchAuthMode = function(mode) {
+  authMode = mode;
+  $('btn-to-login').classList.toggle('active', mode === 'login');
+  $('btn-to-register').classList.toggle('active', mode === 'register');
+  $('auth-register-fields').style.display = mode === 'register' ? 'block' : 'none';
+  $('auth-submit').textContent = mode === 'login' ? 'Se connecter' : 'Créer mon compte';
+  $('auth-error').style.display = 'none';
+};
+
+window.handleAuth = async function() {
+  const email = $('auth-email').value.trim();
+  const pw    = $('auth-pw').value;
+  const errEl = $('auth-error');
+  errEl.style.display = 'none';
+
+  if (!email || !pw) { errEl.textContent = 'Remplis tous les champs.'; errEl.style.display = 'block'; return; }
+
+  $('auth-submit').disabled = true;
+  $('auth-submit').textContent = '…';
+
+  try {
+    if (authMode === 'register') {
+      const uname = $('auth-username').value.trim();
+      if (!uname) { throw { code:'no-username' }; }
+      const cred = await createUserWithEmailAndPassword(auth, email, pw);
+      const uid_ = cred.user.uid;
+      const profile = { ...DEFAULT_PROFILE, displayName: uname };
+      await setDoc(doc(db, 'users', uid_), { username: uname, qrId: uid_, createdAt: Date.now(), profile });
+    } else {
+      await signInWithEmailAndPassword(auth, email, pw);
+    }
+  } catch(e) {
+    const msgs = {
+      'no-username':              'Choisis un nom d\'utilisateur.',
+      'auth/email-already-in-use':'Cet email est déjà utilisé.',
+      'auth/user-not-found':      'Aucun compte avec cet email.',
+      'auth/wrong-password':      'Mot de passe incorrect.',
+      'auth/invalid-email':       'Email invalide.',
+      'auth/weak-password':       'Mot de passe trop court (6 caractères min).',
+      'auth/invalid-credential':  'Email ou mot de passe incorrect.',
+    };
+    errEl.textContent = msgs[e.code] || 'Erreur : ' + e.message;
+    errEl.style.display = 'block';
+    $('auth-submit').disabled = false;
+    $('auth-submit').textContent = authMode === 'login' ? 'Se connecter' : 'Créer mon compte';
+  }
+};
+
+window.handleLogout = async function() {
+  await signOut(auth);
+  STATE.user = null; STATE.profile = null;
+  showScreen('auth');
+};
+
+/* ═══ FIRESTORE ═══ */
+async function loadUserData(uid_) {
+  const snap = await getDoc(doc(db, 'users', uid_));
+  return snap.exists() ? snap.data() : null;
+}
+
+async function saveProfile() {
+  if (!STATE.user) return;
+  try {
+    await setDoc(doc(db, 'users', STATE.user.uid), { profile: STATE.profile }, { merge: true });
+    showFlash();
+  } catch(e) { showToast('❌ Erreur de sauvegarde'); }
+}
+
+/* ═══ AUTO-SAVE ═══ */
+function scheduleAutoSave() {
+  syncFormToProfile();
+  clearTimeout(STATE.saveTimer);
+  STATE.saveTimer = setTimeout(saveProfile, 1200);
+}
+
+function syncFormToProfile() {
+  STATE.profile.displayName = $('p-displayname').value;
+  STATE.profile.bio         = $('p-bio').value;
+  STATE.profile.avatar      = $('p-avatar').value.trim();
+}
+
+/* ═══ TABS ═══ */
+window.switchTab = function(tab) {
+  STATE.activeTab = tab;
+  const tabs = ['content','style','qr'];
+  const btns = document.querySelectorAll('.tabs-bar button');
+  tabs.forEach((t,i) => {
+    $('tab-'+t).classList.toggle('active', t === tab);
+    btns[i].classList.toggle('active', t === tab);
+  });
+  if (tab === 'qr') setTimeout(refreshQR, 100);
+  if (tab === 'style') refreshStyleTab();
+};
+
+/* ═══ BLOCKS ═══ */
+window.addBlock = function(type) {
+  const b = { id: uid(), type, content:'', label:'' };
+  STATE.profile.blocks.push(b);
+  toggleAddPanel(false);
+  renderBlocks();
+  saveProfile();
+};
+
+window.removeBlock = function(id) {
+  STATE.profile.blocks = STATE.profile.blocks.filter(b => b.id !== id);
+  renderBlocks(); saveProfile();
+};
+
+window.updateBlock = function(id, field, val) {
+  const b = STATE.profile.blocks.find(b => b.id === id);
+  if (b) { b[field] = val; scheduleAutoSave(); }
+};
+
+window.toggleAddPanel = function(show) {
+  $('add-block-panel').style.display = show ? 'block' : 'none';
+  $('btn-add-block').style.display  = show ? 'none'  : 'block';
+};
+
+function renderBlocks() {
+  const container = $('blocks-list');
+  if (!STATE.profile.blocks.length) {
+    container.innerHTML = '<div style="text-align:center;color:#bbb;padding:20px 0;font-size:14px;">Aucun bloc — ajoute du contenu !</div>';
+    return;
+  }
+  container.innerHTML = STATE.profile.blocks.map(b => {
+    const icons = { text:'📝', link:'🔗', photo:'🖼️', video:'🎥' };
+    const labels = { text:'Message texte', link:'Lien cliquable', photo:'Photo (URL)', video:'Vidéo YouTube' };
+    const labelInput = b.type === 'link' ? `<label>Titre du lien</label><input type="text" value="${esc(b.label)}" placeholder="Ex: Mon Instagram" onchange="updateBlock('${b.id}','label',this.value)">` : '';
+    const placeholder = { text:'Écris ton message…', link:'https://…', photo:'URL de l\'image (https://…)', video:'Lien YouTube (https://youtube.com/watch?v=…)' };
+    const mainInput = b.type === 'text'
+      ? `<textarea rows="3" placeholder="${placeholder[b.type]}" onchange="updateBlock('${b.id}','content',this.value)">${esc(b.content)}</textarea>`
+      : `<input type="text" value="${esc(b.content)}" placeholder="${placeholder[b.type]}" onchange="updateBlock('${b.id}','content',this.value)">`;
+    return `<div class="block-item">
+      <div class="block-header">
+        <span class="block-type">${icons[b.type]} ${labels[b.type]}</span>
+        <button class="block-del" onclick="removeBlock('${b.id}')">✕ Supprimer</button>
+      </div>
+      ${labelInput}${mainInput}
+    </div>`;
+  }).join('');
+}
+
+function esc(s='') { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+/* ═══ STYLE TAB ═══ */
+function refreshStyleTab() {
+  const p = STATE.profile;
+  // Templates
+  $('tpl-grid').innerHTML = Object.entries(TEMPLATES).map(([id,t]) => {
+    const bg = t.bg2 ? `linear-gradient(135deg,${t.bg},${t.bg2})` : t.bg;
+    const active = p.template === id;
+    return `<button class="tpl-btn${active?' active':''}" onclick="selectTemplate('${id}')" style="background:${bg}">
+      <div style="font-size:22px">${t.emoji}</div>
+      <div class="tpl-name" style="color:${t.text}">${t.name}</div>
+      ${active?`<div class="tpl-check" style="color:${t.accent}">✓ Actif</div>`:''}
+    </button>`;
+  }).join('');
+  // Fonts
+  $('font-list').innerHTML = FONTS.map(f =>
+    `<button class="font-btn${p.font===f.id?' active':''}" onclick="selectFont('${f.id}')" style="font-family:${f.css}">
+      ${f.name} — <span style="opacity:.65;font-weight:400">${f.preview}</span>
+    </button>`
+  ).join('');
+  // Colors
+  $('c-primary').value = p.primaryColor || '#6366f1';
+  $('c-bg').value      = p.bgColor      || '#ffffff';
+  $('c-text').value    = p.textColor    || '#1a1a1a';
+}
+
+window.selectTemplate = function(id) {
+  const t = TEMPLATES[id];
+  STATE.profile.template     = id;
+  STATE.profile.bgColor      = t.bg;
+  STATE.profile.textColor    = t.text;
+  STATE.profile.primaryColor = t.accent;
+  refreshStyleTab(); saveProfile();
+};
+
+window.selectFont = function(id) {
+  STATE.profile.font = id;
+  refreshStyleTab(); saveProfile();
+};
+
+window.onColorChange = function(key, val) {
+  STATE.profile[key] = val;
+  clearTimeout(STATE.saveTimer);
+  STATE.saveTimer = setTimeout(saveProfile, 800);
+};
+
+/* ═══ QR CODE ═══ */
+function getPublicUrl() {
+  const base = window.location.origin + window.location.pathname.replace('index.html','');
+  return `${base}#p=${STATE.user.uid}`;
+}
+
+function refreshQR() {
+  if (!STATE.user) return;
+  const url = getPublicUrl();
+  $('qr-url-display').textContent = url;
+  const container = $('qr-canvas-container');
+  container.innerHTML = '';
+  STATE.qrObj = new QRCode(container, {
+    text: url, width: 200, height: 200,
+    colorDark:'#1a1a1a', colorLight:'#ffffff',
+    correctLevel: QRCode.CorrectLevel.H
+  });
+}
+
+window.downloadQR = function() {
+  const canvas = document.querySelector('#qr-canvas-container canvas');
+  if (!canvas) { showToast('Génère d\'abord le QR'); return; }
+  const a = document.createElement('a');
+  a.download = 'qrtag-mon-qrcode.png';
+  a.href = canvas.toDataURL('image/png');
+  a.click();
+  showToast('✅ QR Code téléchargé !');
+};
+
+window.copyLink = function() {
+  const url = getPublicUrl();
+  navigator.clipboard?.writeText(url).then(() => showToast('📋 Lien copié !'));
+};
+
+/* ═══ PUBLIC PROFILE ═══ */
+async function renderPublicProfile(uid_, isPreview=false) {
+  showScreen('public');
+  $('pub-back-bar').style.display = isPreview ? 'block' : 'none';
+  if (isPreview) {
+    $('pub-back-btn').style.cursor = 'pointer';
+    $('pub-back-btn').onclick = () => showScreen('dashboard');
+  }
+  $('pub-content').innerHTML = '<div style="text-align:center;padding:60px;font-size:14px;color:#888">Chargement…</div>';
+
+  try {
+    let data;
+    if (isPreview && STATE.profile) {
+      data = { profile: STATE.profile, username: STATE.user?.displayName || '' };
+    } else {
+      const snap = await getDoc(doc(db, 'users', uid_));
+      if (!snap.exists()) { $('pub-content').innerHTML = '<div style="text-align:center;padding:60px">Profil introuvable</div>'; return; }
+      data = snap.data();
+    }
+    const { profile:p, username } = data;
+    const t = TEMPLATES[p.template] || TEMPLATES.minimal;
+    const fontCss = (FONTS.find(f => f.id === p.font) || FONTS[0]).css;
+    const bg = t.bg2 ? `linear-gradient(135deg,${p.bgColor||t.bg},${t.bg2})` : (p.bgColor||t.bg);
+    const txt = p.textColor || t.text;
+    const accent = p.primaryColor || t.accent;
+    const card = t.bg2 ? 'rgba(255,255,255,.16)' : t.card;
+
+    const avatarHtml = p.avatar
+      ? `<img src="${esc(p.avatar)}" class="pub-avatar" style="border-color:${accent}" onerror="this.style.display='none'">`
+      : `<div class="pub-avatar-placeholder" style="background:${accent}">${(p.displayName||username||'?')[0].toUpperCase()}</div>`;
+
+    const blocksHtml = (p.blocks||[]).map(b => {
+      if (b.type==='text' && b.content) return `<div class="pub-block"><div class="pub-text" style="background:${card}"><p style="color:${txt}">${esc(b.content)}</p></div></div>`;
+      if (b.type==='link' && b.content) return `<div class="pub-block"><a href="${esc(b.content)}" class="pub-link" style="background:${accent};box-shadow:0 4px 14px ${accent}55" target="_blank" rel="noopener">🔗 ${esc(b.label||b.content)}</a></div>`;
+      if (b.type==='photo' && b.content) return `<div class="pub-block"><div class="pub-photo"><img src="${esc(b.content)}" alt="" onerror="this.parentElement.parentElement.style.display='none'"></div></div>`;
+      if (b.type==='video' && b.content) {
+        const m = b.content.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/))([^&\n?#]+)/);
+        if (m) return `<div class="pub-block"><div class="pub-video"><iframe src="https://www.youtube.com/embed/${m[1]}" allowfullscreen title="video"></iframe></div></div>`;
+      }
+      return '';
+    }).join('');
+
+    const backBtn = isPreview ? `<button style="color:${txt};font-weight:700">← Retour à l'éditeur</button>` : '';
+
+    $('pub-content').innerHTML = `
+      <div style="min-height:100vh;background:${bg};font-family:${fontCss}">
+        <div class="pub-container">
+          <div style="text-align:center;margin-bottom:24px">
+            ${avatarHtml}
+            <h1 class="pub-name" style="color:${txt}">${esc(p.displayName||username)}</h1>
+            ${p.bio ? `<p class="pub-bio" style="color:${txt}">${esc(p.bio)}</p>` : ''}
+          </div>
+          ${blocksHtml || `<div class="pub-empty"><div class="pub-empty-icon">📭</div><p style="color:${txt}">Aucun contenu pour l'instant</p></div>`}
+        </div>
+        <div class="pub-footer" style="color:${txt};border-top:1px solid rgba(128,128,128,.15)">Propulsé par QRTag · Mentions légales</div>
+      </div>`;
+  } catch(e) {
+    $('pub-content').innerHTML = '<div style="text-align:center;padding:60px;color:#e00">Erreur de chargement</div>';
+  }
+}
+
+window.showPublicPreview = function() {
+  syncFormToProfile();
+  renderPublicProfile(STATE.user?.uid, true);
+};
+
+/* ═══ DASHBOARD REFRESH ═══ */
+function refreshDashboard() {
+  if (!STATE.user || !STATE.profile) return;
+  const p = STATE.profile;
+  $('dash-username').textContent = '@' + (STATE.userData?.username || '');
+  $('p-displayname').value = p.displayName || '';
+  $('p-bio').value         = p.bio         || '';
+  $('p-avatar').value      = p.avatar      || '';
+  renderBlocks();
+  if (STATE.activeTab === 'style') refreshStyleTab();
+  if (STATE.activeTab === 'qr')   refreshQR();
+}
+
+/* ═══ ROUTING PUBLIC PAGE ═══ */
+function checkPublicRoute() {
+  const hash = window.location.hash;
+  if (hash && hash.startsWith('#p=')) {
+    const uid_ = hash.slice(3);
+    if (uid_) { renderPublicProfile(uid_, false); return true; }
+  }
+  return false;
+}
+
+/* ═══ STARTUP ═══ */
+if (!checkPublicRoute()) {
+  onAuthStateChanged(auth, async user => {
+    if (user) {
+      STATE.user = user;
+      try {
+        const data = await loadUserData(user.uid);
+        if (data) {
+          STATE.userData  = data;
+          STATE.profile   = data.profile || { ...DEFAULT_PROFILE };
+        } else {
+          STATE.profile = { ...DEFAULT_PROFILE };
+        }
+      } catch(e) { STATE.profile = { ...DEFAULT_PROFILE }; }
+      showScreen('dashboard');
+    } else {
+      showScreen('auth');
+    }
+  });
+}
+
+window.addEventListener('hashchange', () => {
+  const hash = window.location.hash;
+  if (hash && hash.startsWith('#p=')) checkPublicRoute();
+});
+
+</script>
+</body>
+</html>
