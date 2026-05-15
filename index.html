@@ -3,255 +3,327 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-  <meta name="theme-color" content="#667eea">
+  <meta name="theme-color" content="#FFD600">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="manifest" href="manifest.json">
   <title>QRTag</title>
   <style>
-    :root{--accent:#667eea;--accent2:#764ba2;--radius:14px;--shadow:0 4px 20px rgba(0,0,0,.10);}
+    :root{
+      --bg:#fafafa;--surface:#ffffff;--surface2:#f3f3f3;
+      --border:#ebebeb;--text:#1a1a1a;--text2:#555;--muted:#aaa;
+      --accent:#FFD600;--accent-text:#000;--accent-soft:rgba(255,214,0,.15);
+      --shadow:0 2px 20px rgba(0,0,0,.07);--shadow-lg:0 8px 40px rgba(0,0,0,.12);
+      --radius:18px;--r-sm:12px;
+    }
+    body.dark{
+      --bg:#0f0f0f;--surface:#1c1c1c;--surface2:#272727;
+      --border:#333;--text:#f0f0f0;--text2:#aaa;--muted:#555;
+      --shadow:0 2px 20px rgba(0,0,0,.4);--shadow-lg:0 8px 40px rgba(0,0,0,.5);
+    }
     *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-    body{font-family:system-ui,-apple-system,sans-serif;background:#f6f6f9;color:#1a1a1a;overscroll-behavior:none;}
+    body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);transition:background .3s,color .3s;overscroll-behavior:none;}
     .screen{display:none;min-height:100vh;flex-direction:column;}
     .screen.active{display:flex;}
+    input,textarea,button{font-family:inherit;}
+
     /* ── Splash ── */
-    #s-splash{align-items:center;justify-content:center;background:linear-gradient(135deg,#667eea,#764ba2);}
-    .splash-logo{font-size:64px;margin-bottom:12px;}
-    .splash-title{color:#fff;font-size:28px;font-weight:900;letter-spacing:-1px;}
-    .splash-sub{color:rgba(255,255,255,.7);font-size:14px;margin-top:4px;}
+    #s-splash{align-items:center;justify-content:center;background:var(--accent);}
+    .splash-icon{font-size:72px;margin-bottom:12px;animation:pop .5s ease;}
+    @keyframes pop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
+    .splash-title{font-size:32px;font-weight:900;color:#000;letter-spacing:-1px;}
+    .splash-sub{font-size:14px;color:rgba(0,0,0,.5);margin-top:4px;}
+
     /* ── Auth ── */
-    #s-auth{align-items:center;justify-content:center;background:linear-gradient(135deg,#667eea,#764ba2);padding:20px;}
-    .auth-card{background:#fff;border-radius:24px;padding:28px 24px;width:100%;max-width:380px;box-shadow:0 24px 64px rgba(0,0,0,.22);}
-    .auth-logo{text-align:center;margin-bottom:20px;}
-    .auth-logo .icon{font-size:44px;}
-    .auth-logo h1{font-size:26px;font-weight:900;letter-spacing:-1px;margin:4px 0 2px;}
-    .auth-logo p{color:#999;font-size:13px;}
-    .tab-toggle{display:flex;background:#f4f4f5;border-radius:12px;padding:4px;margin-bottom:20px;}
-    .tab-toggle button{flex:1;padding:9px 0;border:none;border-radius:9px;cursor:pointer;font-weight:700;font-size:13px;transition:all .2s;}
-    .tab-toggle button.active{background:#fff;color:var(--accent);box-shadow:0 2px 8px rgba(0,0,0,.10);}
-    .tab-toggle button:not(.active){background:transparent;color:#999;}
-    label{font-size:12px;font-weight:700;color:#555;display:block;margin-bottom:4px;}
-    input[type=text],input[type=email],input[type=password],textarea{width:100%;padding:11px 13px;border:1.5px solid #e4e4e7;border-radius:10px;font-size:14px;outline:none;font-family:inherit;transition:border .2s;margin-bottom:10px;}
-    input:focus,textarea:focus{border-color:var(--accent);}
-    textarea{resize:none;}
-    .btn{display:block;width:100%;padding:13px 0;border:none;border-radius:13px;font-size:15px;font-weight:800;cursor:pointer;text-align:center;text-decoration:none;transition:opacity .2s;}
-    .btn-primary{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;}
-    .btn-secondary{background:#f4f4f5;color:#555;border:1px solid #e4e4e7;}
-    .btn:disabled{opacity:.6;cursor:default;}
-    .error{background:#fef2f2;color:#dc2626;padding:10px 13px;border-radius:9px;font-size:13px;margin-bottom:12px;border:1px solid #fecaca;}
-    .success{background:#f0fdf4;color:#16a34a;padding:10px 13px;border-radius:9px;font-size:13px;margin-bottom:12px;border:1px solid #86efac;}
+    #s-auth{align-items:center;justify-content:center;background:var(--bg);padding:20px;}
+    .auth-card{background:var(--surface);border-radius:28px;padding:32px 24px;width:100%;max-width:380px;box-shadow:var(--shadow-lg);}
+    .auth-logo{text-align:center;margin-bottom:24px;}
+    .auth-logo .icon{font-size:48px;display:block;margin-bottom:8px;}
+    .auth-logo h1{font-size:28px;font-weight:900;letter-spacing:-1px;margin-bottom:2px;}
+    .auth-logo p{font-size:13px;color:var(--muted);}
+    .tog{display:flex;background:var(--surface2);border-radius:14px;padding:4px;margin-bottom:20px;}
+    .tog button{flex:1;padding:10px 0;border:none;border-radius:11px;cursor:pointer;font-size:13px;font-weight:700;transition:all .2s;background:transparent;color:var(--muted);}
+    .tog button.on{background:var(--accent);color:#000;box-shadow:0 2px 10px rgba(255,214,0,.4);}
+    label.lbl{font-size:12px;font-weight:700;color:var(--text2);display:block;margin-bottom:5px;}
+    .inp{width:100%;padding:13px 15px;background:var(--surface2);border:2px solid var(--border);border-radius:var(--r-sm);font-size:14px;color:var(--text);outline:none;transition:border .2s;margin-bottom:12px;}
+    .inp:focus{border-color:var(--accent);}
+    .inp::placeholder{color:var(--muted);}
+    .btn{display:block;width:100%;padding:14px 0;border:none;border-radius:var(--r-sm);font-size:15px;font-weight:800;cursor:pointer;text-align:center;text-decoration:none;transition:all .2s;}
+    .btn-y{background:var(--accent);color:#000;box-shadow:0 4px 20px rgba(255,214,0,.35);}
+    .btn-y:hover{transform:translateY(-1px);}
+    .btn-g{background:var(--surface2);color:var(--text2);border:2px solid var(--border);}
+    .err{background:#fff0f0;color:#e00;padding:11px 14px;border-radius:10px;font-size:13px;margin-bottom:12px;border:1px solid #fcc;}
+    body.dark .err{background:#2a0000;}
+    .ok{background:#f0fff4;color:#0a0;padding:11px 14px;border-radius:10px;font-size:13px;margin-bottom:12px;}
+    .invite-info{font-size:12px;color:var(--muted);text-align:center;margin-top:12px;line-height:1.5;}
+
     /* ── Dashboard ── */
-    #s-dashboard{background:#f6f6f9;}
-    .dash-header{background:linear-gradient(135deg,#667eea,#764ba2);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
-    .dash-header-info small{color:rgba(255,255,255,.7);font-size:11px;font-weight:600;letter-spacing:.4px;display:block;}
-    .dash-header-info strong{color:#fff;font-size:17px;font-weight:900;}
-    .dash-header-btns{display:flex;gap:8px;}
-    .header-btn{padding:8px 12px;background:rgba(255,255,255,.2);color:#fff;border:none;border-radius:10px;font-size:13px;cursor:pointer;font-weight:700;}
-    .tabs-bar{display:flex;background:#fff;border-bottom:1px solid #e8e8ec;flex-shrink:0;}
-    .tabs-bar button{flex:1;padding:12px 4px;border:none;border-bottom:2.5px solid transparent;background:none;font-size:12px;font-weight:700;color:#aaa;cursor:pointer;letter-spacing:.2px;transition:all .2s;}
-    .tabs-bar button.active{color:var(--accent);border-bottom-color:var(--accent);}
-    .tab-content{flex:1;overflow-y:auto;padding:16px;}
+    #s-dashboard{background:var(--bg);}
+    .hdr{background:var(--surface);border-bottom:2px solid var(--border);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:8px;}
+    .hdr-left small{font-size:10px;color:var(--muted);display:block;font-weight:600;text-transform:uppercase;letter-spacing:.5px;}
+    .hdr-left strong{font-size:16px;font-weight:900;}
+    .hdr-right{display:flex;align-items:center;gap:6px;flex-shrink:0;}
+    .icon-btn{width:36px;height:36px;background:var(--surface2);border:2px solid var(--border);border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;flex-shrink:0;transition:border .2s;}
+    .icon-btn:hover{border-color:var(--accent);}
+    .vis-toggle{display:flex;align-items:center;gap:6px;background:var(--surface2);border:2px solid var(--border);border-radius:10px;padding:4px 10px;cursor:pointer;font-size:12px;font-weight:700;color:var(--text2);transition:all .2s;}
+    .vis-dot{width:8px;height:8px;border-radius:50%;background:var(--muted);transition:background .2s;}
+    .vis-toggle.on .vis-dot{background:#00c566;}
+    .vis-toggle.on{border-color:#00c566;color:#00c566;}
+    .tabs{display:flex;background:var(--surface);border-bottom:2px solid var(--border);flex-shrink:0;overflow-x:auto;}
+    .tabs button{flex:1;min-width:70px;padding:12px 4px;border:none;border-bottom:3px solid transparent;background:none;font-size:11px;font-weight:800;color:var(--muted);cursor:pointer;text-transform:uppercase;letter-spacing:.4px;transition:all .2s;white-space:nowrap;}
+    .tabs button.on{color:var(--text);border-bottom-color:var(--accent);}
+    .tab-body{flex:1;overflow-y:auto;padding:16px;}
     .tab-pane{display:none;}
-    .tab-pane.active{display:block;}
+    .tab-pane.on{display:block;}
+
     /* ── Cards ── */
-    .card{background:#fff;border-radius:var(--radius);padding:16px;margin-bottom:14px;box-shadow:var(--shadow);}
-    .card h3{font-size:15px;font-weight:800;margin-bottom:12px;}
-    /* ── Blocks ── */
-    .block-item{background:#fff;border-radius:var(--radius);padding:14px;margin-bottom:10px;box-shadow:var(--shadow);}
-    .block-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
-    .block-type{font-size:13px;font-weight:700;color:var(--accent);}
-    .block-del{background:#fef2f2;color:#dc2626;border:none;border-radius:8px;padding:5px 10px;cursor:pointer;font-size:12px;font-weight:600;}
-    .add-block-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
-    .add-block-btn{padding:14px 8px;background:#f8f8fa;border:1.5px solid #e4e4e7;border-radius:12px;cursor:pointer;text-align:center;font-size:13px;font-weight:700;line-height:1.5;}
-    .add-block-btn span{display:block;font-size:22px;margin-bottom:4px;}
+    .card{background:var(--surface);border-radius:var(--radius);padding:18px;margin-bottom:14px;box-shadow:var(--shadow);}
+    .card-title{font-size:13px;font-weight:800;color:var(--text);margin-bottom:14px;display:flex;align-items:center;gap:6px;}
+
+    /* ── Blocs ── */
+    .block{background:var(--surface);border-radius:var(--radius);padding:16px;margin-bottom:12px;box-shadow:var(--shadow);border-left:4px solid var(--accent);}
+    .block-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+    .block-type{font-size:12px;font-weight:800;background:var(--accent-soft);padding:4px 10px;border-radius:20px;}
+    .block-del{background:#fff0f0;color:#e00;border:none;border-radius:8px;padding:5px 10px;cursor:pointer;font-size:11px;font-weight:700;}
+    body.dark .block-del{background:#2a0000;}
+    .block-inp{width:100%;padding:11px 13px;background:var(--surface2);border:2px solid var(--border);border-radius:10px;font-size:14px;color:var(--text);outline:none;transition:border .2s;margin-bottom:8px;}
+    .block-inp:focus{border-color:var(--accent);}
+    .block-inp::placeholder{color:var(--muted);}
+    textarea.block-inp{resize:none;line-height:1.5;}
+    .block-actions{display:flex;gap:8px;margin-bottom:8px;}
+    .block-action-btn{padding:7px 11px;background:var(--surface2);border:2px solid var(--border);border-radius:9px;cursor:pointer;font-size:13px;color:var(--text2);font-weight:600;transition:all .2s;}
+    .block-action-btn:hover{border-color:var(--accent);color:var(--accent);}
+    .img-preview{width:100%;max-height:200px;object-fit:cover;border-radius:10px;margin-top:4px;display:block;}
+    .upload-zone{width:100%;padding:20px;border:2px dashed var(--border);border-radius:12px;text-align:center;cursor:pointer;color:var(--muted);font-size:13px;font-weight:600;transition:all .2s;margin-bottom:8px;}
+    .upload-zone:hover{border-color:var(--accent);color:var(--accent);}
+    input[type=file]{display:none;}
+    .add-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
+    .add-btn-type{padding:18px 10px;background:var(--surface2);border:2px solid var(--border);border-radius:var(--r-sm);cursor:pointer;text-align:center;font-size:13px;font-weight:700;color:var(--text);transition:all .2s;line-height:1.5;}
+    .add-btn-type:hover{border-color:var(--accent);background:var(--accent-soft);}
+    .add-btn-type span{font-size:26px;display:block;margin-bottom:5px;}
+
+    /* ── Emoji picker ── */
+    .emoji-picker{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);padding:12px;margin-bottom:8px;box-shadow:var(--shadow-lg);}
+    .emoji-grid{display:flex;flex-wrap:wrap;gap:4px;max-height:140px;overflow-y:auto;}
+    .emoji-btn{width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer;border-radius:8px;border:none;background:none;transition:background .15s;}
+    .emoji-btn:hover{background:var(--accent-soft);}
+    .emoji-cats{display:flex;gap:6px;margin-bottom:8px;overflow-x:auto;padding-bottom:4px;}
+    .emoji-cat{padding:4px 10px;border:2px solid var(--border);border-radius:20px;background:none;cursor:pointer;font-size:12px;font-weight:700;color:var(--muted);white-space:nowrap;}
+    .emoji-cat.on{background:var(--accent);color:#000;border-color:var(--accent);}
+
     /* ── Templates ── */
     .tpl-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-    .tpl-btn{padding:18px 8px;border-radius:14px;cursor:pointer;text-align:center;border:2.5px solid transparent;transition:all .15s;}
-    .tpl-btn.active{border-color:var(--accent);box-shadow:0 0 0 3px rgba(99,102,241,.2);}
-    .tpl-btn .tpl-name{font-size:12px;font-weight:700;margin-top:4px;}
-    .tpl-btn .tpl-check{font-size:11px;margin-top:2px;}
-    /* ── Fonts ── */
+    .tpl-card{border-radius:14px;padding:20px 10px;text-align:center;border:3px solid transparent;cursor:pointer;transition:all .2s;}
+    .tpl-card.on{border-color:var(--accent);box-shadow:0 0 0 3px rgba(255,214,0,.25);}
+    .tpl-card .tpl-name{font-size:12px;font-weight:800;margin-top:6px;}
     .font-list{display:flex;flex-direction:column;gap:8px;}
-    .font-btn{padding:12px 14px;border-radius:11px;cursor:pointer;text-align:left;font-size:14px;border:2px solid transparent;transition:all .15s;background:#f8f8fa;}
-    .font-btn.active{background:#f0f0ff;border-color:var(--accent);color:var(--accent);font-weight:700;}
-    /* ── Color row ── */
+    .font-btn{padding:13px 15px;border-radius:12px;cursor:pointer;text-align:left;font-size:14px;border:2px solid var(--border);background:var(--surface2);color:var(--text);transition:all .2s;}
+    .font-btn.on{background:var(--accent-soft);border-color:var(--accent);font-weight:700;}
     .color-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
-    .color-row-info div{font-size:13px;font-weight:600;}
-    .color-row-info small{font-size:11px;color:#aaa;}
-    input[type=color]{width:42px;height:38px;border:2px solid #e4e4e7;border-radius:10px;cursor:pointer;padding:2px;background:none;}
+    .color-row div{font-size:13px;font-weight:600;}
+    .color-row small{font-size:11px;color:var(--muted);display:block;}
+    input[type=color]{width:44px;height:40px;border:2px solid var(--border);border-radius:10px;cursor:pointer;padding:2px;background:var(--surface2);}
+
     /* ── QR ── */
-    .qr-box{background:#f8f8fa;border-radius:18px;padding:20px;display:inline-block;border:1px solid #e4e4e7;margin-bottom:14px;}
-    #qr-canvas-container canvas{display:block;}
-    .qr-url{background:#f4f4f5;border-radius:10px;padding:11px 13px;font-size:12px;color:var(--accent);word-break:break-all;font-family:monospace;margin-bottom:8px;}
-    /* ── Footer ── */
-    .app-footer{padding:11px 18px;background:#fff;border-top:1px solid #e8e8ec;text-align:center;flex-shrink:0;}
-    .app-footer span,.app-footer button{font-size:11px;color:#ccc;}
+    .qr-section{background:var(--surface);border-radius:var(--radius);padding:24px;text-align:center;box-shadow:var(--shadow);margin-bottom:14px;}
+    #qr-display{width:240px;height:240px;margin:0 auto 16px;border-radius:16px;overflow:hidden;display:flex;align-items:center;justify-content:center;background:var(--surface2);}
+    #qr-display canvas,#qr-display svg{display:block !important;}
+    .qr-note{background:var(--accent-soft);border-radius:12px;padding:11px 14px;font-size:12px;font-weight:600;margin-bottom:14px;border:1px solid rgba(255,214,0,.4);}
+    .premium-lock{background:var(--surface2);border-radius:var(--radius);padding:20px;text-align:center;border:2px dashed var(--border);}
+    .premium-lock .lock-icon{font-size:36px;margin-bottom:8px;}
+    .premium-lock h3{font-size:15px;font-weight:800;margin-bottom:4px;}
+    .premium-lock p{font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.5;}
+
+    /* ── Admin panel ── */
+    .code-item{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+    .code-txt{font-family:'Courier New',monospace;font-size:14px;font-weight:800;flex:1;color:var(--text);letter-spacing:.5px;}
+    .code-badge{font-size:10px;font-weight:800;padding:3px 9px;border-radius:20px;white-space:nowrap;}
+    .badge-free{background:#f0fff4;color:#16a34a;}
+    .badge-used{background:#fff0f0;color:#e00;}
+    body.dark .badge-free{background:#002a00;}
+    body.dark .badge-used{background:#2a0000;}
+    .code-btn{padding:6px 12px;border:none;border-radius:8px;cursor:pointer;font-size:12px;font-weight:700;transition:all .2s;}
+    .admin-stats{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:16px;}
+    .stat-box{flex:1;min-width:80px;background:var(--surface2);border-radius:12px;padding:12px;text-align:center;}
+    .stat-num{font-size:24px;font-weight:900;}
+    .stat-lbl{font-size:11px;color:var(--muted);margin-top:2px;}
+
+    /* ── Footer & misc ── */
+    .app-footer{padding:11px 18px;background:var(--surface);border-top:2px solid var(--border);text-align:center;flex-shrink:0;}
+    .app-footer span,.app-footer button{font-size:11px;color:var(--muted);}
     .app-footer button{background:none;border:none;cursor:pointer;text-decoration:underline;}
-    /* ── Toast ── */
-    #toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);background:#1a1a1a;color:#fff;padding:10px 20px;border-radius:30px;font-size:13px;font-weight:600;opacity:0;transition:all .3s;z-index:999;pointer-events:none;white-space:nowrap;}
+    #toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--text);color:var(--bg);padding:10px 20px;border-radius:30px;font-size:13px;font-weight:700;opacity:0;transition:all .3s;z-index:999;pointer-events:none;white-space:nowrap;}
     #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
-    /* ── Public profile ── */
+    #flash{display:none;background:#f0fff4;color:#0a0;padding:9px 14px;border-radius:10px;font-size:12px;font-weight:700;margin-bottom:12px;text-align:center;border:1px solid #afa;}
+    body.dark #flash{background:#002a00;}
+    .upload-progress{width:100%;height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin-top:6px;display:none;}
+    .upload-progress-bar{height:100%;background:var(--accent);border-radius:2px;transition:width .3s;}
+
+    /* ── Page publique ── */
     #s-public{min-height:100vh;}
-    .pub-back{position:sticky;top:0;padding:10px 16px;background:rgba(0,0,0,.12);backdrop-filter:blur(8px);z-index:10;}
-    .pub-back button{background:rgba(255,255,255,.22);border:none;border-radius:9px;padding:7px 14px;cursor:pointer;font-size:13px;font-weight:700;}
-    .pub-container{max-width:480px;margin:0 auto;padding:32px 18px 28px;}
-    .pub-avatar{width:88px;height:88px;border-radius:50%;object-fit:cover;display:block;margin:0 auto 12px;border:3px solid #fff;}
-    .pub-avatar-placeholder{width:80px;height:80px;border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:800;color:#fff;}
-    .pub-name{text-align:center;font-size:24px;font-weight:900;margin-bottom:6px;}
-    .pub-bio{text-align:center;font-size:14px;opacity:.75;margin-bottom:24px;line-height:1.5;}
+    .pub-back-bar{position:sticky;top:0;padding:10px 16px;background:rgba(255,255,255,.9);backdrop-filter:blur(10px);z-index:10;border-bottom:1px solid rgba(0,0,0,.08);}
+    body.dark .pub-back-bar{background:rgba(15,15,15,.9);}
+    .pub-back-btn{background:var(--surface2);border:2px solid var(--border);border-radius:9px;padding:7px 14px;cursor:pointer;font-size:13px;font-weight:700;color:var(--text);}
+    .pub-wrap{max-width:480px;margin:0 auto;padding:28px 18px;}
+    .pub-avatar{width:92px;height:92px;border-radius:50%;object-fit:cover;display:block;margin:0 auto 12px;}
+    .pub-avatar-ph{width:82px;height:82px;border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:800;color:#fff;}
+    .pub-name{text-align:center;font-size:26px;font-weight:900;margin-bottom:6px;}
+    .pub-bio{text-align:center;font-size:14px;opacity:.7;margin-bottom:24px;line-height:1.5;}
     .pub-block{margin-bottom:12px;}
-    .pub-text{border-radius:16px;padding:16px 18px;}
-    .pub-text p{font-size:15px;line-height:1.7;white-space:pre-wrap;}
-    .pub-link{display:block;border-radius:14px;padding:15px 20px;text-align:center;text-decoration:none;font-size:15px;font-weight:800;}
-    .pub-photo{border-radius:16px;overflow:hidden;}
-    .pub-photo img{width:100%;display:block;}
-    .pub-video{border-radius:16px;overflow:hidden;position:relative;padding-top:56.25%;}
-    .pub-video iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none;}
-    .pub-empty{text-align:center;padding:50px 0;opacity:.4;font-size:15px;}
-    .pub-empty .pub-empty-icon{font-size:44px;margin-bottom:8px;}
-    .pub-footer{text-align:center;padding:16px 20px;font-size:11px;opacity:.35;}
+    .pub-footer{text-align:center;padding:16px;font-size:11px;opacity:.35;}
+
     /* ── Legal ── */
-    #s-legal{background:#f6f6f9;padding:20px;}
-    .legal-card{background:#fff;border-radius:18px;padding:24px;box-shadow:var(--shadow);}
-    .legal-section{margin-bottom:18px;padding-bottom:18px;border-bottom:1px solid #f0f0f0;}
-    .legal-section:last-child{border-bottom:none;margin-bottom:0;}
-    .legal-section h3{font-size:13px;font-weight:800;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;}
-    .legal-section p{font-size:13px;color:#555;line-height:1.65;}
-    /* ── Config alert ── */
-    .config-banner{background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:14px;margin-bottom:16px;font-size:13px;color:#92400e;line-height:1.5;}
-    .config-banner strong{display:block;margin-bottom:4px;}
+    #s-legal{background:var(--bg);padding:20px;}
+    .legal-wrap{background:var(--surface);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow);}
+    .legal-s{margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--border);}
+    .legal-s:last-child{border:none;margin:0;padding:0;}
+    .legal-s h3{font-size:12px;font-weight:800;color:#b8960c;text-transform:uppercase;letter-spacing:.8px;margin-bottom:5px;}
+    .legal-s p{font-size:13px;color:var(--text2);line-height:1.65;}
   </style>
 </head>
 <body>
 
-<!-- ═══ SPLASH ═══ -->
+<!-- SPLASH -->
 <div id="s-splash" class="screen active">
-  <div class="splash-logo">🏷️</div>
+  <div class="splash-icon">🏷️</div>
   <div class="splash-title">QRTag</div>
   <div class="splash-sub">Chargement…</div>
 </div>
 
-<!-- ═══ AUTH ═══ -->
+<!-- AUTH -->
 <div id="s-auth" class="screen">
   <div class="auth-card">
     <div class="auth-logo">
-      <div class="icon">🏷️</div>
+      <span class="icon">🏷️</span>
       <h1>QRTag</h1>
       <p>Ton message sur ton t-shirt</p>
     </div>
-    <div class="tab-toggle">
-      <button id="btn-to-login" class="active" onclick="switchAuthMode('login')">Connexion</button>
-      <button id="btn-to-register" onclick="switchAuthMode('register')">Inscription</button>
+    <div class="tog">
+      <button id="btn-login" class="on" onclick="setAuthMode('login')">Connexion</button>
+      <button id="btn-reg" onclick="setAuthMode('register')">Inscription</button>
     </div>
-    <div id="auth-register-fields" style="display:none">
-      <label>Nom d'utilisateur</label>
-      <input type="text" id="auth-username" placeholder="monpseudo" autocomplete="off">
+    <div id="reg-fields" style="display:none">
+      <label class="lbl">Nom d'utilisateur</label>
+      <input class="inp" id="a-name" placeholder="monpseudo" autocomplete="off">
+      <label class="lbl">Code d'invitation</label>
+      <input class="inp" id="a-code" placeholder="QRT-XXXXXXXX" autocomplete="off" style="text-transform:uppercase">
     </div>
-    <label>Email</label>
-    <input type="email" id="auth-email" placeholder="toi@email.com" autocomplete="email">
-    <label>Mot de passe</label>
-    <input type="password" id="auth-pw" placeholder="••••••••" autocomplete="current-password">
-    <div id="auth-error" style="display:none" class="error"></div>
-    <button class="btn btn-primary" id="auth-submit" onclick="handleAuth()">Se connecter</button>
+    <label class="lbl">Email</label>
+    <input class="inp" type="email" id="a-email" placeholder="toi@email.com">
+    <label class="lbl">Mot de passe</label>
+    <input class="inp" type="password" id="a-pw" placeholder="••••••••">
+    <div id="a-err" style="display:none" class="err"></div>
+    <button class="btn btn-y" id="a-submit" onclick="doAuth()">Se connecter</button>
+    <p class="invite-info" id="inv-info" style="display:none">🔒 L'inscription nécessite un code d'invitation.<br>Contacte-nous pour en obtenir un.</p>
   </div>
 </div>
 
-<!-- ═══ DASHBOARD ═══ -->
+<!-- DASHBOARD -->
 <div id="s-dashboard" class="screen">
-  <div class="dash-header">
-    <div class="dash-header-info">
-      <small>CONNECTÉ EN TANT QUE</small>
-      <strong id="dash-username">@user</strong>
+  <div class="hdr">
+    <div class="hdr-left">
+      <small>CONNECTÉ</small>
+      <strong id="hdr-name">@user</strong>
     </div>
-    <div class="dash-header-btns">
-      <button class="header-btn" onclick="showPublicPreview()">👁 Aperçu</button>
-      <button class="header-btn" onclick="handleLogout()">↩</button>
-    </div>
-  </div>
-  <div class="tabs-bar">
-    <button class="active" onclick="switchTab('content')">📝 Contenu</button>
-    <button onclick="switchTab('style')">🎨 Style</button>
-    <button onclick="switchTab('qr')">📲 QR Code</button>
-  </div>
-  <div class="tab-content">
-    <!-- TAB CONTENT -->
-    <div id="tab-content" class="tab-pane active">
-      <div id="flash-saved" style="display:none" class="success">✅ Sauvegardé automatiquement</div>
-      <!-- Profile info -->
-      <div class="card">
-        <h3>👤 Profil</h3>
-        <label>Nom affiché</label>
-        <input type="text" id="p-displayname" placeholder="Ton prénom, pseudo…" oninput="scheduleAutoSave()">
-        <label>Bio / Tagline</label>
-        <textarea id="p-bio" placeholder="Une courte phrase qui te décrit…" rows="2" oninput="scheduleAutoSave()"></textarea>
-        <label>Photo de profil (colle une URL d'image)</label>
-        <input type="text" id="p-avatar" placeholder="https://…/photo.jpg" oninput="scheduleAutoSave()">
+    <div class="hdr-right">
+      <div class="vis-toggle" id="vis-toggle" onclick="toggleVisibility()">
+        <div class="vis-dot"></div>
+        <span id="vis-label">Privé</span>
       </div>
-      <!-- Blocks list -->
+      <div class="icon-btn" onclick="toggleDark()" id="dark-btn">🌙</div>
+      <div class="icon-btn" onclick="showPreview()">👁</div>
+      <div class="icon-btn" onclick="doLogout()">↩</div>
+    </div>
+  </div>
+  <div class="tabs" id="tabs-bar">
+    <button class="on" data-tab="content" onclick="setTab('content')">📝 Contenu</button>
+    <button data-tab="style" onclick="setTab('style')">🎨 Style</button>
+    <button data-tab="qr" onclick="setTab('qr')">📲 QR</button>
+    <!-- onglet admin injecté par JS si admin -->
+  </div>
+  <div class="tab-body">
+    <div id="flash">✅ Sauvegardé !</div>
+
+    <!-- CONTENU -->
+    <div id="tab-content" class="tab-pane on">
+      <div class="card">
+        <div class="card-title">👤 Profil</div>
+        <label class="lbl">Nom affiché</label>
+        <input class="inp" id="p-dn" placeholder="Ton prénom, pseudo…" oninput="autoSave()">
+        <label class="lbl">Bio / Phrase d'accroche</label>
+        <textarea class="inp" id="p-bio" rows="2" placeholder="Une courte phrase sur toi…" oninput="autoSave()"></textarea>
+        <label class="lbl">Photo de profil</label>
+        <div class="upload-zone" onclick="document.getElementById('avatar-file').click()">📷 Choisir une photo depuis ton téléphone</div>
+        <input type="file" id="avatar-file" accept="image/*" onchange="uploadAvatar(this)">
+        <div class="upload-progress" id="av-prog"><div class="upload-progress-bar" id="av-bar"></div></div>
+        <img id="av-preview" style="display:none;width:80px;height:80px;border-radius:50%;object-fit:cover;margin:6px auto 8px;display:none">
+        <input class="inp" id="p-av" placeholder="…ou colle une URL d'image" oninput="autoSave()" style="margin-top:4px">
+      </div>
       <div>
-        <h3 style="font-size:15px;font-weight:800;margin-bottom:12px;">📦 Blocs de contenu</h3>
+        <div class="card-title">📦 Mes blocs</div>
         <div id="blocks-list"></div>
       </div>
-      <!-- Add block -->
-      <div id="add-block-panel" style="display:none" class="card">
-        <p style="font-weight:700;font-size:14px;margin-bottom:12px;">Quel type de bloc ?</p>
-        <div class="add-block-grid">
-          <button class="add-block-btn" onclick="addBlock('text')"><span>📝</span>Message texte</button>
-          <button class="add-block-btn" onclick="addBlock('link')"><span>🔗</span>Lien cliquable</button>
-          <button class="add-block-btn" onclick="addBlock('photo')"><span>🖼️</span>Photo (URL)</button>
-          <button class="add-block-btn" onclick="addBlock('video')"><span>🎥</span>Vidéo YouTube</button>
+      <div id="add-panel" style="display:none" class="card">
+        <div class="card-title">Quel type de bloc ?</div>
+        <div class="add-grid">
+          <button class="add-btn-type" onclick="addBlock('text')"><span>📝</span>Message</button>
+          <button class="add-btn-type" onclick="addBlock('link')"><span>🔗</span>Lien</button>
+          <button class="add-btn-type" onclick="addBlock('photo')"><span>🖼️</span>Photo</button>
+          <button class="add-btn-type" onclick="addBlock('video')"><span>🎥</span>Vidéo</button>
         </div>
-        <button class="btn btn-secondary" style="margin-top:10px" onclick="toggleAddPanel(false)">Annuler</button>
+        <button class="btn btn-g" onclick="setAddPanel(false)">Annuler</button>
       </div>
-      <button id="btn-add-block" class="btn btn-primary" onclick="toggleAddPanel(true)">+ Ajouter un bloc</button>
+      <button class="btn btn-y" id="btn-add" onclick="setAddPanel(true)">+ Ajouter un bloc</button>
     </div>
 
-    <!-- TAB STYLE -->
+    <!-- STYLE -->
     <div id="tab-style" class="tab-pane">
       <div class="card">
-        <h3>🎨 Template</h3>
+        <div class="card-title">🎨 Template</div>
         <div class="tpl-grid" id="tpl-grid"></div>
       </div>
       <div class="card">
-        <h3>🔤 Police de caractères</h3>
+        <div class="card-title">🔤 Police</div>
         <div class="font-list" id="font-list"></div>
       </div>
       <div class="card">
-        <h3>🖌️ Couleurs personnalisées</h3>
-        <div class="color-row">
-          <div class="color-row-info"><div>Couleur principale</div><small>Boutons, liens</small></div>
-          <input type="color" id="c-primary" oninput="onColorChange('primaryColor',this.value)">
-        </div>
-        <div class="color-row">
-          <div class="color-row-info"><div>Fond de page</div><small>Arrière-plan</small></div>
-          <input type="color" id="c-bg" oninput="onColorChange('bgColor',this.value)">
-        </div>
-        <div class="color-row">
-          <div class="color-row-info"><div>Texte</div><small>Couleur du texte</small></div>
-          <input type="color" id="c-text" oninput="onColorChange('textColor',this.value)">
-        </div>
+        <div class="card-title">🖌️ Couleurs</div>
+        <div class="color-row"><div><div>Couleur principale</div><small>Boutons & liens</small></div><input type="color" id="c-accent" oninput="onColor('primaryColor',this.value)"></div>
+        <div class="color-row"><div><div>Fond de page</div><small>Arrière-plan</small></div><input type="color" id="c-bg" oninput="onColor('bgColor',this.value)"></div>
+        <div class="color-row"><div><div>Texte</div><small>Couleur principale</small></div><input type="color" id="c-text" oninput="onColor('textColor',this.value)"></div>
       </div>
     </div>
 
-    <!-- TAB QR -->
+    <!-- QR -->
     <div id="tab-qr" class="tab-pane">
-      <div class="card" style="text-align:center">
-        <h3>📲 Ton QR Code unique</h3>
-        <div class="qr-box">
-          <div id="qr-canvas-container"></div>
-        </div>
-        <div style="background:#fffbeb;border-radius:10px;padding:10px 13px;font-size:12px;color:#92400e;margin-bottom:14px;border:1px solid #fde68a;text-align:left;">
-          🖨️ <strong>Ce QR code est permanent</strong> — même si tu changes ton contenu, il reste identique. Imprime-le sur ton t-shirt en toute confiance !
-        </div>
-        <button class="btn btn-primary" id="btn-download-qr" onclick="downloadQR()">⬇️ Télécharger le QR Code</button>
-        <p style="font-size:11px;color:#bbb;margin-top:8px;">Format PNG haute résolution</p>
+      <div class="qr-section">
+        <div class="card-title" style="justify-content:center">📲 Ton QR Code</div>
+        <div id="qr-display"></div>
+        <div class="qr-note">🖨️ Ce QR code est <strong>permanent</strong> — change ton contenu quand tu veux, il reste identique sur ton t-shirt !</div>
+      </div>
+      <div id="qr-premium" class="card premium-lock">
+        <div class="lock-icon">🔒</div>
+        <h3>Option impression</h3>
+        <p>Le téléchargement haute résolution est une option disponible à l'achat. Contacte-nous pour l'activer.</p>
+        <button class="btn btn-y" onclick="showToast('Contacte-nous pour activer cette option 📩')">En savoir plus</button>
+      </div>
+      <div id="qr-dl" style="display:none" class="card">
+        <button class="btn btn-y" onclick="downloadQR()">⬇️ Télécharger haute résolution</button>
+        <p style="font-size:11px;color:var(--muted);margin-top:8px;text-align:center">Format PNG · Prêt pour impression textile</p>
+      </div>
+    </div>
+
+    <!-- ADMIN -->
+    <div id="tab-admin" class="tab-pane">
+      <div class="card">
+        <div class="card-title">🎟️ Codes d'invitation</div>
+        <div class="admin-stats" id="admin-stats"></div>
+        <button class="btn btn-y" onclick="adminGenCode()" style="margin-bottom:16px">✨ Générer un nouveau code</button>
+        <div id="codes-list"><div style="text-align:center;color:var(--muted);padding:20px">Chargement…</div></div>
       </div>
       <div class="card">
-        <h3>🔗 Lien de ta page publique</h3>
-        <div class="qr-url" id="qr-url-display"></div>
-        <button class="btn btn-secondary" onclick="copyLink()">📋 Copier le lien</button>
-        <p style="font-size:12px;color:#bbb;margin-top:10px;line-height:1.5;">Quand quelqu'un scanne ton t-shirt, il voit ta page telle que tu l'as configurée — modifiable à tout moment.</p>
+        <div class="card-title">👥 Clients actifs</div>
+        <div id="users-list"><div style="text-align:center;color:var(--muted);padding:16px">Chargement…</div></div>
       </div>
     </div>
   </div>
@@ -263,453 +335,507 @@
   </div>
 </div>
 
-<!-- ═══ PUBLIC PROFILE ═══ -->
+<!-- PAGE PUBLIQUE -->
 <div id="s-public" class="screen">
-  <div id="pub-back-bar" style="display:none" class="pub-back">
-    <button id="pub-back-btn" style="color:#1a1a1a">← Retour à l'éditeur</button>
+  <div class="pub-back-bar" id="pub-back-bar" style="display:none">
+    <button class="pub-back-btn" onclick="showScreen('dashboard')">← Retour</button>
   </div>
   <div id="pub-content"></div>
 </div>
 
-<!-- ═══ LEGAL ═══ -->
+<!-- LEGAL -->
 <div id="s-legal" class="screen">
-  <div style="padding:20px;max-width:520px;margin:0 auto;width:100%;">
-    <button class="btn btn-secondary" style="width:auto;padding:9px 18px;margin-bottom:16px;" onclick="showScreen('dashboard')">← Retour</button>
-    <div class="legal-card">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
-        <span style="font-size:32px">📄</span>
-        <div><h2 style="font-size:20px;font-weight:900;">Mentions légales</h2><small style="color:#aaa;">Dernière mise à jour : janvier 2025</small></div>
-      </div>
-      <div class="legal-section"><h3>Éditeur</h3><p>QRTag est une application indépendante éditée à titre personnel. Contact : contact@qrtag.app</p></div>
-      <div class="legal-section"><h3>Hébergement</h3><p>L'application est hébergée via Netlify (netlify.com). Les données utilisateurs sont stockées sur Firebase (Google), conformément à leurs conditions d'utilisation.</p></div>
-      <div class="legal-section"><h3>Données personnelles (RGPD)</h3><p>Conformément au RGPD (UE 2016/679), vous disposez d'un droit d'accès, de rectification et de suppression de vos données personnelles (email, contenu de page). Pour l'exercer : contact@qrtag.app. Aucune donnée n'est transmise à des tiers à des fins commerciales.</p></div>
-      <div class="legal-section"><h3>Contenu utilisateur</h3><p>L'utilisateur s'engage à ne pas publier de contenu illégal, diffamatoire ou portant atteinte aux droits de tiers. QRTag se réserve le droit de suspendre tout compte enfreignant ces conditions.</p></div>
-      <div class="legal-section"><h3>Cookies &amp; Stockage local</h3><p>L'application utilise exclusivement Firebase Auth pour maintenir la session. Aucun cookie publicitaire ou de traçage n'est utilisé.</p></div>
-      <div class="legal-section"><h3>Limitation de responsabilité</h3><p>QRTag ne saurait être tenu responsable des contenus publiés par les utilisateurs, ni des dommages directs ou indirects liés à l'utilisation de l'application.</p></div>
-      <p style="text-align:center;font-size:11px;color:#ccc;margin-top:8px;">© 2025 QRTag — Tous droits réservés</p>
+  <div style="padding:20px;max-width:520px;margin:0 auto;width:100%">
+    <button class="btn btn-g" style="width:auto;padding:9px 18px;margin-bottom:16px" onclick="showScreen('dashboard')">← Retour</button>
+    <div class="legal-wrap">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px"><span style="font-size:30px">📄</span><div><h2 style="font-size:19px;font-weight:900">Mentions légales</h2><small style="color:var(--muted)">Mise à jour : janvier 2025</small></div></div>
+      <div class="legal-s"><h3>Éditeur</h3><p>QRTag — application indépendante. Contact : contact@qrtag.app</p></div>
+      <div class="legal-s"><h3>Hébergement</h3><p>GitHub Pages. Données sur Firebase (Google Cloud).</p></div>
+      <div class="legal-s"><h3>Données personnelles (RGPD)</h3><p>Droit d'accès, rectification, suppression : contact@qrtag.app. Aucune donnée cédée à des tiers.</p></div>
+      <div class="legal-s"><h3>Contenu utilisateur</h3><p>L'utilisateur s'engage à ne pas publier de contenu illégal. QRTag peut suspendre tout compte en infraction.</p></div>
+      <div class="legal-s"><h3>Cookies</h3><p>Aucun cookie publicitaire. Session Firebase uniquement.</p></div>
+      <p style="text-align:center;font-size:11px;color:var(--muted);margin-top:16px">© 2025 QRTag — Tous droits réservés</p>
     </div>
   </div>
 </div>
 
-<!-- ═══ TOAST ═══ -->
 <div id="toast"></div>
 
-<!-- ═══ SCRIPTS ═══ -->
+<!-- SCRIPTS -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://unpkg.com/qr-code-styling@1.6.0-rc.1/lib/qr-code-styling.js"></script>
 <script type="module">
 
-/* ════════════════════════════════════════════════
-   🔧 CONFIGURATION FIREBASE
-   Remplace ces valeurs par celles de ton projet Firebase
-   ════════════════════════════════════════════════ */
-import { initializeApp }                    from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-import { getAuth, createUserWithEmailAndPassword,
-         signInWithEmailAndPassword, signOut,
-         onAuthStateChanged }               from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-import { getFirestore, doc, setDoc,
-         getDoc }                           from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+import{initializeApp}from'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+import{getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,signOut,onAuthStateChanged}from'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+import{getFirestore,doc,setDoc,getDoc,updateDoc,collection,getDocs,deleteDoc,query,orderBy}from'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
-const firebaseConfig = {
-  apiKey:            "AIzaSyAJXkf2hztEQ_rb-u1iISHl5zwzwuwQS5E",
-  authDomain:        "qrtag-6e1f7.firebaseapp.com",
-  projectId:         "qrtag-6e1f7",
-  storageBucket:     "qrtag-6e1f7.firebasestorage.app",
-  messagingSenderId: "901346334115",
-  appId:             "1:901346334115:web:a91feef09e591721637616"
+/* ══════════════════════════════════
+   🔧 CONFIG FIREBASE
+══════════════════════════════════ */
+const FIREBASE={
+  apiKey:"AIzaSyAJXkf2hztEQ_rb-u1iISHl5zwzwuwQS5E",
+  authDomain:"qrtag-6e1f7.firebaseapp.com",
+  projectId:"qrtag-6e1f7",
+  storageBucket:"qrtag-6e1f7.firebasestorage.app",
+  messagingSenderId:"901346334115",
+  appId:"1:901346334115:web:a91feef09e591721637616"
 };
 
-/* ═══ INIT ═══ */
-const app  = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db   = getFirestore(app);
+/* ══════════════════════════════════
+   ⚙️ ADMIN — Mets ton email ici
+══════════════════════════════════ */
+const ADMIN_EMAIL = 'TON_EMAIL_ICI@gmail.com'; // ← REMPLACE PAR TON EMAIL
 
-/* ═══ CONSTANTES ═══ */
-const TEMPLATES = {
-  minimal:  { name:'Minimal',  emoji:'⬜', bg:'#ffffff', bg2:null,      text:'#1a1a1a', accent:'#6366f1', card:'#f4f4f5' },
-  bold:     { name:'Bold',     emoji:'⬛', bg:'#18181b', bg2:null,      text:'#fafafa',  accent:'#f43f5e', card:'#27272a' },
-  gradient: { name:'Gradient', emoji:'🌈', bg:'#667eea', bg2:'#764ba2', text:'#ffffff',  accent:'#fbbf24', card:'rgba(255,255,255,.18)' },
-  nature:   { name:'Nature',   emoji:'🌿', bg:'#f0fdf4', bg2:null,      text:'#166534',  accent:'#16a34a', card:'#dcfce7' },
-  neon:     { name:'Neon',     emoji:'💜', bg:'#09090b', bg2:null,      text:'#e4e4e7',  accent:'#a855f7', card:'#18181b' },
+const APP=initializeApp(FIREBASE);
+const AUTH=getAuth(APP);
+const DB=getFirestore(APP);
+
+/* ══════ CONSTANTES ══════ */
+const TEMPLATES={
+  blanc:  {name:'Blanc',   emoji:'⬜',bg:'#ffffff',bg2:null,text:'#1a1a1a',accent:'#FFD600',card:'#f5f5f5'},
+  noir:   {name:'Noir',    emoji:'⬛',bg:'#0f0f0f',bg2:null,text:'#f0f0f0',accent:'#FFD600',card:'#1c1c1c'},
+  nude:   {name:'Nude',    emoji:'🤎',bg:'#f5ede0',bg2:null,text:'#5c3d2e',accent:'#c4956a',card:'#ede0d0'},
+  soleil: {name:'Soleil',  emoji:'☀️',bg:'#fff9e6',bg2:null,text:'#7a4f00',accent:'#f59e0b',card:'#fff0c2'},
+  ocean:  {name:'Océan',   emoji:'🌊',bg:'#e8f4fd',bg2:null,text:'#0c3547',accent:'#0284c7',card:'#cce8f7'},
+  rose:   {name:'Rose',    emoji:'🌸',bg:'#fdf2f8',bg2:null,text:'#831843',accent:'#db2777',card:'#fce7f3'},
+  foret:  {name:'Forêt',   emoji:'🌿',bg:'#f0fdf4',bg2:null,text:'#14532d',accent:'#16a34a',card:'#dcfce7'},
+  minuit: {name:'Minuit',  emoji:'🌙',bg:'#0f172a',bg2:null,text:'#e2e8f0',accent:'#818cf8',card:'#1e293b'},
+  feu:    {name:'Feu',     emoji:'🔥',bg:'#1a0000',bg2:'#3a0a00',text:'#fff0e0',accent:'#ff6b35',card:'rgba(255,107,53,.15)'},
+  lavande:{name:'Lavande', emoji:'💜',bg:'#f5f3ff',bg2:null,text:'#4c1d95',accent:'#7c3aed',card:'#ede9fe'},
+  cacao:  {name:'Cacao',   emoji:'☕',bg:'#2c1810',bg2:null,text:'#f5e6d0',accent:'#d4a056',card:'#3d2418'},
+  glace:  {name:'Glace',   emoji:'🧊',bg:'#f0f9ff',bg2:null,text:'#0c4a6e',accent:'#38bdf8',card:'#e0f2fe'},
 };
-const FONTS = [
-  { id:'sans',  name:'Moderne',   css:'system-ui,-apple-system,sans-serif', preview:'Voici un aperçu du texte' },
-  { id:'serif', name:'Classique', css:'Georgia,serif',                      preview:'Voici un aperçu du texte' },
-  { id:'mono',  name:'Tech',      css:"'Courier New',monospace",            preview:'Voici un aperçu du texte' },
-  { id:'round', name:'Doux',      css:'Verdana,sans-serif',                 preview:'Voici un aperçu du texte' },
+const FONTS=[
+  {id:'sans',     name:'Moderne',      css:'system-ui,-apple-system,sans-serif'},
+  {id:'serif',    name:'Classique',    css:'Georgia,serif'},
+  {id:'mono',     name:'Tech',         css:"'Courier New',monospace"},
+  {id:'round',    name:'Doux',         css:'Verdana,sans-serif'},
+  {id:'gothic',   name:'⚔️ Gothic',    css:"'UnifrakturMaguntia',cursive"},
+  {id:'marker',   name:'✏️ Graffiti',  css:"'Permanent Marker',cursive"},
+  {id:'dirt',     name:'🏚️ Urban',     css:"'Rubik Dirt',cursive"},
+  {id:'bebas',    name:'💪 Impact',    css:"'Bebas Neue',sans-serif"},
+  {id:'pacifico', name:'🌊 Pacifico',  css:"'Pacifico',cursive"},
+  {id:'rock',     name:'🎸 Rock',      css:"'Rock Salt',cursive"},
+  {id:'creep',    name:'💀 Creepy',    css:"'Creepster',cursive"},
+  {id:'boogaloo', name:'😜 Fun',       css:"'Boogaloo',cursive"},
+  {id:'abril',    name:'🎩 Élégant',   css:"'Abril Fatface',cursive"},
+  {id:'righteous',name:'🔥 Righteous', css:"'Righteous',cursive"},
 ];
+const EMOJIS={
+  'Visages':['😀','😂','🥰','😎','🤩','😏','🤔','😅','🥳','😍','🤗','😜','🙄','😴','🤑','😈','👿','😇','🥺','😭','😡','🤬','🥴','🤢','😤','🧟','🧛','🧙','🫠','🥲','😶','🤫','🤥','🫡','🥸','🤓','😬','🤐','😮','😲','🤯','🤠','🥳','😼','💀','👻','👽','🤖'],
+  'Gestes':['👋','🤙','👌','✌️','🤞','💪','🙏','👏','🫶','❤️','🔥','⭐','✨','💫','🎉','💥','💯','🏆','👍','👎','🤘','🤟','☝️','👆','👇','👉','👈','🤝','🫂','💋','🤲','🫰','🫵','🫳','🫴','✋','🖐️','🖖','👋','🤌','🤏'],
+  'Amour':['❤️','🧡','💛','💚','💙','💜','🖤','🤍','🤎','💔','❣️','💕','💞','💓','💗','💖','💘','💝','💟','♥️','💌','😍','🥰','😘','😗','😙','😚','💏','💑','👫','👬','👭'],
+  'Fête':['🎉','🎊','🥳','🎈','🎁','🎀','🎆','🎇','✨','🎂','🍰','🥂','🍾','🎤','🎵','🎶','🎸','🥁','🎹','🎺','🎻','🪗','🎷','🎠','🎡','🎢','🎪','🎭','🎬','🎤','🎧'],
+  'Nourriture':['🍕','🍔','🌮','🍜','🍣','🍰','🎂','🍩','🍪','🍫','🍓','🍌','🍍','🥑','🍉','🍇','🍒','🧁','🍦','🥤','☕','🧃','🍺','🥂','🍾','🥐','🧆','🌯','🥪','🍟','🧀','🥚','🍳','🥞','🧇','🥓','🥩','🍗','🍖','🌭'],
+  'Animaux':['🐶','🐱','🐭','🐹','🐰','🦊','🐻','🐼','🐨','🐯','🦁','🐮','🐷','🐸','🐵','🦄','🐝','🦋','🐢','🦎','🐙','🦑','🦈','🐋','🦅','🦉','🦚','🦜','🐧','🦩','🐊','🦖','🦕','🐲','🐉','🦄','🦋','🐞','🦗','🦟'],
+  'Objets':['📱','💻','🎵','🎮','🎨','📸','🎬','🎤','🎸','⚡','💎','👑','🔮','🪄','💌','🔑','🛸','🎪','🎡','🎲','🎰','🃏','🔫','⚔️','🛡️','🪃','💣','🪁','🔭','🔬','💊','🩺','🩻','🧬','⚗️','🔋','💡','🔦','📡','🛰️'],
+  'Nature':['🌸','🌺','🌻','🍀','🌿','🌊','🌙','☀️','🌈','❄️','🌴','🦋','🐉','🌵','🍃','🌾','🍄','🌹','🌷','🌼','🌞','🌝','⛅','🌪️','🔥','🌋','🏔️','🏝️','🌊','🌅','🌄','🌠','⛈️','🌩️','☃️','🌬️','🌫️'],
+  'Sport':['⚽','🏀','🎾','🏈','⚾','🎱','🏊','🤸','🏋️','🧘','🏄','🚴','🤺','⛷️','🏂','🧗','🥊','🥋','🏹','🎯','🎣','🤿','🪂','🛹','🛼','🏇','🧜','🤼','🤽','🤾','🏌️','🏇'],
+  'Symboles':['♾️','☮️','✝️','☯️','🔯','♻️','☢️','⚡','🔱','⚜️','🔰','💲','💱','©️','®️','™️','⁉️','‼️','🔞','🚫','⛔','📵','🔕','🔇','🆗','🆙','🆒','🆓','🆕','🆖','🅰️','🅱️'],
+};
+const DEFAULT_PROFILE={displayName:'',bio:'',avatar:'',template:'blanc',font:'sans',primaryColor:'#FFD600',bgColor:'#ffffff',textColor:'#1a1a1a',blocks:[],visible:true};
 
-const DEFAULT_PROFILE = {
-  displayName:'', bio:'', avatar:'',
-  template:'minimal', font:'sans',
-  primaryColor:'#6366f1', bgColor:'#ffffff', textColor:'#1a1a1a',
-  blocks:[]
+/* ══════ STATE ══════ */
+const S={user:null,data:null,profile:null,saveTimer:null,qrObj:null,dark:false};
+const $=id=>document.getElementById(id);
+const esc=s=>(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const uid=()=>Math.random().toString(36).substr(2,9);
+
+/* ══════ NAVIGATION ══════ */
+window.showScreen=id=>{
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  $('s-'+id).classList.add('active');
+  if(id==='dashboard')refreshDash();
+  if(id==='qr')setTimeout(renderQR,100);
 };
 
-/* ═══ STATE ═══ */
-let STATE = { user:null, profile:null, activeTab:'content', saveTimer:null, qrObj:null };
+window.showToast=msg=>{
+  const t=$('toast');t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2400);
+};
+function showFlash(){const f=$('flash');f.style.display='block';setTimeout(()=>f.style.display='none',1600);}
 
-/* ═══ UTILITIES ═══ */
-const uid = () => Math.random().toString(36).substr(2,9);
-const $   = id => document.getElementById(id);
-
-window.showScreen = function(name) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  $('s-'+name).classList.add('active');
-  if (name === 'dashboard') refreshDashboard();
-  if (name === 'qr') setTimeout(refreshQR, 100);
+/* ══════ DARK MODE ══════ */
+window.toggleDark=()=>{
+  S.dark=!S.dark;
+  document.body.classList.toggle('dark',S.dark);
+  $('dark-btn').textContent=S.dark?'☀️':'🌙';
 };
 
-function showToast(msg) {
-  const t = $('toast'); t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2200);
-}
-
-function showFlash() {
-  const f = $('flash-saved'); f.style.display = 'block';
-  setTimeout(() => f.style.display = 'none', 1800);
-}
-
-/* ═══ AUTH ═══ */
-let authMode = 'login';
-
-window.switchAuthMode = function(mode) {
-  authMode = mode;
-  $('btn-to-login').classList.toggle('active', mode === 'login');
-  $('btn-to-register').classList.toggle('active', mode === 'register');
-  $('auth-register-fields').style.display = mode === 'register' ? 'block' : 'none';
-  $('auth-submit').textContent = mode === 'login' ? 'Se connecter' : 'Créer mon compte';
-  $('auth-error').style.display = 'none';
+/* ══════ AUTH ══════ */
+let authMode='login';
+window.setAuthMode=m=>{
+  authMode=m;
+  $('btn-login').classList.toggle('on',m==='login');
+  $('btn-reg').classList.toggle('on',m==='register');
+  $('reg-fields').style.display=m==='register'?'block':'none';
+  $('inv-info').style.display=m==='register'?'block':'none';
+  $('a-submit').textContent=m==='login'?'Se connecter':'Créer mon compte';
+  $('a-err').style.display='none';
 };
 
-window.handleAuth = async function() {
-  const email = $('auth-email').value.trim();
-  const pw    = $('auth-pw').value;
-  const errEl = $('auth-error');
-  errEl.style.display = 'none';
-
-  if (!email || !pw) { errEl.textContent = 'Remplis tous les champs.'; errEl.style.display = 'block'; return; }
-
-  $('auth-submit').disabled = true;
-  $('auth-submit').textContent = '…';
-
-  try {
-    if (authMode === 'register') {
-      const uname = $('auth-username').value.trim();
-      if (!uname) { throw { code:'no-username' }; }
-      const cred = await createUserWithEmailAndPassword(auth, email, pw);
-      const uid_ = cred.user.uid;
-      const profile = { ...DEFAULT_PROFILE, displayName: uname };
-      await setDoc(doc(db, 'users', uid_), { username: uname, qrId: uid_, createdAt: Date.now(), profile });
-    } else {
-      await signInWithEmailAndPassword(auth, email, pw);
+window.doAuth=async()=>{
+  const email=$('a-email').value.trim(), pw=$('a-pw').value;
+  const err=$('a-err');
+  err.style.display='none';
+  if(!email||!pw){err.textContent='Remplis tous les champs.';err.style.display='block';return;}
+  $('a-submit').disabled=true;$('a-submit').textContent='…';
+  try{
+    if(authMode==='register'){
+      const uname=$('a-name').value.trim();
+      const code=$('a-code').value.trim().toUpperCase();
+      if(!uname)throw{msg:'Choisis un nom d\'utilisateur.'};
+      if(!code)throw{msg:'Entre ton code d\'invitation.'};
+      let ok=false;
+      try{const cd=await getDoc(doc(DB,'inviteCodes',code));if(cd.exists()&&!cd.data().used)ok=true;}catch(e){}
+      if(!ok)throw{msg:'Code d\'invitation invalide ou déjà utilisé.'};
+      const cred=await createUserWithEmailAndPassword(AUTH,email,pw);
+      const ui=cred.user.uid;
+      await setDoc(doc(DB,'users',ui),{username:uname,qrId:ui,email,createdAt:Date.now(),premium:false,profile:{...DEFAULT_PROFILE,displayName:uname}});
+      await updateDoc(doc(DB,'inviteCodes',code),{used:true,usedBy:ui,usedAt:Date.now()});
+    }else{
+      await signInWithEmailAndPassword(AUTH,email,pw);
     }
-  } catch(e) {
-    const msgs = {
-      'no-username':              'Choisis un nom d\'utilisateur.',
-      'auth/email-already-in-use':'Cet email est déjà utilisé.',
-      'auth/user-not-found':      'Aucun compte avec cet email.',
-      'auth/wrong-password':      'Mot de passe incorrect.',
-      'auth/invalid-email':       'Email invalide.',
-      'auth/weak-password':       'Mot de passe trop court (6 caractères min).',
-      'auth/invalid-credential':  'Email ou mot de passe incorrect.',
-    };
-    errEl.textContent = msgs[e.code] || 'Erreur : ' + e.message;
-    errEl.style.display = 'block';
-    $('auth-submit').disabled = false;
-    $('auth-submit').textContent = authMode === 'login' ? 'Se connecter' : 'Créer mon compte';
+  }catch(e){
+    const msgs={'auth/email-already-in-use':'Email déjà utilisé.','auth/user-not-found':'Aucun compte.','auth/wrong-password':'Mot de passe incorrect.','auth/invalid-credential':'Email ou mot de passe incorrect.','auth/weak-password':'Mot de passe trop court.','auth/invalid-email':'Email invalide.'};
+    err.textContent=e.msg||msgs[e.code]||'Erreur.';
+    err.style.display='block';
+    $('a-submit').disabled=false;
+    $('a-submit').textContent=authMode==='login'?'Se connecter':'Créer mon compte';
   }
 };
 
-window.handleLogout = async function() {
-  await signOut(auth);
-  STATE.user = null; STATE.profile = null;
-  showScreen('auth');
+window.doLogout=async()=>{await signOut(AUTH);S.user=null;S.profile=null;S.data=null;showScreen('auth');};
+
+/* ══════ FIRESTORE ══════ */
+async function loadUser(uid_){const s=await getDoc(doc(DB,'users',uid_));return s.exists()?s.data():null;}
+async function saveProfile(){
+  if(!S.user||!S.profile)return;
+  try{await setDoc(doc(DB,'users',S.user.uid),{profile:S.profile},{merge:true});showFlash();}
+  catch(e){showToast('❌ Erreur de sauvegarde');}
+}
+function autoSave(){syncForm();clearTimeout(S.saveTimer);S.saveTimer=setTimeout(saveProfile,1200);}
+function syncForm(){
+  if(!S.profile)return;
+  S.profile.displayName=$('p-dn').value;
+  S.profile.bio=$('p-bio').value;
+  const u=$('p-av').value.trim();if(u)S.profile.avatar=u;
+}
+
+/* ══════ VISIBILITÉ ══════ */
+window.toggleVisibility=async()=>{
+  if(!S.profile)return;
+  S.profile.visible=!S.profile.visible;
+  updateVisUI();await saveProfile();
+  showToast(S.profile.visible?'✅ Profil visible':'🔒 Profil masqué');
+};
+function updateVisUI(){
+  const v=S.profile?.visible!==false;
+  $('vis-toggle').classList.toggle('on',v);
+  $('vis-label').textContent=v?'Visible':'Privé';
+}
+
+/* ══════ TABS ══════ */
+window.setTab=tab=>{
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.tabs button').forEach(b=>b.classList.remove('on'));
+  const pane=$('tab-'+tab);if(pane)pane.classList.add('on');
+  document.querySelectorAll('.tabs button').forEach(b=>{if(b.dataset.tab===tab)b.classList.add('on');});
+  if(tab==='style')renderStyleTab();
+  if(tab==='qr')setTimeout(renderQR,100);
+  if(tab==='admin')loadAdminData();
 };
 
-/* ═══ FIRESTORE ═══ */
-async function loadUserData(uid_) {
-  const snap = await getDoc(doc(db, 'users', uid_));
-  return snap.exists() ? snap.data() : null;
-}
+/* ══════ BLOCS ══════ */
+window.addBlock=type=>{S.profile.blocks.push({id:uid(),type,content:'',label:''});setAddPanel(false);renderBlocks();saveProfile();};
+window.removeBlock=id=>{S.profile.blocks=S.profile.blocks.filter(b=>b.id!==id);renderBlocks();saveProfile();};
+window.updateBlock=(id,f,v)=>{const b=S.profile.blocks.find(b=>b.id===id);if(b){b[f]=v;autoSave();}};
+window.setAddPanel=s=>{$('add-panel').style.display=s?'block':'none';$('btn-add').style.display=s?'none':'block';};
 
-async function saveProfile() {
-  if (!STATE.user) return;
-  try {
-    await setDoc(doc(db, 'users', STATE.user.uid), { profile: STATE.profile }, { merge: true });
-    showFlash();
-  } catch(e) { showToast('❌ Erreur de sauvegarde'); }
-}
-
-/* ═══ AUTO-SAVE ═══ */
-function scheduleAutoSave() {
-  syncFormToProfile();
-  clearTimeout(STATE.saveTimer);
-  STATE.saveTimer = setTimeout(saveProfile, 1200);
-}
-
-function syncFormToProfile() {
-  STATE.profile.displayName = $('p-displayname').value;
-  STATE.profile.bio         = $('p-bio').value;
-  STATE.profile.avatar      = $('p-avatar').value.trim();
-}
-
-/* ═══ TABS ═══ */
-window.switchTab = function(tab) {
-  STATE.activeTab = tab;
-  const tabs = ['content','style','qr'];
-  const btns = document.querySelectorAll('.tabs-bar button');
-  tabs.forEach((t,i) => {
-    $('tab-'+t).classList.toggle('active', t === tab);
-    btns[i].classList.toggle('active', t === tab);
+function renderBlocks(){
+  const el=$('blocks-list');
+  if(!S.profile.blocks.length){el.innerHTML='<div style="text-align:center;color:var(--muted);padding:24px 0;font-size:14px">Aucun bloc — ajoute du contenu !</div>';return;}
+  el.innerHTML='';
+  S.profile.blocks.forEach(b=>{
+    const ic={text:'📝',link:'🔗',photo:'🖼️',video:'🎥'};
+    const nm={text:'Message',link:'Lien',photo:'Photo',video:'Vidéo'};
+    const d=document.createElement('div');d.className='block';
+    let f='';
+    if(b.type==='link')f+=`<input class="block-inp" placeholder="Titre du lien" value="${esc(b.label)}" oninput="updateBlock('${b.id}','label',this.value)">`;
+    if(b.type==='text')f+=`<div class="block-actions"><button class="block-action-btn" onclick="openEmoji('${b.id}')">😀 Emoji</button><button class="block-action-btn" style="font-weight:900;font-size:15px" onclick="insertFmt('${b.id}','bold')"><b>G</b></button><button class="block-action-btn" style="font-style:italic;font-weight:700" onclick="insertFmt('${b.id}','italic')"><i>I</i></button></div><textarea id="ta-${b.id}" class="block-inp" rows="3" placeholder="Écris ton message… (sélectionne du texte puis clique G ou I)" oninput="updateBlock('${b.id}','content',this.value)">${esc(b.content)}</textarea>`;
+    if(b.type==='link')f+=`<input class="block-inp" placeholder="https://…" value="${esc(b.content)}" oninput="updateBlock('${b.id}','content',this.value)">`;
+    if(b.type==='photo')f+=`<div class="upload-zone" onclick="document.getElementById('f-${b.id}').click()">📷 Choisir depuis le téléphone</div><input type="file" id="f-${b.id}" accept="image/*" onchange="uploadBlockPhoto('${b.id}',this)"><div class="upload-progress" id="prog-${b.id}"><div class="upload-progress-bar" id="bar-${b.id}"></div></div><input class="block-inp" placeholder="…ou URL d'image" value="${esc(b.content)}" oninput="updateBlock('${b.id}','content',this.value)">${b.content?`<img src="${esc(b.content)}" class="img-preview" onerror="this.style.display='none'">` :''}`;
+    if(b.type==='video')f+=`<input class="block-inp" placeholder="Lien YouTube…" value="${esc(b.content)}" oninput="updateBlock('${b.id}','content',this.value)">`;
+    d.innerHTML=`<div class="block-hdr"><span class="block-type">${ic[b.type]} ${nm[b.type]}</span><button class="block-del" onclick="removeBlock('${b.id}')">✕ Supprimer</button></div>${f}<div id="emoji-panel-${b.id}" style="display:none"></div>`;
+    el.appendChild(d);
   });
-  if (tab === 'qr') setTimeout(refreshQR, 100);
-  if (tab === 'style') refreshStyleTab();
+}
+
+/* ══════ EMOJI PICKER ══════ */
+window.openEmoji=id=>{
+  const panel=$('emoji-panel-'+id);
+  if(panel.style.display==='block'){panel.style.display='none';return;}
+  panel.innerHTML='';
+  const picker=document.createElement('div');picker.className='emoji-picker';
+  const cats=document.createElement('div');cats.className='emoji-cats';
+  const grid=document.createElement('div');grid.className='emoji-grid';
+  const renderCat=cat=>{
+    cats.querySelectorAll('.emoji-cat').forEach(b=>b.classList.toggle('on',b.dataset.cat===cat));
+    grid.innerHTML='';
+    EMOJIS[cat].forEach(em=>{
+      const btn=document.createElement('button');btn.className='emoji-btn';btn.textContent=em;
+      btn.onclick=()=>{
+        const b=S.profile.blocks.find(b=>b.id===id);if(b){b.content=(b.content||'')+em;autoSave();}
+        const ta=panel.closest('.block').querySelector('textarea');if(ta){ta.value=(ta.value||'')+em;}
+      };
+      grid.appendChild(btn);
+    });
+  };
+  Object.keys(EMOJIS).forEach(cat=>{
+    const btn=document.createElement('button');btn.className='emoji-cat';btn.textContent=cat;btn.dataset.cat=cat;
+    btn.onclick=()=>renderCat(cat);cats.appendChild(btn);
+  });
+  picker.appendChild(cats);picker.appendChild(grid);
+  panel.appendChild(picker);panel.style.display='block';
+  renderCat(Object.keys(EMOJIS)[0]);
 };
 
-/* ═══ BLOCKS ═══ */
-window.addBlock = function(type) {
-  const b = { id: uid(), type, content:'', label:'' };
-  STATE.profile.blocks.push(b);
-  toggleAddPanel(false);
-  renderBlocks();
-  saveProfile();
+/* ══════ COMPRESSION + UPLOAD ══════ */
+function compressImg(file,maxPx=900,q=0.82){
+  return new Promise((res,rej)=>{
+    const r=new FileReader();
+    r.onload=e=>{
+      const img=new Image();
+      img.onload=()=>{
+        let w=img.width,h=img.height;
+        if(w>maxPx||h>maxPx){if(w>h){h=Math.round(h*maxPx/w);w=maxPx;}else{w=Math.round(w*maxPx/h);h=maxPx;}}
+        const c=document.createElement('canvas');c.width=w;c.height=h;
+        c.getContext('2d').drawImage(img,0,0,w,h);
+        res(c.toDataURL('image/jpeg',q));
+      };img.onerror=rej;img.src=e.target.result;
+    };r.onerror=rej;r.readAsDataURL(file);
+  });
+}
+
+window.uploadAvatar=async input=>{
+  const file=input.files[0];if(!file)return;
+  const prog=$('av-prog'),bar=$('av-bar');
+  prog.style.display='block';bar.style.width='30%';
+  try{
+    bar.style.width='60%';
+    const b64=await compressImg(file,300,.8);
+    bar.style.width='90%';
+    S.profile.avatar=b64;$('p-av').value='';
+    const av=$('av-preview');av.src=b64;av.style.display='block';
+    bar.style.width='100%';setTimeout(()=>prog.style.display='none',400);
+    await saveProfile();showToast('📸 Photo ajoutée !');
+  }catch(e){showToast('❌ Erreur');prog.style.display='none';}
 };
 
-window.removeBlock = function(id) {
-  STATE.profile.blocks = STATE.profile.blocks.filter(b => b.id !== id);
-  renderBlocks(); saveProfile();
+window.uploadBlockPhoto=async(id,input)=>{
+  const file=input.files[0];if(!file)return;
+  const prog=$('prog-'+id),bar=$('bar-'+id);
+  prog.style.display='block';bar.style.width='30%';
+  try{
+    bar.style.width='60%';
+    const b64=await compressImg(file,900,.82);
+    bar.style.width='90%';
+    const b=S.profile.blocks.find(b=>b.id===id);if(b)b.content=b64;
+    bar.style.width='100%';
+    setTimeout(()=>{prog.style.display='none';renderBlocks();},400);
+    await saveProfile();showToast('🖼️ Photo ajoutée !');
+  }catch(e){showToast('❌ Erreur');prog.style.display='none';}
 };
 
-window.updateBlock = function(id, field, val) {
-  const b = STATE.profile.blocks.find(b => b.id === id);
-  if (b) { b[field] = val; scheduleAutoSave(); }
-};
+/* ══════ STYLE TAB ══════ */
+function renderStyleTab(){
+  const p=S.profile;
+  $('tpl-grid').innerHTML=Object.entries(TEMPLATES).map(([id,t])=>{
+    const bg=t.bg2?`linear-gradient(135deg,${t.bg},${t.bg2})`:t.bg;
+    return`<div class="tpl-card${p.template===id?' on':''}" onclick="selectTpl('${id}')" style="background:${bg}"><div style="font-size:22px">${t.emoji}</div><div class="tpl-name" style="color:${t.text}">${t.name}</div>${p.template===id?`<div style="font-size:10px;color:${t.accent};margin-top:2px">✓ Actif</div>`:''}</div>`;
+  }).join('');
+  $('font-list').innerHTML=FONTS.map(f=>`<button class="font-btn${p.font===f.id?' on':''}" onclick="selectFont('${f.id}')" style="font-family:${f.css}"><strong>${f.name}</strong> — <span style="opacity:.6;font-weight:400">Aperçu du texte</span></button>`).join('');
+  $('c-accent').value=p.primaryColor||'#FFD600';
+  $('c-bg').value=p.bgColor||'#ffffff';
+  $('c-text').value=p.textColor||'#1a1a1a';
+}
+window.selectTpl=id=>{const t=TEMPLATES[id];S.profile.template=id;S.profile.bgColor=t.bg;S.profile.textColor=t.text;S.profile.primaryColor=t.accent;renderStyleTab();saveProfile();};
+window.selectFont=id=>{S.profile.font=id;renderStyleTab();saveProfile();};
+window.onColor=(k,v)=>{S.profile[k]=v;clearTimeout(S.saveTimer);S.saveTimer=setTimeout(saveProfile,800);};
 
-window.toggleAddPanel = function(show) {
-  $('add-block-panel').style.display = show ? 'block' : 'none';
-  $('btn-add-block').style.display  = show ? 'none'  : 'block';
-};
-
-function renderBlocks() {
-  const container = $('blocks-list');
-  if (!STATE.profile.blocks.length) {
-    container.innerHTML = '<div style="text-align:center;color:#bbb;padding:20px 0;font-size:14px;">Aucun bloc — ajoute du contenu !</div>';
-    return;
+/* ══════ QR CODE ══════ */
+function renderQR(){
+  if(!S.user)return;
+  const url=`${location.origin}${location.pathname}#p=${S.user.uid}`;
+  const c=$('qr-display');c.innerHTML='';
+  const dark=S.profile?.textColor||'#111';
+  if(typeof QRCodeStyling!=='undefined'){
+    S.qrObj=new QRCodeStyling({width:220,height:220,type:'canvas',data:url,dotsOptions:{type:'rounded',color:dark},cornersSquareOptions:{type:'extra-rounded',color:dark},cornersDotOptions:{type:'dot',color:dark},backgroundOptions:{color:S.profile?.bgColor||'#ffffff'}});
+    S.qrObj.append(c);
+  }else{
+    new QRCode(c,{text:url,width:220,height:220,colorDark:dark,colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.H});
   }
-  container.innerHTML = STATE.profile.blocks.map(b => {
-    const icons = { text:'📝', link:'🔗', photo:'🖼️', video:'🎥' };
-    const labels = { text:'Message texte', link:'Lien cliquable', photo:'Photo (URL)', video:'Vidéo YouTube' };
-    const labelInput = b.type === 'link' ? `<label>Titre du lien</label><input type="text" value="${esc(b.label)}" placeholder="Ex: Mon Instagram" onchange="updateBlock('${b.id}','label',this.value)">` : '';
-    const placeholder = { text:'Écris ton message…', link:'https://…', photo:'URL de l\'image (https://…)', video:'Lien YouTube (https://youtube.com/watch?v=…)' };
-    const mainInput = b.type === 'text'
-      ? `<textarea rows="3" placeholder="${placeholder[b.type]}" onchange="updateBlock('${b.id}','content',this.value)">${esc(b.content)}</textarea>`
-      : `<input type="text" value="${esc(b.content)}" placeholder="${placeholder[b.type]}" onchange="updateBlock('${b.id}','content',this.value)">`;
-    return `<div class="block-item">
-      <div class="block-header">
-        <span class="block-type">${icons[b.type]} ${labels[b.type]}</span>
-        <button class="block-del" onclick="removeBlock('${b.id}')">✕ Supprimer</button>
-      </div>
-      ${labelInput}${mainInput}
-    </div>`;
-  }).join('');
+  const premium=S.data?.premium===true;
+  $('qr-premium').style.display=premium?'none':'block';
+  $('qr-dl').style.display=premium?'block':'none';
+}
+window.downloadQR=()=>{if(S.qrObj?.download)S.qrObj.download({name:'qrtag-qrcode',extension:'png'});};
+
+/* ══════ ADMIN PANEL ══════ */
+function isAdmin(){return S.user?.email===ADMIN_EMAIL;}
+
+function injectAdminTab(){
+  if(!isAdmin()||$('tab-admin-btn'))return;
+  const tabs=$('tabs-bar');
+  const btn=document.createElement('button');
+  btn.id='tab-admin-btn';
+  btn.dataset.tab='admin';
+  btn.textContent='⚙️ Admin';
+  btn.onclick=()=>setTab('admin');
+  tabs.appendChild(btn);
 }
 
-function esc(s='') { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-
-/* ═══ STYLE TAB ═══ */
-function refreshStyleTab() {
-  const p = STATE.profile;
-  // Templates
-  $('tpl-grid').innerHTML = Object.entries(TEMPLATES).map(([id,t]) => {
-    const bg = t.bg2 ? `linear-gradient(135deg,${t.bg},${t.bg2})` : t.bg;
-    const active = p.template === id;
-    return `<button class="tpl-btn${active?' active':''}" onclick="selectTemplate('${id}')" style="background:${bg}">
-      <div style="font-size:22px">${t.emoji}</div>
-      <div class="tpl-name" style="color:${t.text}">${t.name}</div>
-      ${active?`<div class="tpl-check" style="color:${t.accent}">✓ Actif</div>`:''}
-    </button>`;
-  }).join('');
-  // Fonts
-  $('font-list').innerHTML = FONTS.map(f =>
-    `<button class="font-btn${p.font===f.id?' active':''}" onclick="selectFont('${f.id}')" style="font-family:${f.css}">
-      ${f.name} — <span style="opacity:.65;font-weight:400">${f.preview}</span>
-    </button>`
-  ).join('');
-  // Colors
-  $('c-primary').value = p.primaryColor || '#6366f1';
-  $('c-bg').value      = p.bgColor      || '#ffffff';
-  $('c-text').value    = p.textColor    || '#1a1a1a';
+// Génère un code aléatoire sans caractères ambigus
+function makeCode(){
+  const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let c='QRT-';for(let i=0;i<8;i++)c+=chars[Math.floor(Math.random()*chars.length)];
+  return c;
 }
 
-window.selectTemplate = function(id) {
-  const t = TEMPLATES[id];
-  STATE.profile.template     = id;
-  STATE.profile.bgColor      = t.bg;
-  STATE.profile.textColor    = t.text;
-  STATE.profile.primaryColor = t.accent;
-  refreshStyleTab(); saveProfile();
+window.adminGenCode=async()=>{
+  const code=makeCode();
+  try{
+    await setDoc(doc(DB,'inviteCodes',code),{used:false,createdAt:Date.now(),usedBy:null});
+    showToast('🎟️ Code créé : '+code);
+    loadAdminData();
+  }catch(e){showToast('❌ '+e.message);}
 };
 
-window.selectFont = function(id) {
-  STATE.profile.font = id;
-  refreshStyleTab(); saveProfile();
+window.adminCopy=code=>{
+  navigator.clipboard?.writeText(code).then(()=>showToast('📋 Copié : '+code));
 };
 
-window.onColorChange = function(key, val) {
-  STATE.profile[key] = val;
-  clearTimeout(STATE.saveTimer);
-  STATE.saveTimer = setTimeout(saveProfile, 800);
+window.adminDel=async code=>{
+  if(!confirm(`Supprimer le code ${code} ?`))return;
+  try{await deleteDoc(doc(DB,'inviteCodes',code));showToast('🗑️ Supprimé');loadAdminData();}
+  catch(e){showToast('❌ Erreur');}
 };
 
-/* ═══ QR CODE ═══ */
-function getPublicUrl() {
-  const base = window.location.origin + window.location.pathname.replace('index.html','');
-  return `${base}#p=${STATE.user.uid}`;
+window.adminTogglePremium=async(uid_,current)=>{
+  try{
+    await setDoc(doc(DB,'users',uid_),{premium:!current},{merge:true});
+    showToast(current?'🔒 Premium désactivé':'⭐ Premium activé');
+    loadAdminData();
+  }catch(e){showToast('❌ Erreur');}
+};
+
+async function loadAdminData(){
+  if(!isAdmin())return;
+  await Promise.all([loadCodes(),loadUsers()]);
 }
 
-function refreshQR() {
-  if (!STATE.user) return;
-  const url = getPublicUrl();
-  $('qr-url-display').textContent = url;
-  const container = $('qr-canvas-container');
-  container.innerHTML = '';
-  STATE.qrObj = new QRCode(container, {
-    text: url, width: 200, height: 200,
-    colorDark:'#1a1a1a', colorLight:'#ffffff',
-    correctLevel: QRCode.CorrectLevel.H
-  });
+async function loadCodes(){
+  const el=$('codes-list'),stats=$('admin-stats');
+  if(!el)return;
+  try{
+    const snap=await getDocs(collection(DB,'inviteCodes'));
+    const codes=[];snap.forEach(d=>codes.push({id:d.id,...d.data()}));
+    codes.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+    const total=codes.length,used=codes.filter(c=>c.used).length,free=total-used;
+    if(stats)stats.innerHTML=`
+      <div class="stat-box"><div class="stat-num" style="color:#16a34a">${free}</div><div class="stat-lbl">Disponibles</div></div>
+      <div class="stat-box"><div class="stat-num" style="color:#e00">${used}</div><div class="stat-lbl">Utilisés</div></div>
+      <div class="stat-box"><div class="stat-num">${total}</div><div class="stat-lbl">Total</div></div>`;
+    if(!codes.length){el.innerHTML='<div style="text-align:center;color:var(--muted);padding:20px">Aucun code — génère-en un !</div>';return;}
+    el.innerHTML=codes.map(c=>`
+      <div class="code-item">
+        <span class="code-txt">${esc(c.id)}</span>
+        <span class="code-badge ${c.used?'badge-used':'badge-free'}">${c.used?'✓ Utilisé':'● Libre'}</span>
+        ${!c.used?`<button class="code-btn" style="background:var(--accent);color:#000" onclick="adminCopy('${esc(c.id)}')">📋 Copier</button>`:''}
+        ${!c.used?`<button class="code-btn" style="background:#fff0f0;color:#e00" onclick="adminDel('${esc(c.id)}')">✕</button>`:''}
+      </div>`).join('');
+  }catch(e){el.innerHTML='<div style="color:#e00;padding:16px">Erreur de chargement</div>';}
 }
 
-window.downloadQR = function() {
-  const canvas = document.querySelector('#qr-canvas-container canvas');
-  if (!canvas) { showToast('Génère d\'abord le QR'); return; }
-  const a = document.createElement('a');
-  a.download = 'qrtag-mon-qrcode.png';
-  a.href = canvas.toDataURL('image/png');
-  a.click();
-  showToast('✅ QR Code téléchargé !');
-};
+async function loadUsers(){
+  const el=$('users-list');if(!el)return;
+  try{
+    const snap=await getDocs(collection(DB,'users'));
+    const users=[];snap.forEach(d=>users.push({id:d.id,...d.data()}));
+    users.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+    if(!users.length){el.innerHTML='<div style="text-align:center;color:var(--muted);padding:16px">Aucun client</div>';return;}
+    el.innerHTML=users.map(u=>`
+      <div class="code-item">
+        <div style="flex:1"><div style="font-weight:700;font-size:14px">@${esc(u.username||'—')}</div><div style="font-size:11px;color:var(--muted)">${esc(u.email||'')}</div></div>
+        <span class="code-badge ${u.premium?'badge-free':'badge-used'}">${u.premium?'⭐ Premium':'Gratuit'}</span>
+        <button class="code-btn" style="background:var(--accent);color:#000;font-size:11px" onclick="adminTogglePremium('${u.id}',${!!u.premium})">${u.premium?'Rétrograder':'✦ Premium'}</button>
+      </div>`).join('');
+  }catch(e){el.innerHTML='<div style="color:#e00;padding:16px">Erreur</div>';}
+}
 
-window.copyLink = function() {
-  const url = getPublicUrl();
-  navigator.clipboard?.writeText(url).then(() => showToast('📋 Lien copié !'));
-};
-
-/* ═══ PUBLIC PROFILE ═══ */
-async function renderPublicProfile(uid_, isPreview=false) {
+/* ══════ PAGE PUBLIQUE ══════ */
+async function renderPublicPage(uid_,isPreview=false){
   showScreen('public');
-  $('pub-back-bar').style.display = isPreview ? 'block' : 'none';
-  if (isPreview) {
-    $('pub-back-btn').style.cursor = 'pointer';
-    $('pub-back-btn').onclick = () => showScreen('dashboard');
-  }
-  $('pub-content').innerHTML = '<div style="text-align:center;padding:60px;font-size:14px;color:#888">Chargement…</div>';
-
-  try {
-    let data;
-    if (isPreview && STATE.profile) {
-      data = { profile: STATE.profile, username: STATE.user?.displayName || '' };
-    } else {
-      const snap = await getDoc(doc(db, 'users', uid_));
-      if (!snap.exists()) { $('pub-content').innerHTML = '<div style="text-align:center;padding:60px">Profil introuvable</div>'; return; }
-      data = snap.data();
-    }
-    const { profile:p, username } = data;
-    const t = TEMPLATES[p.template] || TEMPLATES.minimal;
-    const fontCss = (FONTS.find(f => f.id === p.font) || FONTS[0]).css;
-    const bg = t.bg2 ? `linear-gradient(135deg,${p.bgColor||t.bg},${t.bg2})` : (p.bgColor||t.bg);
-    const txt = p.textColor || t.text;
-    const accent = p.primaryColor || t.accent;
-    const card = t.bg2 ? 'rgba(255,255,255,.16)' : t.card;
-
-    const avatarHtml = p.avatar
-      ? `<img src="${esc(p.avatar)}" class="pub-avatar" style="border-color:${accent}" onerror="this.style.display='none'">`
-      : `<div class="pub-avatar-placeholder" style="background:${accent}">${(p.displayName||username||'?')[0].toUpperCase()}</div>`;
-
-    const blocksHtml = (p.blocks||[]).map(b => {
-      if (b.type==='text' && b.content) return `<div class="pub-block"><div class="pub-text" style="background:${card}"><p style="color:${txt}">${esc(b.content)}</p></div></div>`;
-      if (b.type==='link' && b.content) return `<div class="pub-block"><a href="${esc(b.content)}" class="pub-link" style="background:${accent};box-shadow:0 4px 14px ${accent}55" target="_blank" rel="noopener">🔗 ${esc(b.label||b.content)}</a></div>`;
-      if (b.type==='photo' && b.content) return `<div class="pub-block"><div class="pub-photo"><img src="${esc(b.content)}" alt="" onerror="this.parentElement.parentElement.style.display='none'"></div></div>`;
-      if (b.type==='video' && b.content) {
-        const m = b.content.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/))([^&\n?#]+)/);
-        if (m) return `<div class="pub-block"><div class="pub-video"><iframe src="https://www.youtube.com/embed/${m[1]}" allowfullscreen title="video"></iframe></div></div>`;
-      }
-      return '';
-    }).join('');
-
-    const backBtn = isPreview ? `<button style="color:${txt};font-weight:700">← Retour à l'éditeur</button>` : '';
-
-    $('pub-content').innerHTML = `
-      <div style="min-height:100vh;background:${bg};font-family:${fontCss}">
-        <div class="pub-container">
-          <div style="text-align:center;margin-bottom:24px">
-            ${avatarHtml}
-            <h1 class="pub-name" style="color:${txt}">${esc(p.displayName||username)}</h1>
-            ${p.bio ? `<p class="pub-bio" style="color:${txt}">${esc(p.bio)}</p>` : ''}
-          </div>
-          ${blocksHtml || `<div class="pub-empty"><div class="pub-empty-icon">📭</div><p style="color:${txt}">Aucun contenu pour l'instant</p></div>`}
-        </div>
-        <div class="pub-footer" style="color:${txt};border-top:1px solid rgba(128,128,128,.15)">Propulsé par QRTag · Mentions légales</div>
-      </div>`;
-  } catch(e) {
-    $('pub-content').innerHTML = '<div style="text-align:center;padding:60px;color:#e00">Erreur de chargement</div>';
-  }
+  $('pub-back-bar').style.display=isPreview?'block':'none';
+  $('pub-content').innerHTML='<div style="text-align:center;padding:80px;color:var(--muted)">Chargement…</div>';
+  let pd;
+  try{
+    if(isPreview&&S.profile){pd={profile:S.profile,username:S.data?.username||''};}
+    else{const s=await getDoc(doc(DB,'users',uid_));if(!s.exists())throw 0;pd=s.data();}
+  }catch(e){$('pub-content').innerHTML='<div style="text-align:center;padding:80px">Profil introuvable</div>';return;}
+  const{profile:p,username}=pd;
+  if(p.visible===false&&!isPreview){$('pub-content').innerHTML=`<div style="min-height:100vh;background:#111;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff"><div style="font-size:60px">🔒</div><h2 style="margin:12px 0 6px">Profil désactivé</h2><p style="opacity:.5;font-size:14px">Ce profil est temporairement privé.</p></div>`;return;}
+  const t=TEMPLATES[p.template]||TEMPLATES.blanc;
+  const fontCss=(FONTS.find(f=>f.id===p.font)||FONTS[0]).css;
+  const bg=t.bg2?`linear-gradient(135deg,${p.bgColor||t.bg},${t.bg2})`:p.bgColor||t.bg;
+  const txt=p.textColor||t.text,accent=p.primaryColor||t.accent,card=t.bg2?'rgba(255,255,255,.16)':t.card;
+  const avatarHtml=p.avatar?`<img src="${esc(p.avatar)}" class="pub-avatar" style="border:3px solid ${accent}" onerror="this.style.display='none'">`:`<div class="pub-avatar-ph" style="background:${accent};color:#000">${((p.displayName||username||'?')[0]||'?').toUpperCase()}</div>`;
+  const blocksHtml=(p.blocks||[]).map(b=>{
+    if(b.type==='text'&&b.content)return`<div class="pub-block"><div style="background:${card};border-radius:16px;padding:16px 18px"><p style="color:${txt};font-size:15px;line-height:1.7;white-space:pre-wrap">${parseFmt(b.content)}</p></div></div>`;
+    if(b.type==='link'&&b.content)return`<div class="pub-block"><a href="${esc(b.content)}" style="display:block;background:${accent};color:#000;border-radius:14px;padding:15px 20px;text-align:center;text-decoration:none;font-size:15px;font-weight:800;box-shadow:0 4px 20px ${accent}55" target="_blank" rel="noopener">🔗 ${esc(b.label||b.content)}</a></div>`;
+    if(b.type==='photo'&&b.content)return`<div class="pub-block"><div style="border-radius:16px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.15)"><img src="${esc(b.content)}" style="width:100%;display:block" onerror="this.parentElement.parentElement.style.display='none'"></div></div>`;
+    if(b.type==='video'&&b.content){const m=b.content.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/))([^&\n?#]+)/);if(m)return`<div class="pub-block"><div style="border-radius:16px;overflow:hidden;position:relative;padding-top:56.25%;box-shadow:0 4px 20px rgba(0,0,0,.15)"><iframe src="https://www.youtube.com/embed/${m[1]}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:none" allowfullscreen></iframe></div></div>`;}
+    return'';
+  }).join('');
+  $('pub-content').innerHTML=`<div style="min-height:100vh;background:${bg};font-family:${fontCss}"><div class="pub-wrap"><div style="text-align:center;margin-bottom:24px">${avatarHtml}<h1 class="pub-name" style="color:${txt}">${esc(p.displayName||username)}</h1>${p.bio?`<p class="pub-bio" style="color:${txt}">${esc(p.bio)}</p>`:''}</div>${blocksHtml||`<div style="text-align:center;padding:40px;opacity:.35;color:${txt}"><div style="font-size:48px">📭</div><p>Aucun contenu</p></div>`}</div><div class="pub-footer" style="color:${txt}">Propulsé par QRTag · Mentions légales</div></div>`;
 }
 
-window.showPublicPreview = function() {
-  syncFormToProfile();
-  renderPublicProfile(STATE.user?.uid, true);
-};
+window.showPreview=()=>{syncForm();renderPublicPage(S.user?.uid,true);};
 
-/* ═══ DASHBOARD REFRESH ═══ */
-function refreshDashboard() {
-  if (!STATE.user || !STATE.profile) return;
-  const p = STATE.profile;
-  $('dash-username').textContent = '@' + (STATE.userData?.username || '');
-  $('p-displayname').value = p.displayName || '';
-  $('p-bio').value         = p.bio         || '';
-  $('p-avatar').value      = p.avatar      || '';
-  renderBlocks();
-  if (STATE.activeTab === 'style') refreshStyleTab();
-  if (STATE.activeTab === 'qr')   refreshQR();
+/* ══════ DASHBOARD ══════ */
+function refreshDash(){
+  if(!S.data||!S.profile)return;
+  $('hdr-name').textContent='@'+(S.data.username||'');
+  $('p-dn').value=S.profile.displayName||'';
+  $('p-bio').value=S.profile.bio||'';
+  $('p-av').value=typeof S.profile.avatar==='string'&&S.profile.avatar.startsWith('http')?S.profile.avatar:'';
+  if(S.profile.avatar){const av=$('av-preview');av.src=S.profile.avatar;av.style.display='block';}
+  updateVisUI();renderBlocks();
+  injectAdminTab(); // Ajoute l'onglet admin si admin
 }
 
-/* ═══ ROUTING PUBLIC PAGE ═══ */
-function checkPublicRoute() {
-  const hash = window.location.hash;
-  if (hash && hash.startsWith('#p=')) {
-    const uid_ = hash.slice(3);
-    if (uid_) { renderPublicProfile(uid_, false); return true; }
-  }
+/* ══════ ROUTING ══════ */
+function checkPublicRoute(){
+  const h=location.hash;
+  if(h&&h.startsWith('#p=')){const id=h.slice(3);if(id){renderPublicPage(id,false);return true;}}
   return false;
 }
 
-/* ═══ STARTUP ═══ */
-if (!checkPublicRoute()) {
-  onAuthStateChanged(auth, async user => {
-    if (user) {
-      STATE.user = user;
-      try {
-        const data = await loadUserData(user.uid);
-        if (data) {
-          STATE.userData  = data;
-          STATE.profile   = data.profile || { ...DEFAULT_PROFILE };
-        } else {
-          STATE.profile = { ...DEFAULT_PROFILE };
-        }
-      } catch(e) { STATE.profile = { ...DEFAULT_PROFILE }; }
+/* ══════ INIT ══════ */
+if(!checkPublicRoute()){
+  onAuthStateChanged(AUTH,async user=>{
+    if(user){
+      S.user=user;
+      try{const d=await loadUser(user.uid);if(d){S.data=d;S.profile=d.profile||{...DEFAULT_PROFILE};}else S.profile={...DEFAULT_PROFILE};}
+      catch(e){S.profile={...DEFAULT_PROFILE};}
       showScreen('dashboard');
-    } else {
+    }else{
       showScreen('auth');
     }
   });
 }
-
-window.addEventListener('hashchange', () => {
-  const hash = window.location.hash;
-  if (hash && hash.startsWith('#p=')) checkPublicRoute();
-});
+window.addEventListener('hashchange',()=>{if(location.hash.startsWith('#p='))checkPublicRoute();});
 
 </script>
 </body>
