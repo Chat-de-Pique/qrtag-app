@@ -217,7 +217,14 @@
     <label class="lbl" id="lbl-email">Email</label>
     <input class="inp" type="email" id="a-email" placeholder="toi@email.com">
     <label class="lbl" id="lbl-pw">Mot de passe</label>
-    <input class="inp" type="password" id="a-pw" placeholder="••••••••">
+    <div style="position:relative;margin-bottom:12px">
+      <input class="inp" type="password" id="a-pw" placeholder="••••••••" style="margin-bottom:0;padding-right:46px">
+      <button type="button" onclick="togglePwEye()" id="pw-eye" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:18px;color:var(--muted);line-height:1">👁</button>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
+      <input type="checkbox" id="remember-me" style="width:16px;height:16px;accent-color:var(--accent);cursor:pointer">
+      <label for="remember-me" style="font-size:13px;color:var(--text2);cursor:pointer;user-select:none">Se souvenir de moi</label>
+    </div>
     <div id="a-err" style="display:none" class="err"></div>
     <button class="btn btn-y" id="a-submit" onclick="doAuth()">Se connecter</button>
     <div style="display:flex;align-items:center;gap:8px;margin:14px 0">
@@ -394,7 +401,7 @@
 <script type="module">
 
 import{initializeApp}from'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-import{getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,signOut,onAuthStateChanged,GoogleAuthProvider,signInWithPopup,sendPasswordResetEmail}from'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+import{getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,signOut,onAuthStateChanged,GoogleAuthProvider,signInWithRedirect,getRedirectResult,sendPasswordResetEmail,setPersistence,browserLocalPersistence,browserSessionPersistence}from'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
 import{getFirestore,doc,setDoc,getDoc,updateDoc,collection,getDocs,deleteDoc}from'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
 /* ═══ CONFIG ═══ */
@@ -408,39 +415,23 @@ const FIREBASE={
 };
 const GOOGLE = new GoogleAuthProvider();
 
+window.togglePwEye=()=>{
+  const inp=$('a-pw'),btn=$('pw-eye');
+  const show=inp.type==='password';
+  inp.type=show?'text':'password';
+  btn.textContent=show?'🙈':'👁';
+};
+
 window.signInWithGoogle=async()=>{
-  try{
-    const result=await signInWithPopup(AUTH,GOOGLE);
-    const user=result.user;
-    // Vérifie si le compte existe dans Firestore
-    const existing=await loadUser(user.uid);
-    if(!existing && user.email?.toLowerCase()!==ADMIN_EMAIL.toLowerCase()){
-      await signOut(AUTH);
-      const err=$('a-err');
-      err.textContent='Compte introuvable. Inscris-toi d\'abord avec un code d\'invitation.';
-      err.style.display='block';
-      return;
-    }
-    // Si admin Google → crée le doc si besoin
-    if(!existing && user.email?.toLowerCase()===ADMIN_EMAIL.toLowerCase()){
-      const newData={username:'Admin',qrId:user.uid,email:user.email,createdAt:Date.now(),plan:'app',profile:{...DEFAULT_PROFILE,displayName:'Admin'}};
-      await setDoc(doc(DB,'users',user.uid),newData);
-    }
-  }catch(e){
-    if(e.code!=='auth/popup-closed-by-user') showToast('❌ Erreur Google : '+(e.message||e.code));
-  }
+  try{await signInWithRedirect(AUTH,GOOGLE);}
+  catch(e){showToast('❌ '+(e.message||e.code));}
 };
 
 window.forgotPassword=async()=>{
   const email=$('a-email').value.trim();
   if(!email){showToast('Entre ton email d\'abord 📧');return;}
-  try{
-    await sendPasswordResetEmail(AUTH,email);
-    showToast('✉️ Email de récupération envoyé !');
-  }catch(e){
-    const msgs={'auth/user-not-found':'Aucun compte avec cet email.','auth/invalid-email':'Email invalide.'};
-    showToast('❌ '+(msgs[e.code]||'Erreur'));
-  }
+  try{await sendPasswordResetEmail(AUTH,email);showToast('✉️ Email de récupération envoyé !');}
+  catch(e){const m={'auth/user-not-found':'Email introuvable.','auth/invalid-email':'Email invalide.'};showToast('❌ '+(m[e.code]||'Erreur'));}
 };
 
 const APP=initializeApp(FIREBASE);
@@ -982,6 +973,18 @@ function checkPublicRoute(){
 
 /* ═══ INIT ═══ */
 buildLangGrid();
+
+// Récupère le résultat de la redirection Google si applicable
+getRedirectResult(AUTH).then(async result=>{
+  if(!result)return;
+  const user=result.user;
+  const existing=await loadUser(user.uid);
+  if(!existing&&user.email?.toLowerCase()!==ADMIN_EMAIL.toLowerCase()){
+    await signOut(AUTH);
+    showScreen('auth');
+    setTimeout(()=>{const e=$('a-err');e.textContent='Compte introuvable. Inscris-toi avec un code d\'invitation.';e.style.display='block';},300);
+  }
+}).catch(()=>{});
 
 if(!checkPublicRoute()){
   onAuthStateChanged(AUTH,async user=>{
