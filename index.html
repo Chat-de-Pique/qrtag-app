@@ -521,7 +521,7 @@ const EMOJIS={
   'Symboles':['♾️','☮️','✝️','☯️','🔯','♻️','☢️','⚡','🔱','⚜️','🔰','💲','©️','®️','™️','⁉️','‼️','🚫','⛔','📵','🆗','🆙','🆒','🆓','🆕','🅰️','🅱️'],
 };
 
-const DEFAULT_PROFILE={displayName:'',bio:'',avatar:'',template:'blanc',font:'sans',primaryColor:'#FFD600',bgColor:'#ffffff',textColor:'#1a1a1a',blocks:[],visible:true};
+const DEFAULT_PROFILE={displayName:'',bio:'',avatar:'',template:'blanc',font:'sans',primaryColor:'#FFD600',bgColor:'#ffffff',textColor:'#1a1a1a',blocks:[],showProfile:true};
 
 /* ═══ STATE ═══ */
 const S={user:null,data:null,profile:null,saveTimer:null,qrObj:null,dark:false};
@@ -642,14 +642,14 @@ function syncForm(){
 /* ═══ VISIBILITÉ ═══ */
 window.toggleVisibility=async()=>{
   if(!S.profile)return;
-  S.profile.visible=!S.profile.visible;
+  S.profile.showProfile=!S.profile.showProfile;
   updateVisUI();await saveProfile();
-  showToast(S.profile.visible?'✅ Profil visible':'🔒 Profil masqué');
+  showToast(S.profile.showProfile?'👤 Profil affiché':'🙈 Profil masqué');
 };
 function updateVisUI(){
-  const v=S.profile?.visible!==false;
+  const v=S.profile?.showProfile!==false;
   $('vis-toggle').classList.toggle('on',v);
-  $('vis-label').textContent=v?'Visible':'Privé';
+  $('vis-label').textContent=v?'Profil ON':'Profil OFF';
 }
 
 /* ═══ TABS ═══ */
