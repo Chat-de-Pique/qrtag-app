@@ -721,7 +721,12 @@ window.openEmoji=id=>{
 };
 
 /* ═══ COMPRESSION ═══ */
+function readFile(file){
+  return new Promise((res,rej)=>{const r=new FileReader();r.onload=e=>res(e.target.result);r.onerror=rej;r.readAsDataURL(file);});
+}
+
 function compressImg(file,maxPx=900,q=0.82){
+  if(file.type==='image/gif') return readFile(file); // GIF : pas de compression (préserve l'animation)
   return new Promise((res,rej)=>{
     const r=new FileReader();
     r.onload=e=>{
@@ -765,7 +770,21 @@ window.uploadBlockPhoto=async(id,input)=>{
   }catch(e){showToast('❌ Erreur');prog.style.display='none';}
 };
 
-/* ═══ STYLE TAB ═══ */
+window.uploadBlockVideo=async(id,input)=>{
+  const file=input.files[0];if(!file)return;
+  if(file.size>8*1024*1024){showToast('❌ Fichier trop lourd (max 8MB). Utilise YouTube pour les vidéos longues.');return;}
+  const prog=$('vprog-'+id),bar=$('vbar-'+id);
+  prog.style.display='block';bar.style.width='40%';
+  try{
+    const b64=await readFile(file);
+    bar.style.width='90%';
+    const b=S.profile.blocks.find(b=>b.id===id);if(b)b.content=b64;
+    bar.style.width='100%';
+    setTimeout(()=>{prog.style.display='none';renderBlocks();},400);
+    await saveProfile();showToast('✅ Fichier ajouté !');
+  }catch(e){showToast('❌ Erreur');prog.style.display='none';}
+};
+
 function renderStyleTab(){
   const p=S.profile;
   $('tpl-grid').innerHTML=Object.entries(TEMPLATES).map(([id,t_])=>{
