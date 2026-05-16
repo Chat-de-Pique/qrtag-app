@@ -250,10 +250,6 @@
       <strong id="hdr-name">@user</strong>
     </div>
     <div class="hdr-right">
-      <div class="vis-toggle" id="vis-toggle" onclick="toggleVisibility()">
-        <div class="vis-dot"></div>
-        <span id="vis-label">Privé</span>
-      </div>
       <div class="icon-btn" onclick="openLang()">🌐</div>
       <div class="icon-btn" onclick="toggleDark()" id="dark-btn">🌙</div>
       <div class="icon-btn" onclick="showPreview()">👁</div>
@@ -272,7 +268,13 @@
     <!-- CONTENU -->
     <div id="tab-content" class="tab-pane on">
       <div class="card">
-        <div class="card-title">👤 Profil</div>
+        <div class="card-title" style="justify-content:space-between">
+          <span>👤 Profil</span>
+          <div class="vis-toggle" id="vis-toggle" onclick="toggleVisibility()" style="font-size:11px">
+            <div class="vis-dot"></div>
+            <span id="vis-label">Privé</span>
+          </div>
+        </div>
         <label class="lbl">Nom affiché</label>
         <input class="inp" id="p-dn" placeholder="Ton prénom, pseudo…" oninput="autoSave()">
         <label class="lbl">Bio / Phrase d'accroche</label>
