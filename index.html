@@ -6,19 +6,22 @@
   <meta name="theme-color" content="#FFD600">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <link rel="manifest" href="manifest.json">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/png" href="/icon-192.png">
+  <link rel="apple-touch-icon" href="/icon-192.png">
   <title>QRTag</title>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=Permanent+Marker&family=Bebas+Neue&family=Pacifico&family=Rock+Salt&family=Creepster&family=Abril+Fatface&family=Righteous&family=Rubik+Dirt&family=Boogaloo&display=swap');
     :root{
-      --bg:#fafafa;--surface:#ffffff;--surface2:#f3f3f3;
-      --border:#ebebeb;--text:#1a1a1a;--text2:#555;--muted:#aaa;
-      --accent:#FFD600;--accent-text:#000;--accent-soft:rgba(255,214,0,.15);
+      --bg:#fafafa;--surface:#fff;--surface2:#f3f3f3;--border:#ebebeb;
+      --text:#1a1a1a;--text2:#555;--muted:#aaa;
+      --accent:#FFD600;--accent-soft:rgba(255,214,0,.15);
       --shadow:0 2px 20px rgba(0,0,0,.07);--shadow-lg:0 8px 40px rgba(0,0,0,.12);
       --radius:18px;--r-sm:12px;
     }
     body.dark{
-      --bg:#0f0f0f;--surface:#1c1c1c;--surface2:#272727;
-      --border:#333;--text:#f0f0f0;--text2:#aaa;--muted:#555;
+      --bg:#0f0f0f;--surface:#1c1c1c;--surface2:#272727;--border:#333;
+      --text:#f0f0f0;--text2:#aaa;--muted:#555;
       --shadow:0 2px 20px rgba(0,0,0,.4);--shadow-lg:0 8px 40px rgba(0,0,0,.5);
     }
     *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
@@ -26,15 +29,13 @@
     .screen{display:none;min-height:100vh;flex-direction:column;}
     .screen.active{display:flex;}
     input,textarea,button{font-family:inherit;}
-
-    /* ── Splash ── */
+    /* Splash */
     #s-splash{align-items:center;justify-content:center;background:var(--accent);}
     .splash-icon{font-size:72px;margin-bottom:12px;animation:pop .5s ease;}
     @keyframes pop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
     .splash-title{font-size:32px;font-weight:900;color:#000;letter-spacing:-1px;}
     .splash-sub{font-size:14px;color:rgba(0,0,0,.5);margin-top:4px;}
-
-    /* ── Auth ── */
+    /* Auth */
     #s-auth{align-items:center;justify-content:center;background:var(--bg);padding:20px;}
     .auth-card{background:var(--surface);border-radius:28px;padding:32px 24px;width:100%;max-width:380px;box-shadow:var(--shadow-lg);}
     .auth-logo{text-align:center;margin-bottom:24px;}
@@ -54,130 +55,135 @@
     .btn-g{background:var(--surface2);color:var(--text2);border:2px solid var(--border);}
     .err{background:#fff0f0;color:#e00;padding:11px 14px;border-radius:10px;font-size:13px;margin-bottom:12px;border:1px solid #fcc;}
     body.dark .err{background:#2a0000;}
-    .ok{background:#f0fff4;color:#0a0;padding:11px 14px;border-radius:10px;font-size:13px;margin-bottom:12px;}
     .invite-info{font-size:12px;color:var(--muted);text-align:center;margin-top:12px;line-height:1.5;}
-
-    /* ── Dashboard ── */
+    /* Dashboard */
     #s-dashboard{background:var(--bg);}
-    .hdr{background:var(--surface);border-bottom:2px solid var(--border);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:8px;}
+    .hdr{background:var(--surface);border-bottom:2px solid var(--border);padding:10px 12px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:6px;}
     .hdr-left small{font-size:10px;color:var(--muted);display:block;font-weight:600;text-transform:uppercase;letter-spacing:.5px;}
-    .hdr-left strong{font-size:16px;font-weight:900;}
-    .hdr-right{display:flex;align-items:center;gap:6px;flex-shrink:0;}
-    .icon-btn{width:36px;height:36px;background:var(--surface2);border:2px solid var(--border);border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;flex-shrink:0;transition:border .2s;}
+    .hdr-left strong{font-size:15px;font-weight:900;}
+    .hdr-right{display:flex;align-items:center;gap:5px;flex-shrink:0;flex-wrap:wrap;}
+    .icon-btn{width:34px;height:34px;background:var(--surface2);border:2px solid var(--border);border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;flex-shrink:0;transition:border .2s;}
     .icon-btn:hover{border-color:var(--accent);}
-    .vis-toggle{display:flex;align-items:center;gap:6px;background:var(--surface2);border:2px solid var(--border);border-radius:10px;padding:4px 10px;cursor:pointer;font-size:12px;font-weight:700;color:var(--text2);transition:all .2s;}
-    .vis-dot{width:8px;height:8px;border-radius:50%;background:var(--muted);transition:background .2s;}
+    .vis-toggle{display:flex;align-items:center;gap:5px;background:var(--surface2);border:2px solid var(--border);border-radius:10px;padding:4px 9px;cursor:pointer;font-size:11px;font-weight:700;color:var(--text2);transition:all .2s;}
+    .vis-dot{width:7px;height:7px;border-radius:50%;background:var(--muted);transition:background .2s;}
     .vis-toggle.on .vis-dot{background:#00c566;}
     .vis-toggle.on{border-color:#00c566;color:#00c566;}
     .tabs{display:flex;background:var(--surface);border-bottom:2px solid var(--border);flex-shrink:0;overflow-x:auto;}
-    .tabs button{flex:1;min-width:70px;padding:12px 4px;border:none;border-bottom:3px solid transparent;background:none;font-size:11px;font-weight:800;color:var(--muted);cursor:pointer;text-transform:uppercase;letter-spacing:.4px;transition:all .2s;white-space:nowrap;}
+    .tabs button{flex:1;min-width:60px;padding:11px 3px;border:none;border-bottom:3px solid transparent;background:none;font-size:10px;font-weight:800;color:var(--muted);cursor:pointer;text-transform:uppercase;letter-spacing:.3px;transition:all .2s;white-space:nowrap;}
     .tabs button.on{color:var(--text);border-bottom-color:var(--accent);}
-    .tab-body{flex:1;overflow-y:auto;padding:16px;}
+    .tab-body{flex:1;overflow-y:auto;padding:14px;}
     .tab-pane{display:none;}
     .tab-pane.on{display:block;}
-
-    /* ── Cards ── */
-    .card{background:var(--surface);border-radius:var(--radius);padding:18px;margin-bottom:14px;box-shadow:var(--shadow);}
-    .card-title{font-size:13px;font-weight:800;color:var(--text);margin-bottom:14px;display:flex;align-items:center;gap:6px;}
-
-    /* ── Blocs ── */
-    .block{background:var(--surface);border-radius:var(--radius);padding:16px;margin-bottom:12px;box-shadow:var(--shadow);border-left:4px solid var(--accent);}
-    .block-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
-    .block-type{font-size:12px;font-weight:800;background:var(--accent-soft);padding:4px 10px;border-radius:20px;}
+    /* Lang picker */
+    .lang-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:center;justify-content:center;padding:20px;}
+    .lang-modal.open{display:flex;}
+    .lang-box{background:var(--surface);border-radius:20px;padding:20px;width:100%;max-width:360px;max-height:70vh;overflow-y:auto;box-shadow:var(--shadow-lg);}
+    .lang-box h3{font-size:16px;font-weight:900;margin-bottom:14px;}
+    .lang-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+    .lang-item{padding:10px 12px;background:var(--surface2);border:2px solid var(--border);border-radius:10px;cursor:pointer;font-size:13px;font-weight:600;display:flex;align-items:center;gap:7px;transition:all .2s;}
+    .lang-item:hover,.lang-item.on{border-color:var(--accent);background:var(--accent-soft);}
+    /* Cards */
+    .card{background:var(--surface);border-radius:var(--radius);padding:16px;margin-bottom:12px;box-shadow:var(--shadow);}
+    .card-title{font-size:13px;font-weight:800;color:var(--text);margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+    /* Blocs */
+    .block{background:var(--surface);border-radius:var(--radius);padding:14px;margin-bottom:10px;box-shadow:var(--shadow);border-left:4px solid var(--accent);}
+    .block-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+    .block-type{font-size:11px;font-weight:800;background:var(--accent-soft);padding:3px 9px;border-radius:20px;}
     .block-del{background:#fff0f0;color:#e00;border:none;border-radius:8px;padding:5px 10px;cursor:pointer;font-size:11px;font-weight:700;}
     body.dark .block-del{background:#2a0000;}
     .block-inp{width:100%;padding:11px 13px;background:var(--surface2);border:2px solid var(--border);border-radius:10px;font-size:14px;color:var(--text);outline:none;transition:border .2s;margin-bottom:8px;}
     .block-inp:focus{border-color:var(--accent);}
     .block-inp::placeholder{color:var(--muted);}
     textarea.block-inp{resize:none;line-height:1.5;}
-    .block-actions{display:flex;gap:8px;margin-bottom:8px;}
-    .block-action-btn{padding:7px 11px;background:var(--surface2);border:2px solid var(--border);border-radius:9px;cursor:pointer;font-size:13px;color:var(--text2);font-weight:600;transition:all .2s;}
+    .block-actions{display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;}
+    .block-action-btn{padding:6px 10px;background:var(--surface2);border:2px solid var(--border);border-radius:9px;cursor:pointer;font-size:12px;color:var(--text2);font-weight:700;transition:all .2s;}
     .block-action-btn:hover{border-color:var(--accent);color:var(--accent);}
-    .img-preview{width:100%;max-height:200px;object-fit:cover;border-radius:10px;margin-top:4px;display:block;}
-    .upload-zone{width:100%;padding:20px;border:2px dashed var(--border);border-radius:12px;text-align:center;cursor:pointer;color:var(--muted);font-size:13px;font-weight:600;transition:all .2s;margin-bottom:8px;}
+    .img-preview{width:100%;max-height:200px;object-fit:cover;border-radius:10px;margin-top:4px;display:block;background:#888;}
+    .upload-zone{width:100%;padding:18px;border:2px dashed var(--border);border-radius:12px;text-align:center;cursor:pointer;color:var(--muted);font-size:13px;font-weight:600;transition:all .2s;margin-bottom:8px;}
     .upload-zone:hover{border-color:var(--accent);color:var(--accent);}
     input[type=file]{display:none;}
     .add-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
-    .add-btn-type{padding:18px 10px;background:var(--surface2);border:2px solid var(--border);border-radius:var(--r-sm);cursor:pointer;text-align:center;font-size:13px;font-weight:700;color:var(--text);transition:all .2s;line-height:1.5;}
+    .add-btn-type{padding:16px 10px;background:var(--surface2);border:2px solid var(--border);border-radius:var(--r-sm);cursor:pointer;text-align:center;font-size:12px;font-weight:700;color:var(--text);transition:all .2s;line-height:1.5;}
     .add-btn-type:hover{border-color:var(--accent);background:var(--accent-soft);}
-    .add-btn-type span{font-size:26px;display:block;margin-bottom:5px;}
-
-    /* ── Emoji picker ── */
-    .emoji-picker{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);padding:12px;margin-bottom:8px;box-shadow:var(--shadow-lg);}
-    .emoji-grid{display:flex;flex-wrap:wrap;gap:4px;max-height:140px;overflow-y:auto;}
-    .emoji-btn{width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer;border-radius:8px;border:none;background:none;transition:background .15s;}
+    .add-btn-type span{font-size:24px;display:block;margin-bottom:4px;}
+    /* Emoji */
+    .emoji-picker{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);padding:10px;margin-bottom:8px;box-shadow:var(--shadow-lg);}
+    .emoji-grid{display:flex;flex-wrap:wrap;gap:3px;max-height:130px;overflow-y:auto;}
+    .emoji-btn{width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer;border-radius:8px;border:none;background:none;transition:background .15s;}
     .emoji-btn:hover{background:var(--accent-soft);}
-    .emoji-cats{display:flex;gap:6px;margin-bottom:8px;overflow-x:auto;padding-bottom:4px;}
-    .emoji-cat{padding:4px 10px;border:2px solid var(--border);border-radius:20px;background:none;cursor:pointer;font-size:12px;font-weight:700;color:var(--muted);white-space:nowrap;}
+    .emoji-cats{display:flex;gap:5px;margin-bottom:8px;overflow-x:auto;padding-bottom:4px;}
+    .emoji-cat{padding:4px 9px;border:2px solid var(--border);border-radius:20px;background:none;cursor:pointer;font-size:11px;font-weight:700;color:var(--muted);white-space:nowrap;}
     .emoji-cat.on{background:var(--accent);color:#000;border-color:var(--accent);}
-
-    /* ── Templates ── */
+    /* Templates */
     .tpl-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-    .tpl-card{border-radius:14px;padding:20px 10px;text-align:center;border:3px solid transparent;cursor:pointer;transition:all .2s;}
+    .tpl-card{border-radius:14px;padding:18px 8px;text-align:center;border:3px solid transparent;cursor:pointer;transition:all .2s;}
     .tpl-card.on{border-color:var(--accent);box-shadow:0 0 0 3px rgba(255,214,0,.25);}
-    .tpl-card .tpl-name{font-size:12px;font-weight:800;margin-top:6px;}
+    .tpl-card .tpl-name{font-size:11px;font-weight:800;margin-top:5px;}
     .font-list{display:flex;flex-direction:column;gap:8px;}
-    .font-btn{padding:13px 15px;border-radius:12px;cursor:pointer;text-align:left;font-size:14px;border:2px solid var(--border);background:var(--surface2);color:var(--text);transition:all .2s;}
-    .font-btn.on{background:var(--accent-soft);border-color:var(--accent);font-weight:700;}
-    .color-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
-    .color-row div{font-size:13px;font-weight:600;}
-    .color-row small{font-size:11px;color:var(--muted);display:block;}
-    input[type=color]{width:44px;height:40px;border:2px solid var(--border);border-radius:10px;cursor:pointer;padding:2px;background:var(--surface2);}
-
-    /* ── QR ── */
-    .qr-section{background:var(--surface);border-radius:var(--radius);padding:24px;text-align:center;box-shadow:var(--shadow);margin-bottom:14px;}
-    #qr-display{width:240px;height:240px;margin:0 auto 16px;border-radius:16px;overflow:hidden;display:flex;align-items:center;justify-content:center;background:var(--surface2);}
+    .font-btn{padding:12px 14px;border-radius:12px;cursor:pointer;text-align:left;font-size:15px;border:2px solid var(--border);background:var(--surface2);color:var(--text);transition:all .2s;}
+    .font-btn.on{background:var(--accent-soft);border-color:var(--accent);}
+    .color-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+    .color-row-info div{font-size:13px;font-weight:600;}
+    .color-row-info small{font-size:11px;color:var(--muted);display:block;}
+    input[type=color]{width:44px;height:38px;border:2px solid var(--border);border-radius:10px;cursor:pointer;padding:2px;background:var(--surface2);}
+    /* QR */
+    .qr-section{background:var(--surface);border-radius:var(--radius);padding:22px;text-align:center;box-shadow:var(--shadow);margin-bottom:12px;}
+    #qr-display{width:230px;height:230px;margin:0 auto 14px;border-radius:14px;overflow:hidden;display:flex;align-items:center;justify-content:center;background:var(--surface2);}
     #qr-display canvas,#qr-display svg{display:block !important;}
-    .qr-note{background:var(--accent-soft);border-radius:12px;padding:11px 14px;font-size:12px;font-weight:600;margin-bottom:14px;border:1px solid rgba(255,214,0,.4);}
-    .premium-lock{background:var(--surface2);border-radius:var(--radius);padding:20px;text-align:center;border:2px dashed var(--border);}
-    .premium-lock .lock-icon{font-size:36px;margin-bottom:8px;}
-    .premium-lock h3{font-size:15px;font-weight:800;margin-bottom:4px;}
-    .premium-lock p{font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.5;}
-
-    /* ── Admin panel ── */
-    .code-item{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
-    .code-txt{font-family:'Courier New',monospace;font-size:14px;font-weight:800;flex:1;color:var(--text);letter-spacing:.5px;}
-    .code-badge{font-size:10px;font-weight:800;padding:3px 9px;border-radius:20px;white-space:nowrap;}
+    .qr-note{background:var(--accent-soft);border-radius:10px;padding:10px 13px;font-size:12px;font-weight:600;margin-bottom:12px;border:1px solid rgba(255,214,0,.4);}
+    .plan-lock{background:var(--surface2);border-radius:var(--radius);padding:20px;text-align:center;border:2px dashed var(--border);margin-bottom:12px;}
+    .plan-lock .lock-icon{font-size:34px;margin-bottom:8px;}
+    .plan-lock h3{font-size:15px;font-weight:800;margin-bottom:4px;}
+    .plan-lock p{font-size:13px;color:var(--muted);margin-bottom:12px;line-height:1.5;}
+    /* Plan badges */
+    .plan-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:800;}
+    .plan-tshirt{background:#e0f0ff;color:#0055aa;}
+    .plan-app{background:#fff0e0;color:#aa5500;}
+    body.dark .plan-tshirt{background:#002244;}
+    body.dark .plan-app{background:#331100;}
+    /* Admin */
+    .code-item{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:11px 13px;margin-bottom:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+    .code-txt{font-family:'Courier New',monospace;font-size:13px;font-weight:800;flex:1;color:var(--text);letter-spacing:.5px;}
+    .code-badge{font-size:10px;font-weight:800;padding:3px 8px;border-radius:20px;white-space:nowrap;}
     .badge-free{background:#f0fff4;color:#16a34a;}
     .badge-used{background:#fff0f0;color:#e00;}
     body.dark .badge-free{background:#002a00;}
     body.dark .badge-used{background:#2a0000;}
-    .code-btn{padding:6px 12px;border:none;border-radius:8px;cursor:pointer;font-size:12px;font-weight:700;transition:all .2s;}
-    .admin-stats{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:16px;}
-    .stat-box{flex:1;min-width:80px;background:var(--surface2);border-radius:12px;padding:12px;text-align:center;}
-    .stat-num{font-size:24px;font-weight:900;}
-    .stat-lbl{font-size:11px;color:var(--muted);margin-top:2px;}
-
-    /* ── Footer & misc ── */
-    .app-footer{padding:11px 18px;background:var(--surface);border-top:2px solid var(--border);text-align:center;flex-shrink:0;}
+    .code-btn{padding:5px 10px;border:none;border-radius:8px;cursor:pointer;font-size:11px;font-weight:700;transition:all .2s;}
+    .admin-stats{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px;}
+    .stat-box{flex:1;min-width:70px;background:var(--surface2);border-radius:12px;padding:10px;text-align:center;}
+    .stat-num{font-size:22px;font-weight:900;}
+    .stat-lbl{font-size:10px;color:var(--muted);margin-top:2px;}
+    /* Footer */
+    .app-footer{padding:10px 16px;background:var(--surface);border-top:2px solid var(--border);text-align:center;flex-shrink:0;}
     .app-footer span,.app-footer button{font-size:11px;color:var(--muted);}
     .app-footer button{background:none;border:none;cursor:pointer;text-decoration:underline;}
-    #toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--text);color:var(--bg);padding:10px 20px;border-radius:30px;font-size:13px;font-weight:700;opacity:0;transition:all .3s;z-index:999;pointer-events:none;white-space:nowrap;}
+    #toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--text);color:var(--bg);padding:10px 18px;border-radius:30px;font-size:13px;font-weight:700;opacity:0;transition:all .3s;z-index:999;pointer-events:none;white-space:nowrap;}
     #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
-    #flash{display:none;background:#f0fff4;color:#0a0;padding:9px 14px;border-radius:10px;font-size:12px;font-weight:700;margin-bottom:12px;text-align:center;border:1px solid #afa;}
+    #flash{display:none;background:#f0fff4;color:#0a0;padding:8px 13px;border-radius:10px;font-size:12px;font-weight:700;margin-bottom:10px;text-align:center;border:1px solid #afa;}
     body.dark #flash{background:#002a00;}
-    .upload-progress{width:100%;height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin-top:6px;display:none;}
+    .upload-progress{width:100%;height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin-top:5px;display:none;}
     .upload-progress-bar{height:100%;background:var(--accent);border-radius:2px;transition:width .3s;}
-
-    /* ── Page publique ── */
+    /* Public */
     #s-public{min-height:100vh;}
     .pub-back-bar{position:sticky;top:0;padding:10px 16px;background:rgba(255,255,255,.9);backdrop-filter:blur(10px);z-index:10;border-bottom:1px solid rgba(0,0,0,.08);}
     body.dark .pub-back-bar{background:rgba(15,15,15,.9);}
-    .pub-back-btn{background:var(--surface2);border:2px solid var(--border);border-radius:9px;padding:7px 14px;cursor:pointer;font-size:13px;font-weight:700;color:var(--text);}
+    .pub-back-btn{background:var(--surface2);border:2px solid var(--border);border-radius:9px;padding:7px 13px;cursor:pointer;font-size:13px;font-weight:700;color:var(--text);}
     .pub-wrap{max-width:480px;margin:0 auto;padding:28px 18px;}
-    .pub-avatar{width:92px;height:92px;border-radius:50%;object-fit:cover;display:block;margin:0 auto 12px;}
+    .pub-avatar{width:90px;height:90px;border-radius:50%;object-fit:cover;display:block;margin:0 auto 12px;background:#fff;}
     .pub-avatar-ph{width:82px;height:82px;border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:800;color:#fff;}
     .pub-name{text-align:center;font-size:26px;font-weight:900;margin-bottom:6px;}
     .pub-bio{text-align:center;font-size:14px;opacity:.7;margin-bottom:24px;line-height:1.5;}
     .pub-block{margin-bottom:12px;}
-    .pub-footer{text-align:center;padding:16px;font-size:11px;opacity:.35;}
-
-    /* ── Legal ── */
+    .pub-footer{text-align:center;padding:14px;font-size:11px;opacity:.35;}
+    .priv-banner{background:rgba(255,214,0,.15);border:1px solid rgba(255,214,0,.4);border-radius:12px;padding:10px 14px;font-size:12px;font-weight:700;margin-bottom:12px;text-align:center;color:#7a5c00;}
+    body.dark .priv-banner{color:#FFD600;}
+    /* Legal */
     #s-legal{background:var(--bg);padding:20px;}
-    .legal-wrap{background:var(--surface);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow);}
-    .legal-s{margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--border);}
+    .legal-wrap{background:var(--surface);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow);}
+    .legal-s{margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--border);}
     .legal-s:last-child{border:none;margin:0;padding:0;}
-    .legal-s h3{font-size:12px;font-weight:800;color:#b8960c;text-transform:uppercase;letter-spacing:.8px;margin-bottom:5px;}
+    .legal-s h3{font-size:11px;font-weight:800;color:#b8960c;text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px;}
     .legal-s p{font-size:13px;color:var(--text2);line-height:1.65;}
   </style>
 </head>
@@ -196,25 +202,43 @@
     <div class="auth-logo">
       <span class="icon">🏷️</span>
       <h1>QRTag</h1>
-      <p>Ton message sur ton t-shirt</p>
+      <p id="auth-tagline">Ton message sur ton t-shirt</p>
     </div>
     <div class="tog">
-      <button id="btn-login" class="on" onclick="setAuthMode('login')">Connexion</button>
-      <button id="btn-reg" onclick="setAuthMode('register')">Inscription</button>
+      <button id="btn-login" class="on" onclick="setAuthMode('login')" id="tog-login">Connexion</button>
+      <button id="btn-reg" onclick="setAuthMode('register')" id="tog-reg">Inscription</button>
     </div>
     <div id="reg-fields" style="display:none">
-      <label class="lbl">Nom d'utilisateur</label>
+      <label class="lbl" id="lbl-uname">Nom d'utilisateur</label>
       <input class="inp" id="a-name" placeholder="monpseudo" autocomplete="off">
-      <label class="lbl">Code d'invitation</label>
+      <label class="lbl" id="lbl-invite">Code d'invitation</label>
       <input class="inp" id="a-code" placeholder="QRT-XXXXXXXX" autocomplete="off" style="text-transform:uppercase">
     </div>
-    <label class="lbl">Email</label>
+    <label class="lbl" id="lbl-email">Email</label>
     <input class="inp" type="email" id="a-email" placeholder="toi@email.com">
-    <label class="lbl">Mot de passe</label>
+    <label class="lbl" id="lbl-pw">Mot de passe</label>
     <input class="inp" type="password" id="a-pw" placeholder="••••••••">
     <div id="a-err" style="display:none" class="err"></div>
     <button class="btn btn-y" id="a-submit" onclick="doAuth()">Se connecter</button>
-    <p class="invite-info" id="inv-info" style="display:none">🔒 L'inscription nécessite un code d'invitation.<br>Contacte-nous pour en obtenir un.</p>
+    <div style="display:flex;align-items:center;gap:8px;margin:14px 0">
+      <div style="flex:1;height:1px;background:var(--border)"></div>
+      <span style="font-size:12px;color:var(--muted)">ou</span>
+      <div style="flex:1;height:1px;background:var(--border)"></div>
+    </div>
+    <button class="btn btn-g" onclick="signInWithGoogle()" style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:12px">
+      <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+      Continuer avec Google
+    </button>
+    <button onclick="forgotPassword()" style="width:100%;background:none;border:none;cursor:pointer;font-size:12px;color:var(--muted);text-decoration:underline;padding:4px 0">Mot de passe oublié ?</button>
+    <p class="invite-info" id="inv-info" style="display:none">🔒 L'inscription nécessite un code d'invitation.</p>
+  </div>
+</div>
+
+<!-- LANG MODAL -->
+<div class="lang-modal" id="lang-modal" onclick="if(event.target===this)closeLang()">
+  <div class="lang-box">
+    <h3>🌐 Langue / Language</h3>
+    <div class="lang-grid" id="lang-grid"></div>
   </div>
 </div>
 
@@ -230,6 +254,7 @@
         <div class="vis-dot"></div>
         <span id="vis-label">Privé</span>
       </div>
+      <div class="icon-btn" onclick="openLang()">🌐</div>
       <div class="icon-btn" onclick="toggleDark()" id="dark-btn">🌙</div>
       <div class="icon-btn" onclick="showPreview()">👁</div>
       <div class="icon-btn" onclick="doLogout()">↩</div>
@@ -239,7 +264,7 @@
     <button class="on" data-tab="content" onclick="setTab('content')">📝 Contenu</button>
     <button data-tab="style" onclick="setTab('style')">🎨 Style</button>
     <button data-tab="qr" onclick="setTab('qr')">📲 QR</button>
-    <!-- onglet admin injecté par JS si admin -->
+    <button id="tab-admin-btn" style="display:none" data-tab="admin" onclick="setTab('admin')">⚙️ Admin</button>
   </div>
   <div class="tab-body">
     <div id="flash">✅ Sauvegardé !</div>
@@ -253,10 +278,10 @@
         <label class="lbl">Bio / Phrase d'accroche</label>
         <textarea class="inp" id="p-bio" rows="2" placeholder="Une courte phrase sur toi…" oninput="autoSave()"></textarea>
         <label class="lbl">Photo de profil</label>
-        <div class="upload-zone" onclick="document.getElementById('avatar-file').click()">📷 Choisir une photo depuis ton téléphone</div>
+        <div class="upload-zone" onclick="document.getElementById('avatar-file').click()">📷 Choisir depuis ton téléphone</div>
         <input type="file" id="avatar-file" accept="image/*" onchange="uploadAvatar(this)">
         <div class="upload-progress" id="av-prog"><div class="upload-progress-bar" id="av-bar"></div></div>
-        <img id="av-preview" style="display:none;width:80px;height:80px;border-radius:50%;object-fit:cover;margin:6px auto 8px;display:none">
+        <img id="av-preview" style="display:none;width:80px;height:80px;border-radius:50%;object-fit:cover;margin:6px auto 8px;background:#888;border:3px solid var(--accent)">
         <input class="inp" id="p-av" placeholder="…ou colle une URL d'image" oninput="autoSave()" style="margin-top:4px">
       </div>
       <div>
@@ -283,33 +308,35 @@
         <div class="tpl-grid" id="tpl-grid"></div>
       </div>
       <div class="card">
-        <div class="card-title">🔤 Police</div>
+        <div class="card-title">🔤 Police de caractères</div>
         <div class="font-list" id="font-list"></div>
       </div>
       <div class="card">
         <div class="card-title">🖌️ Couleurs</div>
-        <div class="color-row"><div><div>Couleur principale</div><small>Boutons & liens</small></div><input type="color" id="c-accent" oninput="onColor('primaryColor',this.value)"></div>
-        <div class="color-row"><div><div>Fond de page</div><small>Arrière-plan</small></div><input type="color" id="c-bg" oninput="onColor('bgColor',this.value)"></div>
-        <div class="color-row"><div><div>Texte</div><small>Couleur principale</small></div><input type="color" id="c-text" oninput="onColor('textColor',this.value)"></div>
+        <div class="color-row"><div class="color-row-info"><div>Couleur principale</div><small>Boutons & liens</small></div><input type="color" id="c-accent" oninput="onColor('primaryColor',this.value)"></div>
+        <div class="color-row"><div class="color-row-info"><div>Fond de page</div><small>Arrière-plan</small></div><input type="color" id="c-bg" oninput="onColor('bgColor',this.value)"></div>
+        <div class="color-row"><div class="color-row-info"><div>Texte</div><small>Couleur principale</small></div><input type="color" id="c-text" oninput="onColor('textColor',this.value)"></div>
       </div>
     </div>
 
     <!-- QR -->
     <div id="tab-qr" class="tab-pane">
-      <div class="qr-section">
-        <div class="card-title" style="justify-content:center">📲 Ton QR Code</div>
-        <div id="qr-display"></div>
-        <div class="qr-note">🖨️ Ce QR code est <strong>permanent</strong> — change ton contenu quand tu veux, il reste identique sur ton t-shirt !</div>
-      </div>
-      <div id="qr-premium" class="card premium-lock">
+      <div id="qr-locked" class="plan-lock">
         <div class="lock-icon">🔒</div>
-        <h3>Option impression</h3>
-        <p>Le téléchargement haute résolution est une option disponible à l'achat. Contacte-nous pour l'activer.</p>
-        <button class="btn btn-y" onclick="showToast('Contacte-nous pour activer cette option 📩')">En savoir plus</button>
+        <h3>Option "App seule"</h3>
+        <p>Le QR code et son téléchargement sont inclus dans l'option <strong>App seule</strong>. Contacte-nous pour l'activer sur ton compte.</p>
+        <button class="btn btn-y" onclick="showToast('Contacte-nous : contact@qrtag.app 📩')">En savoir plus</button>
       </div>
-      <div id="qr-dl" style="display:none" class="card">
-        <button class="btn btn-y" onclick="downloadQR()">⬇️ Télécharger haute résolution</button>
-        <p style="font-size:11px;color:var(--muted);margin-top:8px;text-align:center">Format PNG · Prêt pour impression textile</p>
+      <div id="qr-unlocked" style="display:none">
+        <div class="qr-section">
+          <div class="card-title" style="justify-content:center">📲 Ton QR Code</div>
+          <div id="qr-display"></div>
+          <div class="qr-note">🖨️ QR code <strong>permanent</strong> — modifie ton contenu quand tu veux, le QR reste identique !</div>
+        </div>
+        <div class="card">
+          <button class="btn btn-y" onclick="downloadQR()">⬇️ Télécharger haute résolution</button>
+          <p style="font-size:11px;color:var(--muted);margin-top:8px;text-align:center">Format PNG · Prêt pour impression textile</p>
+        </div>
       </div>
     </div>
 
@@ -318,16 +345,15 @@
       <div class="card">
         <div class="card-title">🎟️ Codes d'invitation</div>
         <div class="admin-stats" id="admin-stats"></div>
-        <button class="btn btn-y" onclick="adminGenCode()" style="margin-bottom:16px">✨ Générer un nouveau code</button>
+        <button class="btn btn-y" onclick="adminGenCode()" style="margin-bottom:14px">✨ Générer un code</button>
         <div id="codes-list"><div style="text-align:center;color:var(--muted);padding:20px">Chargement…</div></div>
       </div>
       <div class="card">
-        <div class="card-title">👥 Clients actifs</div>
-        <div id="users-list"><div style="text-align:center;color:var(--muted);padding:16px">Chargement…</div></div>
+        <div class="card-title">👥 Clients</div>
+        <div id="users-list"><div style="text-align:center;color:var(--muted);padding:14px">Chargement…</div></div>
       </div>
     </div>
   </div>
-
   <div class="app-footer">
     <span>© 2025 QRTag &nbsp;·&nbsp;</span>
     <button onclick="showScreen('legal')">Mentions légales</button>
@@ -335,7 +361,7 @@
   </div>
 </div>
 
-<!-- PAGE PUBLIQUE -->
+<!-- PUBLIC -->
 <div id="s-public" class="screen">
   <div class="pub-back-bar" id="pub-back-bar" style="display:none">
     <button class="pub-back-btn" onclick="showScreen('dashboard')">← Retour</button>
@@ -348,31 +374,28 @@
   <div style="padding:20px;max-width:520px;margin:0 auto;width:100%">
     <button class="btn btn-g" style="width:auto;padding:9px 18px;margin-bottom:16px" onclick="showScreen('dashboard')">← Retour</button>
     <div class="legal-wrap">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px"><span style="font-size:30px">📄</span><div><h2 style="font-size:19px;font-weight:900">Mentions légales</h2><small style="color:var(--muted)">Mise à jour : janvier 2025</small></div></div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px"><span style="font-size:28px">📄</span><div><h2 style="font-size:18px;font-weight:900">Mentions légales</h2><small style="color:var(--muted)">Mise à jour : janvier 2025</small></div></div>
       <div class="legal-s"><h3>Éditeur</h3><p>QRTag — application indépendante. Contact : contact@qrtag.app</p></div>
       <div class="legal-s"><h3>Hébergement</h3><p>GitHub Pages. Données sur Firebase (Google Cloud).</p></div>
       <div class="legal-s"><h3>Données personnelles (RGPD)</h3><p>Droit d'accès, rectification, suppression : contact@qrtag.app. Aucune donnée cédée à des tiers.</p></div>
       <div class="legal-s"><h3>Contenu utilisateur</h3><p>L'utilisateur s'engage à ne pas publier de contenu illégal. QRTag peut suspendre tout compte en infraction.</p></div>
       <div class="legal-s"><h3>Cookies</h3><p>Aucun cookie publicitaire. Session Firebase uniquement.</p></div>
-      <p style="text-align:center;font-size:11px;color:var(--muted);margin-top:16px">© 2025 QRTag — Tous droits réservés</p>
+      <p style="text-align:center;font-size:11px;color:var(--muted);margin-top:14px">© 2025 QRTag — Tous droits réservés</p>
     </div>
   </div>
 </div>
 
 <div id="toast"></div>
 
-<!-- SCRIPTS -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://unpkg.com/qr-code-styling@1.6.0-rc.1/lib/qr-code-styling.js"></script>
 <script type="module">
 
 import{initializeApp}from'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-import{getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,signOut,onAuthStateChanged}from'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-import{getFirestore,doc,setDoc,getDoc,updateDoc,collection,getDocs,deleteDoc,query,orderBy}from'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+import{getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,signOut,onAuthStateChanged,GoogleAuthProvider,signInWithPopup,sendPasswordResetEmail}from'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+import{getFirestore,doc,setDoc,getDoc,updateDoc,collection,getDocs,deleteDoc}from'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
-/* ══════════════════════════════════
-   🔧 CONFIG FIREBASE
-══════════════════════════════════ */
+/* ═══ CONFIG ═══ */
 const FIREBASE={
   apiKey:"AIzaSyAJXkf2hztEQ_rb-u1iISHl5zwzwuwQS5E",
   authDomain:"qrtag-6e1f7.firebaseapp.com",
@@ -381,17 +404,75 @@ const FIREBASE={
   messagingSenderId:"901346334115",
   appId:"1:901346334115:web:a91feef09e591721637616"
 };
+const GOOGLE = new GoogleAuthProvider();
 
-/* ══════════════════════════════════
-   ⚙️ ADMIN — Mets ton email ici
-══════════════════════════════════ */
-const ADMIN_EMAIL = 'TON_EMAIL_ICI@gmail.com'; // ← REMPLACE PAR TON EMAIL
+window.signInWithGoogle=async()=>{
+  try{
+    const result=await signInWithPopup(AUTH,GOOGLE);
+    const user=result.user;
+    // Vérifie si le compte existe dans Firestore
+    const existing=await loadUser(user.uid);
+    if(!existing && user.email?.toLowerCase()!==ADMIN_EMAIL.toLowerCase()){
+      await signOut(AUTH);
+      const err=$('a-err');
+      err.textContent='Compte introuvable. Inscris-toi d\'abord avec un code d\'invitation.';
+      err.style.display='block';
+      return;
+    }
+    // Si admin Google → crée le doc si besoin
+    if(!existing && user.email?.toLowerCase()===ADMIN_EMAIL.toLowerCase()){
+      const newData={username:'Admin',qrId:user.uid,email:user.email,createdAt:Date.now(),plan:'app',profile:{...DEFAULT_PROFILE,displayName:'Admin'}};
+      await setDoc(doc(DB,'users',user.uid),newData);
+    }
+  }catch(e){
+    if(e.code!=='auth/popup-closed-by-user') showToast('❌ Erreur Google : '+(e.message||e.code));
+  }
+};
+
+window.forgotPassword=async()=>{
+  const email=$('a-email').value.trim();
+  if(!email){showToast('Entre ton email d\'abord 📧');return;}
+  try{
+    await sendPasswordResetEmail(AUTH,email);
+    showToast('✉️ Email de récupération envoyé !');
+  }catch(e){
+    const msgs={'auth/user-not-found':'Aucun compte avec cet email.','auth/invalid-email':'Email invalide.'};
+    showToast('❌ '+(msgs[e.code]||'Erreur'));
+  }
+};
 
 const APP=initializeApp(FIREBASE);
 const AUTH=getAuth(APP);
 const DB=getFirestore(APP);
 
-/* ══════ CONSTANTES ══════ */
+/* ═══ LANGUES ═══ */
+const LANGS={
+  fr:{f:'🇫🇷',n:'Français',connect:'Connexion',register:'Inscription',create:'Créer mon compte',poweredBy:'Propulsé par QRTag',privateMsg:'Ce profil est temporairement privé.',previewPrivate:'⚠️ Ton profil est actuellement privé — les visiteurs voient une page verrouillée.'},
+  en:{f:'🇬🇧',n:'English',connect:'Sign In',register:'Sign Up',create:'Create account',poweredBy:'Powered by QRTag',privateMsg:'This profile is temporarily private.',previewPrivate:'⚠️ Your profile is currently private — visitors see a locked page.'},
+  es:{f:'🇪🇸',n:'Español',connect:'Iniciar sesión',register:'Registrarse',create:'Crear cuenta',poweredBy:'Desarrollado por QRTag',privateMsg:'Este perfil está temporalmente privado.',previewPrivate:'⚠️ Tu perfil está actualmente privado.'},
+  de:{f:'🇩🇪',n:'Deutsch',connect:'Anmelden',register:'Registrieren',create:'Konto erstellen',poweredBy:'Bereitgestellt von QRTag',privateMsg:'Dieses Profil ist vorübergehend privat.',previewPrivate:'⚠️ Dein Profil ist derzeit privat.'},
+  it:{f:'🇮🇹',n:'Italiano',connect:'Accedi',register:'Registrati',create:'Crea account',poweredBy:'Powered by QRTag',privateMsg:'Questo profilo è temporaneamente privato.',previewPrivate:'⚠️ Il tuo profilo è attualmente privato.'},
+  pt:{f:'🇵🇹',n:'Português',connect:'Entrar',register:'Registrar',create:'Criar conta',poweredBy:'Desenvolvido por QRTag',privateMsg:'Este perfil está temporariamente privado.',previewPrivate:'⚠️ Seu perfil está atualmente privado.'},
+  ru:{f:'🇷🇺',n:'Русский',connect:'Войти',register:'Зарегистрироваться',create:'Создать аккаунт',poweredBy:'На платформе QRTag',privateMsg:'Этот профиль временно скрыт.',previewPrivate:'⚠️ Ваш профиль сейчас скрыт.'},
+  ar:{f:'🇸🇦',n:'العربية',connect:'تسجيل الدخول',register:'إنشاء حساب',create:'إنشاء حساب',poweredBy:'مدعوم من QRTag',privateMsg:'هذا الملف الشخصي خاص مؤقتاً.',previewPrivate:'⚠️ ملفك الشخصي خاص حالياً.',rtl:true},
+  zh:{f:'🇨🇳',n:'中文',connect:'登录',register:'注册',create:'创建账号',poweredBy:'由QRTag提供',privateMsg:'此主页暂时为私密状态。',previewPrivate:'⚠️ 您的主页目前处于私密模式。'},
+  ja:{f:'🇯🇵',n:'日本語',connect:'ログイン',register:'新規登録',create:'アカウント作成',poweredBy:'QRTagより',privateMsg:'このプロフィールは一時的に非公開です。',previewPrivate:'⚠️ あなたのプロフィールは現在非公開です。'},
+  ko:{f:'🇰🇷',n:'한국어',connect:'로그인',register:'회원가입',create:'계정 만들기',poweredBy:'QRTag 제공',privateMsg:'이 프로필은 일시적으로 비공개입니다.',previewPrivate:'⚠️ 현재 프로필이 비공개입니다.'},
+  nl:{f:'🇳🇱',n:'Nederlands',connect:'Inloggen',register:'Registreren',create:'Account aanmaken',poweredBy:'Mogelijk gemaakt door QRTag',privateMsg:'Dit profiel is tijdelijk privé.',previewPrivate:'⚠️ Je profiel is momenteel privé.'},
+  pl:{f:'🇵🇱',n:'Polski',connect:'Zaloguj się',register:'Zarejestruj',create:'Utwórz konto',poweredBy:'Powered by QRTag',privateMsg:'Ten profil jest tymczasowo prywatny.',previewPrivate:'⚠️ Twój profil jest obecnie prywatny.'},
+  tr:{f:'🇹🇷',n:'Türkçe',connect:'Giriş yap',register:'Kayıt ol',create:'Hesap oluştur',poweredBy:'QRTag tarafından',privateMsg:'Bu profil geçici olarak gizli.',previewPrivate:'⚠️ Profiliniz şu anda gizli.'},
+  sv:{f:'🇸🇪',n:'Svenska',connect:'Logga in',register:'Registrera',create:'Skapa konto',poweredBy:'Drivs av QRTag',privateMsg:'Den här profilen är tillfälligt privat.',previewPrivate:'⚠️ Din profil är för närvarande privat.'},
+  da:{f:'🇩🇰',n:'Dansk',connect:'Log ind',register:'Registrer',create:'Opret konto',poweredBy:'Drevet af QRTag',privateMsg:'Denne profil er midlertidigt privat.',previewPrivate:'⚠️ Din profil er i øjeblikket privat.'},
+  fi:{f:'🇫🇮',n:'Suomi',connect:'Kirjaudu',register:'Rekisteröidy',create:'Luo tili',poweredBy:'QRTagin tarjoama',privateMsg:'Tämä profiili on väliaikaisesti yksityinen.',previewPrivate:'⚠️ Profiilisi on tällä hetkellä yksityinen.'},
+  no:{f:'🇳🇴',n:'Norsk',connect:'Logg inn',register:'Registrer deg',create:'Opprett konto',poweredBy:'Drevet av QRTag',privateMsg:'Denne profilen er midlertidig privat.',previewPrivate:'⚠️ Profilen din er for øyeblikket privat.'},
+  hi:{f:'🇮🇳',n:'हिन्दी',connect:'लॉग इन',register:'रजिस्टर',create:'खाता बनाएं',poweredBy:'QRTag द्वारा',privateMsg:'यह प्रोफ़ाइल अस्थायी रूप से निजी है।',previewPrivate:'⚠️ आपकी प्रोफ़ाइल अभी निजी है।'},
+  vi:{f:'🇻🇳',n:'Tiếng Việt',connect:'Đăng nhập',register:'Đăng ký',create:'Tạo tài khoản',poweredBy:'Được cung cấp bởi QRTag',privateMsg:'Hồ sơ này tạm thời ở chế độ riêng tư.',previewPrivate:'⚠️ Hồ sơ của bạn hiện đang ở chế độ riêng tư.'},
+};
+
+let LANG=(()=>{const l=navigator.language.slice(0,2).toLowerCase();return LANGS[l]?l:'fr';})();
+function t(k){return LANGS[LANG]?.[k]||LANGS.fr[k]||k;}
+
+/* ═══ CONSTANTES ═══ */
 const TEMPLATES={
   blanc:  {name:'Blanc',   emoji:'⬜',bg:'#ffffff',bg2:null,text:'#1a1a1a',accent:'#FFD600',card:'#f5f5f5'},
   noir:   {name:'Noir',    emoji:'⬛',bg:'#0f0f0f',bg2:null,text:'#f0f0f0',accent:'#FFD600',card:'#1c1c1c'},
@@ -406,43 +487,66 @@ const TEMPLATES={
   cacao:  {name:'Cacao',   emoji:'☕',bg:'#2c1810',bg2:null,text:'#f5e6d0',accent:'#d4a056',card:'#3d2418'},
   glace:  {name:'Glace',   emoji:'🧊',bg:'#f0f9ff',bg2:null,text:'#0c4a6e',accent:'#38bdf8',card:'#e0f2fe'},
 };
+
+// Polices visuellement très différentes
 const FONTS=[
-  {id:'sans',     name:'Moderne',      css:'system-ui,-apple-system,sans-serif'},
-  {id:'serif',    name:'Classique',    css:'Georgia,serif'},
-  {id:'mono',     name:'Tech',         css:"'Courier New',monospace"},
-  {id:'round',    name:'Doux',         css:'Verdana,sans-serif'},
-  {id:'gothic',   name:'⚔️ Gothic',    css:"'UnifrakturMaguntia',cursive"},
-  {id:'marker',   name:'✏️ Graffiti',  css:"'Permanent Marker',cursive"},
-  {id:'dirt',     name:'🏚️ Urban',     css:"'Rubik Dirt',cursive"},
-  {id:'bebas',    name:'💪 Impact',    css:"'Bebas Neue',sans-serif"},
-  {id:'pacifico', name:'🌊 Pacifico',  css:"'Pacifico',cursive"},
-  {id:'rock',     name:'🎸 Rock',      css:"'Rock Salt',cursive"},
-  {id:'creep',    name:'💀 Creepy',    css:"'Creepster',cursive"},
-  {id:'boogaloo', name:'😜 Fun',       css:"'Boogaloo',cursive"},
-  {id:'abril',    name:'🎩 Élégant',   css:"'Abril Fatface',cursive"},
-  {id:'righteous',name:'🔥 Righteous', css:"'Righteous',cursive"},
+  {id:'sans',    name:'Moderne',         css:'system-ui,-apple-system,sans-serif',    sample:'Aa Bb Cc'},
+  {id:'serif',   name:'Classique serif', css:'Georgia,serif',                          sample:'Aa Bb Cc'},
+  {id:'mono',    name:'Typewriter',      css:"'Courier New',monospace",                sample:'Aa Bb Cc'},
+  {id:'gothic',  name:'⚔️ Médiéval',    css:"'UnifrakturMaguntia',cursive",           sample:'Aa Bb Cc'},
+  {id:'marker',  name:'✏️ Marker',       css:"'Permanent Marker',cursive",             sample:'Aa Bb Cc'},
+  {id:'bebas',   name:'💪 CONDENSED',    css:"'Bebas Neue',sans-serif",                sample:'BEBAS NEUE'},
+  {id:'pacifico',name:'🌊 Pacifico',     css:"'Pacifico',cursive",                     sample:'Aa Bb Cc'},
+  {id:'rock',    name:'🎸 Rock Salt',    css:"'Rock Salt',cursive",                    sample:'Aa Bb'},
+  {id:'creep',   name:'💀 Creepster',    css:"'Creepster',cursive",                    sample:'Aa Bb Cc'},
+  {id:'abril',   name:'🎩 Abril Fatface',css:"'Abril Fatface',cursive",                sample:'Aa Bb Cc'},
+  {id:'right',   name:'🔥 Righteous',    css:"'Righteous',cursive",                    sample:'Aa Bb Cc'},
+  {id:'boogaloo',name:'😜 Boogaloo',     css:"'Boogaloo',cursive",                     sample:'Aa Bb Cc'},
+  {id:'dirt',    name:'🏚️ Rubik Dirt',   css:"'Rubik Dirt',cursive",                   sample:'Aa Bb Cc'},
 ];
+
+// Emojis sans les unicode 14+ qui font des rectangles
 const EMOJIS={
-  'Visages':['😀','😂','🥰','😎','🤩','😏','🤔','😅','🥳','😍','🤗','😜','🙄','😴','🤑','😈','👿','😇','🥺','😭','😡','🤬','🥴','🤢','😤','🧟','🧛','🧙','🫠','🥲','😶','🤫','🤥','🫡','🥸','🤓','😬','🤐','😮','😲','🤯','🤠','🥳','😼','💀','👻','👽','🤖'],
-  'Gestes':['👋','🤙','👌','✌️','🤞','💪','🙏','👏','🫶','❤️','🔥','⭐','✨','💫','🎉','💥','💯','🏆','👍','👎','🤘','🤟','☝️','👆','👇','👉','👈','🤝','🫂','💋','🤲','🫰','🫵','🫳','🫴','✋','🖐️','🖖','👋','🤌','🤏'],
-  'Amour':['❤️','🧡','💛','💚','💙','💜','🖤','🤍','🤎','💔','❣️','💕','💞','💓','💗','💖','💘','💝','💟','♥️','💌','😍','🥰','😘','😗','😙','😚','💏','💑','👫','👬','👭'],
-  'Fête':['🎉','🎊','🥳','🎈','🎁','🎀','🎆','🎇','✨','🎂','🍰','🥂','🍾','🎤','🎵','🎶','🎸','🥁','🎹','🎺','🎻','🪗','🎷','🎠','🎡','🎢','🎪','🎭','🎬','🎤','🎧'],
-  'Nourriture':['🍕','🍔','🌮','🍜','🍣','🍰','🎂','🍩','🍪','🍫','🍓','🍌','🍍','🥑','🍉','🍇','🍒','🧁','🍦','🥤','☕','🧃','🍺','🥂','🍾','🥐','🧆','🌯','🥪','🍟','🧀','🥚','🍳','🥞','🧇','🥓','🥩','🍗','🍖','🌭'],
-  'Animaux':['🐶','🐱','🐭','🐹','🐰','🦊','🐻','🐼','🐨','🐯','🦁','🐮','🐷','🐸','🐵','🦄','🐝','🦋','🐢','🦎','🐙','🦑','🦈','🐋','🦅','🦉','🦚','🦜','🐧','🦩','🐊','🦖','🦕','🐲','🐉','🦄','🦋','🐞','🦗','🦟'],
-  'Objets':['📱','💻','🎵','🎮','🎨','📸','🎬','🎤','🎸','⚡','💎','👑','🔮','🪄','💌','🔑','🛸','🎪','🎡','🎲','🎰','🃏','🔫','⚔️','🛡️','🪃','💣','🪁','🔭','🔬','💊','🩺','🩻','🧬','⚗️','🔋','💡','🔦','📡','🛰️'],
-  'Nature':['🌸','🌺','🌻','🍀','🌿','🌊','🌙','☀️','🌈','❄️','🌴','🦋','🐉','🌵','🍃','🌾','🍄','🌹','🌷','🌼','🌞','🌝','⛅','🌪️','🔥','🌋','🏔️','🏝️','🌊','🌅','🌄','🌠','⛈️','🌩️','☃️','🌬️','🌫️'],
-  'Sport':['⚽','🏀','🎾','🏈','⚾','🎱','🏊','🤸','🏋️','🧘','🏄','🚴','🤺','⛷️','🏂','🧗','🥊','🥋','🏹','🎯','🎣','🤿','🪂','🛹','🛼','🏇','🧜','🤼','🤽','🤾','🏌️','🏇'],
-  'Symboles':['♾️','☮️','✝️','☯️','🔯','♻️','☢️','⚡','🔱','⚜️','🔰','💲','💱','©️','®️','™️','⁉️','‼️','🔞','🚫','⛔','📵','🔕','🔇','🆗','🆙','🆒','🆓','🆕','🆖','🅰️','🅱️'],
+  'Visages':['😀','😂','🥰','😎','🤩','😏','🤔','😅','🥳','😍','🤗','😜','🙄','😴','🤑','😈','👿','😇','🥺','😭','😡','🤬','🥴','🤢','😤','🧟','🧛','🧙','🤓','🤥','😬','🤐','😲','💀','👻','👽','🤖'],
+  'Gestes':['👋','🤙','👌','✌️','🤞','💪','🙏','👏','❤️','🔥','⭐','✨','💫','🎉','💥','💯','🏆','👍','👎','🤘','🤟','☝️','👆','👇','👉','👈','🤝','💋','✋','🖖','🖐️'],
+  'Amour':['❤️','🧡','💛','💚','💙','💜','🖤','🤍','🤎','💔','❣️','💕','💞','💓','💗','💖','💘','💝','💟','💌','😍','🥰','😘','😗','😙','💏','💑'],
+  'Fête':['🎉','🎊','🥳','🎈','🎁','🎀','🎆','🎇','✨','🎂','🍰','🥂','🍾','🎤','🎵','🎶','🎸','🥁','🎹','🎺','🎻','🎷','🎠','🎡','🎢','🎪','🎭','🎬','🎧'],
+  'Nourriture':['🍕','🍔','🌮','🍜','🍣','🍰','🎂','🍩','🍪','🍫','🍓','🍌','🍍','🥑','🍉','🍇','🍒','🧁','🍦','🥤','☕','🧃','🍺','🥂','🍾','🥐','🌯','🥪','🍟','🧀','🥚','🍳','🥩','🍗','🍖'],
+  'Animaux':['🐶','🐱','🐭','🐹','🐰','🦊','🐻','🐼','🐨','🐯','🦁','🐮','🐷','🐸','🐵','🦄','🐝','🦋','🐢','🦎','🐙','🦑','🦈','🐋','🦅','🦉','🦚','🦜','🐧','🦩','🐊','🐉','🐞','🦋'],
+  'Objets':['📱','💻','🎵','🎮','🎨','📸','🎬','🎤','🎸','⚡','💎','👑','🔮','🪄','💌','🔑','🛸','🎲','🃏','⚔️','🛡️','💣','🔭','🔬','💊','💡','🔦','📡','🔋','🎯'],
+  'Nature':['🌸','🌺','🌻','🍀','🌿','🌊','🌙','☀️','🌈','❄️','🌴','🦋','🌵','🍃','🌾','🍄','🌹','🌷','🌼','🌞','🌝','⛅','🌪️','🔥','🌋','🏔️','🏝️','🌅','🌄','🌠','☃️'],
+  'Sport':['⚽','🏀','🎾','🏈','⚾','🎱','🏊','🤸','🏋️','🧘','🏄','🚴','🤺','⛷️','🏂','🥊','🥋','🏹','🎣','🛹','🏇','🎿','🏌️','🤼','🤽'],
+  'Symboles':['♾️','☮️','✝️','☯️','🔯','♻️','☢️','⚡','🔱','⚜️','🔰','💲','©️','®️','™️','⁉️','‼️','🚫','⛔','📵','🆗','🆙','🆒','🆓','🆕','🅰️','🅱️'],
 };
+
 const DEFAULT_PROFILE={displayName:'',bio:'',avatar:'',template:'blanc',font:'sans',primaryColor:'#FFD600',bgColor:'#ffffff',textColor:'#1a1a1a',blocks:[],visible:true};
 
-/* ══════ STATE ══════ */
+/* ═══ STATE ═══ */
 const S={user:null,data:null,profile:null,saveTimer:null,qrObj:null,dark:false};
 const $=id=>document.getElementById(id);
 const esc=s=>(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 const uid=()=>Math.random().toString(36).substr(2,9);
 
-/* ══════ NAVIGATION ══════ */
+if('serviceWorker'in navigator) navigator.serviceWorker.register('/sw.js').catch(()=>{});
+
+/* ═══ LANGUE ═══ */
+window.openLang=()=>$('lang-modal').classList.add('open');
+window.closeLang=()=>$('lang-modal').classList.remove('open');
+
+function buildLangGrid(){
+  $('lang-grid').innerHTML=Object.entries(LANGS).map(([k,l])=>
+    `<div class="lang-item${LANG===k?' on':''}" onclick="switchLang('${k}')">${l.f} ${l.n}</div>`
+  ).join('');
+}
+
+window.switchLang=k=>{
+  LANG=k;
+  buildLangGrid();
+  closeLang();
+  showToast(LANGS[k].f+' '+LANGS[k].n);
+};
+
+/* ═══ NAVIGATION ═══ */
 window.showScreen=id=>{
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   $('s-'+id).classList.add('active');
@@ -450,20 +554,16 @@ window.showScreen=id=>{
   if(id==='qr')setTimeout(renderQR,100);
 };
 
-window.showToast=msg=>{
-  const t=$('toast');t.textContent=msg;t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),2400);
-};
+window.showToast=msg=>{const t=$('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2400);};
 function showFlash(){const f=$('flash');f.style.display='block';setTimeout(()=>f.style.display='none',1600);}
 
-/* ══════ DARK MODE ══════ */
 window.toggleDark=()=>{
   S.dark=!S.dark;
   document.body.classList.toggle('dark',S.dark);
   $('dark-btn').textContent=S.dark?'☀️':'🌙';
 };
 
-/* ══════ AUTH ══════ */
+/* ═══ AUTH ═══ */
 let authMode='login';
 window.setAuthMode=m=>{
   authMode=m;
@@ -471,51 +571,65 @@ window.setAuthMode=m=>{
   $('btn-reg').classList.toggle('on',m==='register');
   $('reg-fields').style.display=m==='register'?'block':'none';
   $('inv-info').style.display=m==='register'?'block':'none';
-  $('a-submit').textContent=m==='login'?'Se connecter':'Créer mon compte';
+  $('a-submit').textContent=m==='login'?t('connect'):t('create');
   $('a-err').style.display='none';
 };
 
 window.doAuth=async()=>{
-  const email=$('a-email').value.trim(), pw=$('a-pw').value;
-  const err=$('a-err');
-  err.style.display='none';
-  if(!email||!pw){err.textContent='Remplis tous les champs.';err.style.display='block';return;}
+  const email=$('a-email').value.trim().toLowerCase(),pw=$('a-pw').value;
+  const errEl=$('a-err');
+  errEl.style.display='none';
+  if(!email||!pw){errEl.textContent='Remplis tous les champs.';errEl.style.display='block';return;}
   $('a-submit').disabled=true;$('a-submit').textContent='…';
   try{
     if(authMode==='register'){
       const uname=$('a-name').value.trim();
       const code=$('a-code').value.trim().toUpperCase();
-      if(!uname)throw{msg:'Choisis un nom d\'utilisateur.'};
-      if(!code)throw{msg:'Entre ton code d\'invitation.'};
-      let ok=false;
-      try{const cd=await getDoc(doc(DB,'inviteCodes',code));if(cd.exists()&&!cd.data().used)ok=true;}catch(e){}
-      if(!ok)throw{msg:'Code d\'invitation invalide ou déjà utilisé.'};
-      const cred=await createUserWithEmailAndPassword(AUTH,email,pw);
-      const ui=cred.user.uid;
-      await setDoc(doc(DB,'users',ui),{username:uname,qrId:ui,email,createdAt:Date.now(),premium:false,profile:{...DEFAULT_PROFILE,displayName:uname}});
-      await updateDoc(doc(DB,'inviteCodes',code),{used:true,usedBy:ui,usedAt:Date.now()});
+      if(!uname) throw{msg:"Choisis un nom d'utilisateur."};
+      // Admin : pas de code requis
+      const isAdminEmail=email===ADMIN_EMAIL.toLowerCase();
+      if(!isAdminEmail){
+        if(!code) throw{msg:'Entre ton code d\'invitation.'};
+        let ok=false;
+        try{const cd=await getDoc(doc(DB,'inviteCodes',code));if(cd.exists()&&!cd.data().used)ok=true;}catch(e){}
+        if(!ok) throw{msg:'Code invalide ou déjà utilisé.'};
+        const cred=await createUserWithEmailAndPassword(AUTH,email,pw);
+        const ui=cred.user.uid;
+        await setDoc(doc(DB,'users',ui),{username:uname,qrId:ui,email,createdAt:Date.now(),plan:'tshirt',profile:{...DEFAULT_PROFILE,displayName:uname}});
+        await updateDoc(doc(DB,'inviteCodes',code),{used:true,usedBy:ui,usedAt:Date.now()});
+      }else{
+        // Admin s'inscrit sans code
+        const cred=await createUserWithEmailAndPassword(AUTH,email,pw);
+        const ui=cred.user.uid;
+        await setDoc(doc(DB,'users',ui),{username:uname,qrId:ui,email,createdAt:Date.now(),plan:'app',profile:{...DEFAULT_PROFILE,displayName:uname}});
+      }
     }else{
       await signInWithEmailAndPassword(AUTH,email,pw);
     }
   }catch(e){
-    const msgs={'auth/email-already-in-use':'Email déjà utilisé.','auth/user-not-found':'Aucun compte.','auth/wrong-password':'Mot de passe incorrect.','auth/invalid-credential':'Email ou mot de passe incorrect.','auth/weak-password':'Mot de passe trop court.','auth/invalid-email':'Email invalide.'};
-    err.textContent=e.msg||msgs[e.code]||'Erreur.';
-    err.style.display='block';
+    const msgs={'auth/email-already-in-use':'Email déjà utilisé.','auth/user-not-found':'Aucun compte.','auth/wrong-password':'Mot de passe incorrect.','auth/invalid-credential':'Email ou mot de passe incorrect.','auth/weak-password':'Mot de passe trop court (6 car. min).','auth/invalid-email':'Email invalide.'};
+    errEl.textContent=e.msg||msgs[e.code]||'Erreur.';
+    errEl.style.display='block';
     $('a-submit').disabled=false;
-    $('a-submit').textContent=authMode==='login'?'Se connecter':'Créer mon compte';
+    $('a-submit').textContent=authMode==='login'?t('connect'):t('create');
   }
 };
 
 window.doLogout=async()=>{await signOut(AUTH);S.user=null;S.profile=null;S.data=null;showScreen('auth');};
 
-/* ══════ FIRESTORE ══════ */
+/* ═══ FIRESTORE ═══ */
 async function loadUser(uid_){const s=await getDoc(doc(DB,'users',uid_));return s.exists()?s.data():null;}
 async function saveProfile(){
   if(!S.user||!S.profile)return;
-  try{await setDoc(doc(DB,'users',S.user.uid),{profile:S.profile},{merge:true});showFlash();}
-  catch(e){showToast('❌ Erreur de sauvegarde');}
+  try{
+    await setDoc(doc(DB,'users',S.user.uid),{profile:S.profile},{merge:true});
+    showFlash();
+  }catch(e){
+    // Silencieux si erreur mineure — affiche seulement si persistant
+    console.warn('Save error:',e.code,e.message);
+  }
 }
-function autoSave(){syncForm();clearTimeout(S.saveTimer);S.saveTimer=setTimeout(saveProfile,1200);}
+function autoSave(){syncForm();clearTimeout(S.saveTimer);S.saveTimer=setTimeout(saveProfile,1400);}
 function syncForm(){
   if(!S.profile)return;
   S.profile.displayName=$('p-dn').value;
@@ -523,7 +637,7 @@ function syncForm(){
   const u=$('p-av').value.trim();if(u)S.profile.avatar=u;
 }
 
-/* ══════ VISIBILITÉ ══════ */
+/* ═══ VISIBILITÉ ═══ */
 window.toggleVisibility=async()=>{
   if(!S.profile)return;
   S.profile.visible=!S.profile.visible;
@@ -536,7 +650,7 @@ function updateVisUI(){
   $('vis-label').textContent=v?'Visible':'Privé';
 }
 
-/* ══════ TABS ══════ */
+/* ═══ TABS ═══ */
 window.setTab=tab=>{
   document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('on'));
   document.querySelectorAll('.tabs button').forEach(b=>b.classList.remove('on'));
@@ -547,7 +661,7 @@ window.setTab=tab=>{
   if(tab==='admin')loadAdminData();
 };
 
-/* ══════ BLOCS ══════ */
+/* ═══ BLOCS ═══ */
 window.addBlock=type=>{S.profile.blocks.push({id:uid(),type,content:'',label:''});setAddPanel(false);renderBlocks();saveProfile();};
 window.removeBlock=id=>{S.profile.blocks=S.profile.blocks.filter(b=>b.id!==id);renderBlocks();saveProfile();};
 window.updateBlock=(id,f,v)=>{const b=S.profile.blocks.find(b=>b.id===id);if(b){b[f]=v;autoSave();}};
@@ -562,17 +676,29 @@ function renderBlocks(){
     const nm={text:'Message',link:'Lien',photo:'Photo',video:'Vidéo'};
     const d=document.createElement('div');d.className='block';
     let f='';
-    if(b.type==='link')f+=`<input class="block-inp" placeholder="Titre du lien" value="${esc(b.label)}" oninput="updateBlock('${b.id}','label',this.value)">`;
-    if(b.type==='text')f+=`<div class="block-actions"><button class="block-action-btn" onclick="openEmoji('${b.id}')">😀 Emoji</button><button class="block-action-btn" style="font-weight:900;font-size:15px" onclick="insertFmt('${b.id}','bold')"><b>G</b></button><button class="block-action-btn" style="font-style:italic;font-weight:700" onclick="insertFmt('${b.id}','italic')"><i>I</i></button></div><textarea id="ta-${b.id}" class="block-inp" rows="3" placeholder="Écris ton message… (sélectionne du texte puis clique G ou I)" oninput="updateBlock('${b.id}','content',this.value)">${esc(b.content)}</textarea>`;
-    if(b.type==='link')f+=`<input class="block-inp" placeholder="https://…" value="${esc(b.content)}" oninput="updateBlock('${b.id}','content',this.value)">`;
-    if(b.type==='photo')f+=`<div class="upload-zone" onclick="document.getElementById('f-${b.id}').click()">📷 Choisir depuis le téléphone</div><input type="file" id="f-${b.id}" accept="image/*" onchange="uploadBlockPhoto('${b.id}',this)"><div class="upload-progress" id="prog-${b.id}"><div class="upload-progress-bar" id="bar-${b.id}"></div></div><input class="block-inp" placeholder="…ou URL d'image" value="${esc(b.content)}" oninput="updateBlock('${b.id}','content',this.value)">${b.content?`<img src="${esc(b.content)}" class="img-preview" onerror="this.style.display='none'">` :''}`;
-    if(b.type==='video')f+=`<input class="block-inp" placeholder="Lien YouTube…" value="${esc(b.content)}" oninput="updateBlock('${b.id}','content',this.value)">`;
+    if(b.type==='link') f+=`<input class="block-inp" placeholder="Titre du lien (ex: Mon Insta)" value="${esc(b.label)}" oninput="updateBlock('${b.id}','label',this.value)">`;
+    if(b.type==='text') f+=`<div class="block-actions"><button class="block-action-btn" onclick="openEmoji('${b.id}')">😀 Emoji</button><button class="block-action-btn" style="font-weight:900" onclick="insertFmt('${b.id}','bold')"><b>G</b></button><button class="block-action-btn" style="font-style:italic" onclick="insertFmt('${b.id}','italic')"><i>I</i></button></div><textarea id="ta-${b.id}" class="block-inp" rows="3" placeholder="Écris ton message… (sélectionne puis G=gras, I=italique)" oninput="updateBlock('${b.id}','content',this.value)">${esc(b.content)}</textarea>`;
+    if(b.type==='link') f+=`<input class="block-inp" placeholder="https://…" value="${esc(b.content)}" oninput="updateBlock('${b.id}','content',this.value)">`;
+    if(b.type==='photo') f+=`<div class="upload-zone" onclick="document.getElementById('f-${b.id}').click()">📷 Choisir depuis le téléphone</div><input type="file" id="f-${b.id}" accept="image/*" onchange="uploadBlockPhoto('${b.id}',this)"><div class="upload-progress" id="prog-${b.id}"><div class="upload-progress-bar" id="bar-${b.id}"></div></div><input class="block-inp" placeholder="…ou URL d'image" value="${esc(b.content)}" oninput="updateBlock('${b.id}','content',this.value)">${b.content?`<img src="${esc(b.content)}" class="img-preview" onerror="this.style.display='none'">`:''}`;
+    if(b.type==='video') f+=`<input class="block-inp" placeholder="Lien YouTube…" value="${esc(b.content)}" oninput="updateBlock('${b.id}','content',this.value)">`;
     d.innerHTML=`<div class="block-hdr"><span class="block-type">${ic[b.type]} ${nm[b.type]}</span><button class="block-del" onclick="removeBlock('${b.id}')">✕ Supprimer</button></div>${f}<div id="emoji-panel-${b.id}" style="display:none"></div>`;
     el.appendChild(d);
   });
 }
 
-/* ══════ EMOJI PICKER ══════ */
+/* ═══ FORMATAGE ═══ */
+window.insertFmt=(id,fmt)=>{
+  const ta=document.getElementById('ta-'+id);if(!ta)return;
+  const s=ta.selectionStart,e=ta.selectionEnd;
+  const sel=ta.value.substring(s,e)||'texte';
+  const w=fmt==='bold'?'**':'_';
+  ta.value=ta.value.substring(0,s)+w+sel+w+ta.value.substring(e);
+  ta.setSelectionRange(s+w.length,s+w.length+sel.length);
+  const b=S.profile.blocks.find(b=>b.id===id);if(b){b.content=ta.value;autoSave();}
+};
+function parseFmt(s){return esc(s).replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/_(.*?)_/g,'<em>$1</em>');}
+
+/* ═══ EMOJI PICKER ═══ */
 window.openEmoji=id=>{
   const panel=$('emoji-panel-'+id);
   if(panel.style.display==='block'){panel.style.display='none';return;}
@@ -587,7 +713,7 @@ window.openEmoji=id=>{
       const btn=document.createElement('button');btn.className='emoji-btn';btn.textContent=em;
       btn.onclick=()=>{
         const b=S.profile.blocks.find(b=>b.id===id);if(b){b.content=(b.content||'')+em;autoSave();}
-        const ta=panel.closest('.block').querySelector('textarea');if(ta){ta.value=(ta.value||'')+em;}
+        const ta=document.getElementById('ta-'+id);if(ta){ta.value=(ta.value||'')+em;}
       };
       grid.appendChild(btn);
     });
@@ -601,7 +727,7 @@ window.openEmoji=id=>{
   renderCat(Object.keys(EMOJIS)[0]);
 };
 
-/* ══════ COMPRESSION + UPLOAD ══════ */
+/* ═══ COMPRESSION ═══ */
 function compressImg(file,maxPx=900,q=0.82){
   return new Promise((res,rej)=>{
     const r=new FileReader();
@@ -623,7 +749,6 @@ window.uploadAvatar=async input=>{
   const prog=$('av-prog'),bar=$('av-bar');
   prog.style.display='block';bar.style.width='30%';
   try{
-    bar.style.width='60%';
     const b64=await compressImg(file,300,.8);
     bar.style.width='90%';
     S.profile.avatar=b64;$('p-av').value='';
@@ -638,7 +763,6 @@ window.uploadBlockPhoto=async(id,input)=>{
   const prog=$('prog-'+id),bar=$('bar-'+id);
   prog.style.display='block';bar.style.width='30%';
   try{
-    bar.style.width='60%';
     const b64=await compressImg(file,900,.82);
     bar.style.width='90%';
     const b=S.profile.blocks.find(b=>b.id===id);if(b)b.content=b64;
@@ -648,84 +772,88 @@ window.uploadBlockPhoto=async(id,input)=>{
   }catch(e){showToast('❌ Erreur');prog.style.display='none';}
 };
 
-/* ══════ STYLE TAB ══════ */
+/* ═══ STYLE TAB ═══ */
 function renderStyleTab(){
   const p=S.profile;
-  $('tpl-grid').innerHTML=Object.entries(TEMPLATES).map(([id,t])=>{
-    const bg=t.bg2?`linear-gradient(135deg,${t.bg},${t.bg2})`:t.bg;
-    return`<div class="tpl-card${p.template===id?' on':''}" onclick="selectTpl('${id}')" style="background:${bg}"><div style="font-size:22px">${t.emoji}</div><div class="tpl-name" style="color:${t.text}">${t.name}</div>${p.template===id?`<div style="font-size:10px;color:${t.accent};margin-top:2px">✓ Actif</div>`:''}</div>`;
+  $('tpl-grid').innerHTML=Object.entries(TEMPLATES).map(([id,t_])=>{
+    const bg=t_.bg2?`linear-gradient(135deg,${t_.bg},${t_.bg2})`:t_.bg;
+    const on=p.template===id;
+    return`<div class="tpl-card${on?' on':''}" onclick="selectTpl('${id}')" style="background:${bg}"><div style="font-size:20px">${t_.emoji}</div><div class="tpl-name" style="color:${t_.text}">${t_.name}</div>${on?`<div style="font-size:10px;color:${t_.accent};margin-top:2px">✓</div>`:''}</div>`;
   }).join('');
-  $('font-list').innerHTML=FONTS.map(f=>`<button class="font-btn${p.font===f.id?' on':''}" onclick="selectFont('${f.id}')" style="font-family:${f.css}"><strong>${f.name}</strong> — <span style="opacity:.6;font-weight:400">Aperçu du texte</span></button>`).join('');
+  $('font-list').innerHTML=FONTS.map(f=>
+    `<button class="font-btn${p.font===f.id?' on':''}" onclick="selectFont('${f.id}')" style="font-family:${f.css};font-size:17px">
+      <span style="font-weight:700">${f.name}</span>
+      <span style="float:right;opacity:.55;font-weight:400;font-size:15px">${f.sample}</span>
+    </button>`
+  ).join('');
   $('c-accent').value=p.primaryColor||'#FFD600';
   $('c-bg').value=p.bgColor||'#ffffff';
   $('c-text').value=p.textColor||'#1a1a1a';
 }
-window.selectTpl=id=>{const t=TEMPLATES[id];S.profile.template=id;S.profile.bgColor=t.bg;S.profile.textColor=t.text;S.profile.primaryColor=t.accent;renderStyleTab();saveProfile();};
+window.selectTpl=id=>{const t_=TEMPLATES[id];S.profile.template=id;S.profile.bgColor=t_.bg;S.profile.textColor=t_.text;S.profile.primaryColor=t_.accent;renderStyleTab();saveProfile();};
 window.selectFont=id=>{S.profile.font=id;renderStyleTab();saveProfile();};
 window.onColor=(k,v)=>{S.profile[k]=v;clearTimeout(S.saveTimer);S.saveTimer=setTimeout(saveProfile,800);};
 
-/* ══════ QR CODE ══════ */
+/* ═══ QR CODE ═══ */
 function renderQR(){
   if(!S.user)return;
+  const isApp=S.data?.plan==='app';
+  $('qr-locked').style.display=isApp?'none':'block';
+  $('qr-unlocked').style.display=isApp?'block':'none';
+  if(!isApp)return;
+
   const url=`${location.origin}${location.pathname}#p=${S.user.uid}`;
   const c=$('qr-display');c.innerHTML='';
-  const dark=S.profile?.textColor||'#111';
+  const dark=S.profile?.textColor||'#111111';
   if(typeof QRCodeStyling!=='undefined'){
-    S.qrObj=new QRCodeStyling({width:220,height:220,type:'canvas',data:url,dotsOptions:{type:'rounded',color:dark},cornersSquareOptions:{type:'extra-rounded',color:dark},cornersDotOptions:{type:'dot',color:dark},backgroundOptions:{color:S.profile?.bgColor||'#ffffff'}});
+    S.qrObj=new QRCodeStyling({
+      width:220,height:220,type:'canvas',data:url,
+      dotsOptions:{type:'rounded',color:dark},
+      cornersSquareOptions:{type:'extra-rounded',color:dark},
+      cornersDotOptions:{type:'dot',color:dark},
+      backgroundOptions:{color:S.profile?.bgColor||'#ffffff'},
+    });
     S.qrObj.append(c);
   }else{
     new QRCode(c,{text:url,width:220,height:220,colorDark:dark,colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.H});
   }
-  const premium=S.data?.premium===true;
-  $('qr-premium').style.display=premium?'none':'block';
-  $('qr-dl').style.display=premium?'block':'none';
 }
 window.downloadQR=()=>{if(S.qrObj?.download)S.qrObj.download({name:'qrtag-qrcode',extension:'png'});};
 
-/* ══════ ADMIN PANEL ══════ */
-function isAdmin(){return S.user?.email===ADMIN_EMAIL;}
+/* ═══ ADMIN ═══ */
+function isAdmin(){return S.user?.email?.toLowerCase()===ADMIN_EMAIL.toLowerCase();}
 
 function injectAdminTab(){
-  if(!isAdmin()||$('tab-admin-btn'))return;
-  const tabs=$('tabs-bar');
-  const btn=document.createElement('button');
-  btn.id='tab-admin-btn';
-  btn.dataset.tab='admin';
-  btn.textContent='⚙️ Admin';
-  btn.onclick=()=>setTab('admin');
-  tabs.appendChild(btn);
+  const btn=$('tab-admin-btn');if(!btn)return;
+  btn.style.display=isAdmin()?'block':'none';
 }
 
-// Génère un code aléatoire sans caractères ambigus
 function makeCode(){
-  const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  let c='QRT-';for(let i=0;i<8;i++)c+=chars[Math.floor(Math.random()*chars.length)];
-  return c;
+  const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let s='QRT-';for(let i=0;i<8;i++)s+=c[Math.floor(Math.random()*c.length)];
+  return s;
 }
 
 window.adminGenCode=async()=>{
   const code=makeCode();
   try{
     await setDoc(doc(DB,'inviteCodes',code),{used:false,createdAt:Date.now(),usedBy:null});
-    showToast('🎟️ Code créé : '+code);
-    loadAdminData();
+    showToast('🎟️ Code : '+code);loadAdminData();
   }catch(e){showToast('❌ '+e.message);}
 };
 
-window.adminCopy=code=>{
-  navigator.clipboard?.writeText(code).then(()=>showToast('📋 Copié : '+code));
-};
+window.adminCopy=code=>{navigator.clipboard?.writeText(code).then(()=>showToast('📋 Copié : '+code));};
 
 window.adminDel=async code=>{
-  if(!confirm(`Supprimer le code ${code} ?`))return;
+  if(!confirm(`Supprimer ${code} ?`))return;
   try{await deleteDoc(doc(DB,'inviteCodes',code));showToast('🗑️ Supprimé');loadAdminData();}
   catch(e){showToast('❌ Erreur');}
 };
 
-window.adminTogglePremium=async(uid_,current)=>{
+window.adminSetPlan=async(uid_,plan)=>{
   try{
-    await setDoc(doc(DB,'users',uid_),{premium:!current},{merge:true});
-    showToast(current?'🔒 Premium désactivé':'⭐ Premium activé');
+    await setDoc(doc(DB,'users',uid_),{plan},{merge:true});
+    showToast(plan==='app'?'📱 App activée':'👕 T-shirt activé');
     loadAdminData();
   }catch(e){showToast('❌ Erreur');}
 };
@@ -736,26 +864,25 @@ async function loadAdminData(){
 }
 
 async function loadCodes(){
-  const el=$('codes-list'),stats=$('admin-stats');
-  if(!el)return;
+  const el=$('codes-list'),stats=$('admin-stats');if(!el)return;
   try{
     const snap=await getDocs(collection(DB,'inviteCodes'));
     const codes=[];snap.forEach(d=>codes.push({id:d.id,...d.data()}));
     codes.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
     const total=codes.length,used=codes.filter(c=>c.used).length,free=total-used;
     if(stats)stats.innerHTML=`
-      <div class="stat-box"><div class="stat-num" style="color:#16a34a">${free}</div><div class="stat-lbl">Disponibles</div></div>
+      <div class="stat-box"><div class="stat-num" style="color:#16a34a">${free}</div><div class="stat-lbl">Libres</div></div>
       <div class="stat-box"><div class="stat-num" style="color:#e00">${used}</div><div class="stat-lbl">Utilisés</div></div>
       <div class="stat-box"><div class="stat-num">${total}</div><div class="stat-lbl">Total</div></div>`;
-    if(!codes.length){el.innerHTML='<div style="text-align:center;color:var(--muted);padding:20px">Aucun code — génère-en un !</div>';return;}
-    el.innerHTML=codes.map(c=>`
-      <div class="code-item">
+    el.innerHTML=!codes.length
+      ?'<div style="text-align:center;color:var(--muted);padding:16px">Aucun code — génère-en un !</div>'
+      :codes.map(c=>`<div class="code-item">
         <span class="code-txt">${esc(c.id)}</span>
         <span class="code-badge ${c.used?'badge-used':'badge-free'}">${c.used?'✓ Utilisé':'● Libre'}</span>
-        ${!c.used?`<button class="code-btn" style="background:var(--accent);color:#000" onclick="adminCopy('${esc(c.id)}')">📋 Copier</button>`:''}
+        ${!c.used?`<button class="code-btn" style="background:var(--accent);color:#000" onclick="adminCopy('${esc(c.id)}')">📋</button>`:''}
         ${!c.used?`<button class="code-btn" style="background:#fff0f0;color:#e00" onclick="adminDel('${esc(c.id)}')">✕</button>`:''}
       </div>`).join('');
-  }catch(e){el.innerHTML='<div style="color:#e00;padding:16px">Erreur de chargement</div>';}
+  }catch(e){el.innerHTML='<div style="color:#e00;padding:14px">Erreur : '+esc(e.message)+'</div>';}
 }
 
 async function loadUsers(){
@@ -764,17 +891,20 @@ async function loadUsers(){
     const snap=await getDocs(collection(DB,'users'));
     const users=[];snap.forEach(d=>users.push({id:d.id,...d.data()}));
     users.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
-    if(!users.length){el.innerHTML='<div style="text-align:center;color:var(--muted);padding:16px">Aucun client</div>';return;}
-    el.innerHTML=users.map(u=>`
-      <div class="code-item">
-        <div style="flex:1"><div style="font-weight:700;font-size:14px">@${esc(u.username||'—')}</div><div style="font-size:11px;color:var(--muted)">${esc(u.email||'')}</div></div>
-        <span class="code-badge ${u.premium?'badge-free':'badge-used'}">${u.premium?'⭐ Premium':'Gratuit'}</span>
-        <button class="code-btn" style="background:var(--accent);color:#000;font-size:11px" onclick="adminTogglePremium('${u.id}',${!!u.premium})">${u.premium?'Rétrograder':'✦ Premium'}</button>
-      </div>`).join('');
-  }catch(e){el.innerHTML='<div style="color:#e00;padding:16px">Erreur</div>';}
+    el.innerHTML=!users.length
+      ?'<div style="text-align:center;color:var(--muted);padding:14px">Aucun client</div>'
+      :users.map(u=>{
+        const plan=u.plan||'tshirt';
+        return`<div class="code-item">
+          <div style="flex:1;min-width:80px"><div style="font-weight:700;font-size:13px">@${esc(u.username||'—')}</div><div style="font-size:11px;color:var(--muted)">${esc(u.email||'')}</div></div>
+          <span class="plan-badge plan-${plan}">${plan==='app'?'📱 App':'👕 T-shirt'}</span>
+          <button class="code-btn" style="background:${plan==='app'?'#fff0f0':'var(--accent)'};color:${plan==='app'?'#e00':'#000'};font-size:10px" onclick="adminSetPlan('${u.id}','${plan==='app'?'tshirt':'app'}')">${plan==='app'?'→ T-shirt':'→ App'}</button>
+        </div>`;
+      }).join('');
+  }catch(e){el.innerHTML='<div style="color:#e00;padding:14px">Erreur</div>';}
 }
 
-/* ══════ PAGE PUBLIQUE ══════ */
+/* ═══ PAGE PUBLIQUE ═══ */
 async function renderPublicPage(uid_,isPreview=false){
   showScreen('public');
   $('pub-back-bar').style.display=isPreview?'block':'none';
@@ -785,25 +915,49 @@ async function renderPublicPage(uid_,isPreview=false){
     else{const s=await getDoc(doc(DB,'users',uid_));if(!s.exists())throw 0;pd=s.data();}
   }catch(e){$('pub-content').innerHTML='<div style="text-align:center;padding:80px">Profil introuvable</div>';return;}
   const{profile:p,username}=pd;
-  if(p.visible===false&&!isPreview){$('pub-content').innerHTML=`<div style="min-height:100vh;background:#111;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff"><div style="font-size:60px">🔒</div><h2 style="margin:12px 0 6px">Profil désactivé</h2><p style="opacity:.5;font-size:14px">Ce profil est temporairement privé.</p></div>`;return;}
-  const t=TEMPLATES[p.template]||TEMPLATES.blanc;
-  const fontCss=(FONTS.find(f=>f.id===p.font)||FONTS[0]).css;
-  const bg=t.bg2?`linear-gradient(135deg,${p.bgColor||t.bg},${t.bg2})`:p.bgColor||t.bg;
-  const txt=p.textColor||t.text,accent=p.primaryColor||t.accent,card=t.bg2?'rgba(255,255,255,.16)':t.card;
-  const avatarHtml=p.avatar?`<img src="${esc(p.avatar)}" class="pub-avatar" style="border:3px solid ${accent}" onerror="this.style.display='none'">`:`<div class="pub-avatar-ph" style="background:${accent};color:#000">${((p.displayName||username||'?')[0]||'?').toUpperCase()}</div>`;
+
+  if(p.visible===false&&!isPreview){
+    $('pub-content').innerHTML=`<div style="min-height:100vh;background:#111;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;text-align:center;padding:20px"><div style="font-size:60px">🔒</div><h2 style="margin:12px 0 6px">${esc(t('privateMsg'))}</h2></div>`;
+    return;
+  }
+
+  const t_=TEMPLATES[p.template]||TEMPLATES.blanc;
+  const fontObj=FONTS.find(f=>f.id===p.font)||FONTS[0];
+  const bg=t_.bg2?`linear-gradient(135deg,${p.bgColor||t_.bg},${t_.bg2})`:p.bgColor||t_.bg;
+  const txt=p.textColor||t_.text,accent=p.primaryColor||t_.accent;
+  const card=t_.bg2?'rgba(255,255,255,.16)':t_.card;
+
+  const avatarHtml=p.avatar
+    ?`<img src="${esc(p.avatar)}" class="pub-avatar" style="border:3px solid ${accent};background:rgba(255,255,255,.9)" onerror="this.style.display='none'">`
+    :`<div class="pub-avatar-ph" style="background:${accent};color:#000">${((p.displayName||username||'?')[0]||'?').toUpperCase()}</div>`;
+
   const blocksHtml=(p.blocks||[]).map(b=>{
-    if(b.type==='text'&&b.content)return`<div class="pub-block"><div style="background:${card};border-radius:16px;padding:16px 18px"><p style="color:${txt};font-size:15px;line-height:1.7;white-space:pre-wrap">${parseFmt(b.content)}</p></div></div>`;
-    if(b.type==='link'&&b.content)return`<div class="pub-block"><a href="${esc(b.content)}" style="display:block;background:${accent};color:#000;border-radius:14px;padding:15px 20px;text-align:center;text-decoration:none;font-size:15px;font-weight:800;box-shadow:0 4px 20px ${accent}55" target="_blank" rel="noopener">🔗 ${esc(b.label||b.content)}</a></div>`;
-    if(b.type==='photo'&&b.content)return`<div class="pub-block"><div style="border-radius:16px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.15)"><img src="${esc(b.content)}" style="width:100%;display:block" onerror="this.parentElement.parentElement.style.display='none'"></div></div>`;
+    if(b.type==='text'&&b.content) return`<div class="pub-block"><div style="background:${card};border-radius:16px;padding:16px 18px"><p style="color:${txt};font-size:15px;line-height:1.7;white-space:pre-wrap">${parseFmt(b.content)}</p></div></div>`;
+    if(b.type==='link'&&b.content) return`<div class="pub-block"><a href="${esc(b.content)}" style="display:block;background:${accent};color:#000;border-radius:14px;padding:15px 20px;text-align:center;text-decoration:none;font-size:15px;font-weight:800;box-shadow:0 4px 20px ${accent}55" target="_blank" rel="noopener">🔗 ${esc(b.label||b.content)}</a></div>`;
+    if(b.type==='photo'&&b.content) return`<div class="pub-block"><div style="border-radius:16px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.15)"><img src="${esc(b.content)}" style="width:100%;display:block;background:#888" onerror="this.parentElement.parentElement.style.display='none'"></div></div>`;
     if(b.type==='video'&&b.content){const m=b.content.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/))([^&\n?#]+)/);if(m)return`<div class="pub-block"><div style="border-radius:16px;overflow:hidden;position:relative;padding-top:56.25%;box-shadow:0 4px 20px rgba(0,0,0,.15)"><iframe src="https://www.youtube.com/embed/${m[1]}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:none" allowfullscreen></iframe></div></div>`;}
     return'';
   }).join('');
-  $('pub-content').innerHTML=`<div style="min-height:100vh;background:${bg};font-family:${fontCss}"><div class="pub-wrap"><div style="text-align:center;margin-bottom:24px">${avatarHtml}<h1 class="pub-name" style="color:${txt}">${esc(p.displayName||username)}</h1>${p.bio?`<p class="pub-bio" style="color:${txt}">${esc(p.bio)}</p>`:''}</div>${blocksHtml||`<div style="text-align:center;padding:40px;opacity:.35;color:${txt}"><div style="font-size:48px">📭</div><p>Aucun contenu</p></div>`}</div><div class="pub-footer" style="color:${txt}">Propulsé par QRTag · Mentions légales</div></div>`;
+
+  const privBanner=isPreview&&p.visible===false?`<div class="priv-banner">${t('previewPrivate')}</div>`:'';
+
+  $('pub-content').innerHTML=`<div style="min-height:100vh;background:${bg};font-family:${fontObj.css}">
+    <div class="pub-wrap">
+      ${privBanner}
+      <div style="text-align:center;margin-bottom:24px">
+        ${avatarHtml}
+        <h1 class="pub-name" style="color:${txt};font-family:${fontObj.css}">${esc(p.displayName||username)}</h1>
+        ${p.bio?`<p class="pub-bio" style="color:${txt}">${esc(p.bio)}</p>`:''}
+      </div>
+      ${blocksHtml||`<div style="text-align:center;padding:40px;opacity:.35;color:${txt}"><div style="font-size:48px">📭</div><p>Aucun contenu</p></div>`}
+    </div>
+    <div class="pub-footer" style="color:${txt};border-top:1px solid rgba(128,128,128,.15)">${t('poweredBy')}</div>
+  </div>`;
 }
 
 window.showPreview=()=>{syncForm();renderPublicPage(S.user?.uid,true);};
 
-/* ══════ DASHBOARD ══════ */
+/* ═══ DASHBOARD ═══ */
 function refreshDash(){
   if(!S.data||!S.profile)return;
   $('hdr-name').textContent='@'+(S.data.username||'');
@@ -811,30 +965,50 @@ function refreshDash(){
   $('p-bio').value=S.profile.bio||'';
   $('p-av').value=typeof S.profile.avatar==='string'&&S.profile.avatar.startsWith('http')?S.profile.avatar:'';
   if(S.profile.avatar){const av=$('av-preview');av.src=S.profile.avatar;av.style.display='block';}
-  updateVisUI();renderBlocks();
-  injectAdminTab(); // Ajoute l'onglet admin si admin
+  updateVisUI();
+  renderBlocks();
+  injectAdminTab();
+  buildLangGrid();
 }
 
-/* ══════ ROUTING ══════ */
+/* ═══ ROUTING ═══ */
 function checkPublicRoute(){
   const h=location.hash;
   if(h&&h.startsWith('#p=')){const id=h.slice(3);if(id){renderPublicPage(id,false);return true;}}
   return false;
 }
 
-/* ══════ INIT ══════ */
+/* ═══ INIT ═══ */
+buildLangGrid();
+
 if(!checkPublicRoute()){
   onAuthStateChanged(AUTH,async user=>{
     if(user){
       S.user=user;
-      try{const d=await loadUser(user.uid);if(d){S.data=d;S.profile=d.profile||{...DEFAULT_PROFILE};}else S.profile={...DEFAULT_PROFILE};}
-      catch(e){S.profile={...DEFAULT_PROFILE};}
+      try{
+        const d=await loadUser(user.uid);
+        if(d){
+          S.data=d;S.profile=d.profile||{...DEFAULT_PROFILE};
+          // Force admin → plan app automatiquement
+          if(isAdmin()&&S.data.plan!=='app'){
+            S.data.plan='app';
+            try{await setDoc(doc(DB,'users',user.uid),{plan:'app'},{merge:true});}catch(e){}
+          }
+        }
+        else{
+          // Créer le document si inexistant (ex: admin créé via Firebase Console)
+          const newData={username:user.email.split('@')[0],qrId:user.uid,email:user.email,createdAt:Date.now(),plan:isAdmin()?'app':'tshirt',profile:{...DEFAULT_PROFILE}};
+          await setDoc(doc(DB,'users',user.uid),newData);
+          S.data=newData;S.profile={...DEFAULT_PROFILE};
+        }
+      }catch(e){S.profile={...DEFAULT_PROFILE};}
       showScreen('dashboard');
     }else{
       showScreen('auth');
     }
   });
 }
+
 window.addEventListener('hashchange',()=>{if(location.hash.startsWith('#p='))checkPublicRoute();});
 
 </script>
