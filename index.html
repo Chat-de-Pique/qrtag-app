@@ -536,6 +536,14 @@ window.switchLang=k=>{
   LANG=k;
   buildLangGrid();
   closeLang();
+  // Met à jour les textes visibles
+  const isLogin=authMode==='login';
+  if($('btn-login')) $('btn-login').textContent=t('connect');
+  if($('btn-reg'))   $('btn-reg').textContent=t('register');
+  if($('a-submit'))  $('a-submit').textContent=isLogin?t('connect'):t('create');
+  if($('auth-tagline')) $('auth-tagline').textContent=t('tagline')||'Ton message sur ton t-shirt';
+  // Rafraîchit le dashboard si ouvert
+  if($('s-dashboard')?.classList.contains('active')) refreshDash();
   showToast(LANGS[k].f+' '+LANGS[k].n);
 };
 
@@ -946,8 +954,16 @@ async function renderPublicPage(uid_,isPreview=false){
   const blocksHtml=(p.blocks||[]).map(b=>{
     if(b.type==='text'&&b.content) return`<div class="pub-block"><div style="background:${card};border-radius:16px;padding:16px 18px"><p style="color:${txt};font-size:15px;line-height:1.7;white-space:pre-wrap">${parseFmt(b.content)}</p></div></div>`;
     if(b.type==='link'&&b.content) return`<div class="pub-block"><a href="${esc(b.content)}" style="display:block;background:${accent};color:#000;border-radius:14px;padding:15px 20px;text-align:center;text-decoration:none;font-size:15px;font-weight:800;box-shadow:0 4px 20px ${accent}55" target="_blank" rel="noopener">🔗 ${esc(b.label||b.content)}</a></div>`;
-    if(b.type==='photo'&&b.content) return`<div class="pub-block"><div style="border-radius:16px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.15)"><img src="${esc(b.content)}" style="width:100%;display:block;background:#888" onerror="this.parentElement.parentElement.style.display='none'"></div></div>`;
-    if(b.type==='video'&&b.content){const m=b.content.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/))([^&\n?#]+)/);if(m)return`<div class="pub-block"><div style="border-radius:16px;overflow:hidden;position:relative;padding-top:56.25%;box-shadow:0 4px 20px rgba(0,0,0,.15)"><iframe src="https://www.youtube.com/embed/${m[1]}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:none" allowfullscreen></iframe></div></div>`;}
+    if(b.type==='photo'&&b.content) return`<div class="pub-block"><div style="border-radius:16px;overflow:hidden;background:#fff;box-shadow:0 4px 20px rgba(0,0,0,.15)"><img src="${esc(b.content)}" style="width:100%;display:block" onerror="this.parentElement.parentElement.style.display='none'"></div></div>`;
+    if(b.type==='video'&&b.content){
+      // Fichier local vidéo
+      if(b.content.startsWith('data:video/')) return`<div class="pub-block"><video src="${esc(b.content)}" controls playsinline style="width:100%;border-radius:16px;display:block;background:#000;box-shadow:0 4px 20px rgba(0,0,0,.15)"></video></div>`;
+      // GIF local
+      if(b.content.startsWith('data:image/gif')) return`<div class="pub-block"><div style="border-radius:16px;overflow:hidden;background:#fff;box-shadow:0 4px 20px rgba(0,0,0,.15)"><img src="${esc(b.content)}" style="width:100%;display:block"></div></div>`;
+      // YouTube
+      const m=b.content.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/))([^&\n?#]+)/);
+      if(m)return`<div class="pub-block"><div style="border-radius:16px;overflow:hidden;position:relative;padding-top:56.25%;box-shadow:0 4px 20px rgba(0,0,0,.15)"><iframe src="https://www.youtube.com/embed/${m[1]}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:none" allowfullscreen></iframe></div></div>`;
+    }
     return'';
   }).join('');
 
