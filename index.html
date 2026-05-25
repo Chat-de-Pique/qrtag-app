@@ -330,31 +330,17 @@
       </div>
 
       <!-- Blocs -->
-      <div class="card-title" style="margin-bottom:8px">📦 Mes blocs de contenu</div>
+      <div id="blocks-section-title" class="card-title" style="margin-bottom:8px">📦 Mes blocs de contenu</div>
       <div class="blocks-container" id="blocks-list"></div>
-
-      <!-- Ajouter un bloc -->
       <div id="add-panel" style="display:none" class="card">
-        <div class="card-title">Quel type de bloc ?</div>
+        <div class="card-title" id="add-panel-title">Quel type de bloc ?</div>
         <div class="add-block-grid">
-          <div class="add-block-item" onclick="addBlock('text')">
-            <div class="abi-icon">📝</div>
-            <div class="abi-label">Message texte</div>
-          </div>
-          <div class="add-block-item" onclick="addBlock('link')">
-            <div class="abi-icon">🔗</div>
-            <div class="abi-label">Lien cliquable</div>
-          </div>
-          <div class="add-block-item" onclick="addBlock('photo')">
-            <div class="abi-icon">🖼️</div>
-            <div class="abi-label">Photo / GIF</div>
-          </div>
-          <div class="add-block-item" onclick="addBlock('video')">
-            <div class="abi-icon">🎥</div>
-            <div class="abi-label">Vidéo / GIF</div>
-          </div>
+          <div class="add-block-item" onclick="addBlock('text')"><div class="abi-icon">📝</div><div class="abi-label" id="lbl-add-text">Message texte</div></div>
+          <div class="add-block-item" onclick="addBlock('link')"><div class="abi-icon">🔗</div><div class="abi-label" id="lbl-add-link">Lien cliquable</div></div>
+          <div class="add-block-item" onclick="addBlock('photo')"><div class="abi-icon">🖼️</div><div class="abi-label" id="lbl-add-photo">Photo / GIF</div></div>
+          <div class="add-block-item" onclick="addBlock('video')"><div class="abi-icon">🎥</div><div class="abi-label" id="lbl-add-video">Vidéo / GIF</div></div>
         </div>
-        <button class="btn btn-g" onclick="setAddPanel(false)" style="margin-top:10px">Annuler</button>
+        <button class="btn btn-g" id="cancel-btn" onclick="setAddPanel(false)" style="margin-top:10px">Annuler</button>
       </div>
       <button class="btn btn-y" id="btn-add" onclick="setAddPanel(true)">+ Ajouter un bloc</button>
     </div>
@@ -575,13 +561,59 @@ window.switchLang=k=>{
   saveLang(k);
   buildLangGrid();
   closeLang();
-  // Mise à jour des textes visibles
-  if($('btn-login'))  $('btn-login').textContent=t('connect');
-  if($('btn-reg'))    $('btn-reg').textContent=t('register');
-  if($('a-submit'))   $('a-submit').textContent=authMode==='login'?t('connect'):t('create');
-  if($('s-dashboard').classList.contains('active'))refreshDash();
+  applyLang();
   showToast(LANGS[k].f+' '+LANGS[k].n);
 };
+
+function applyLang(){
+  // ── Auth ──
+  if($('btn-login'))   $('btn-login').textContent=t('connect');
+  if($('btn-reg'))     $('btn-reg').textContent=t('register');
+  if($('a-submit'))    $('a-submit').textContent=authMode==='login'?t('connect'):t('create');
+  const remLbl=$('remember-me')?.nextElementSibling;
+  if(remLbl) remLbl.textContent=t('remember');
+
+  // ── Action bar ──
+  if($('vis-label'))   $('vis-label').textContent=S.profile?.showProfile!==false?t('profileShown'):t('profileHidden');
+  const prevPill=document.querySelector('.action-pill.active');
+  if(prevPill) prevPill.innerHTML=`👁 ${t('preview')}`;
+
+  // ── Tabs ──
+  document.querySelectorAll('.tabs button[data-tab]').forEach(b=>{
+    const map={content:`📝 ${t('tabContent')}`,style:`🎨 ${t('tabStyle')}`,qr:`📲 ${t('tabQr')}`,admin:'⚙️ Admin'};
+    if(map[b.dataset.tab]) b.textContent=map[b.dataset.tab];
+  });
+
+  // ── Profil labels ──
+  if($('lbl-dn'))               $('lbl-dn').textContent=t('nameLabel');
+  if($('lbl-bio'))              $('lbl-bio').textContent=t('bioLabel');
+  if($('lbl-url'))              $('lbl-url').textContent=t('urlLabel');
+
+  // ── Blocs section ──
+  if($('blocks-section-title')) $('blocks-section-title').textContent=`📦 ${t('myBlocks')}`;
+  if($('btn-add'))              $('btn-add').textContent=t('addBlock');
+  if($('cancel-btn'))           $('cancel-btn').textContent=t('cancel');
+
+  // ── Style tab ──
+  document.querySelectorAll('#tab-style .card-title').forEach((el,i)=>{
+    if(i===0) el.textContent=`🎨 ${t('template')}`;
+    if(i===1) el.textContent=`🔤 ${t('fontLabel')}`;
+    if(i===2) el.textContent=`🖌️ ${t('colors')}`;
+  });
+
+  // ── Footer ──
+  const footer=document.querySelector('.app-footer button');
+  if(footer) footer.textContent=t('legal');
+
+  // ── Flash ──
+  if($('flash')) $('flash').textContent=`✅ ${t('saved')}`;
+
+  // ── RTL (arabe) ──
+  document.documentElement.dir=LANGS[LANG]?.rtl?'rtl':'ltr';
+
+  // ── Re-render blocs si dashboard actif ──
+  if($('s-dashboard')?.classList.contains('active')&&S.profile) renderBlocks();
+}
 
 /* ═══ NAV ═══ */
 window.showScreen=id=>{
@@ -722,25 +754,25 @@ function renderBlocks(){
         <button class="fmt-btn" style="font-weight:900" onclick="insertFmt('${b.id}','bold')"><b>G</b></button>
         <button class="fmt-btn" style="font-style:italic" onclick="insertFmt('${b.id}','italic')"><i>I</i></button>
       </div>
-      <textarea id="ta-${b.id}" class="block-inp" rows="4" placeholder="Écris ton message ici…&#10;&#10;💡 Sélectionne du texte puis clique G ou I pour le mettre en gras/italique" oninput="updateBlock('${b.id}','content',this.value)">${esc(b.content)}</textarea>
+      <textarea id="ta-${b.id}" class="block-inp" rows="4" placeholder="${t('msgPlaceholder')}" oninput="updateBlock('${b.id}','content',this.value)">${esc(b.content)}</textarea>
       <div id="emoji-panel-${b.id}" style="display:none"></div>`;
     }
     if(b.type==='link'){
-      body=`<input class="block-inp" placeholder="Titre du lien (ex: Mon Instagram)" value="${esc(b.label)}" oninput="updateBlock('${b.id}','label',this.value)">
-      <input class="block-inp" placeholder="https://…" value="${esc(b.content)}" oninput="updateBlock('${b.id}','content',this.value)" style="margin-bottom:0">`;
+      body=`<input class="block-inp" placeholder="${t('linkTitle')}" value="${esc(b.label)}" oninput="updateBlock('${b.id}','label',this.value)">
+      <input class="block-inp" placeholder="${t('linkUrl')}" value="${esc(b.content)}" oninput="updateBlock('${b.id}','content',this.value)" style="margin-bottom:0">`;
     }
     if(b.type==='photo'){
-      body=`<div class="upload-zone" onclick="document.getElementById('f-${b.id}').click()">📷 Choisir depuis le téléphone</div>
+      body=`<div class="upload-zone" onclick="document.getElementById('f-${b.id}').click()">📷 ${t('choosePhoto')}</div>
       <input type="file" id="f-${b.id}" accept="image/*" onchange="uploadBlockPhoto('${b.id}',this)">
       <div class="upload-progress" id="prog-${b.id}"><div class="upload-progress-bar" id="bar-${b.id}"></div></div>
-      <input class="block-inp" placeholder="…ou coller une URL d'image / GIF" value="${esc(b.content.startsWith('data:')||b.content.startsWith('http')?b.content:'')}" oninput="updateBlock('${b.id}','content',this.value)">
+      <input class="block-inp" placeholder="${t('pasteUrl')}" value="${esc(b.content.startsWith('data:')||b.content.startsWith('http')?b.content:'')}" oninput="updateBlock('${b.id}','content',this.value)">
       ${b.content?`<img src="${esc(b.content)}" class="media-preview" onerror="this.style.display='none'">`:''}`;
     }
     if(b.type==='video'){
-      body=`<div class="upload-zone" onclick="document.getElementById('vf-${b.id}').click()">📹 Vidéo ou GIF depuis le téléphone <small style="opacity:.6;font-size:11px">(max 50MB)</small></div>
+      body=`<div class="upload-zone" onclick="document.getElementById('vf-${b.id}').click()">📹 ${t('chooseVideo')} <small style="opacity:.6;font-size:11px">(max 50MB)</small></div>
       <input type="file" id="vf-${b.id}" accept="video/*,image/gif" onchange="uploadBlockVideo('${b.id}',this)">
       <div class="upload-progress" id="vprog-${b.id}"><div class="upload-progress-bar" id="vbar-${b.id}"></div></div>
-      <input class="block-inp" placeholder="…ou lien YouTube" value="${esc(!b.content.startsWith('data:')?b.content:'')}" oninput="updateBlock('${b.id}','content',this.value)">
+      <input class="block-inp" placeholder="${t('linkUrl')}" value="${esc(!b.content.startsWith('data:')?b.content:'')}" oninput="updateBlock('${b.id}','content',this.value)">
       ${b.content.startsWith('data:video/')||b.isCloud&&b.content?`<video src="${esc(b.content)}" controls class="media-preview"></video>`:''}
       ${b.content.startsWith('data:image/gif')?`<img src="${esc(b.content)}" class="media-preview">`:''}`;
     }
@@ -1015,6 +1047,7 @@ function refreshDash(){
   $('p-av').value=S.profile.avatar?.startsWith('http')?S.profile.avatar:'';
   if(S.profile.avatar)updateAvatarPreview(S.profile.avatar);
   updateVisUI();renderBlocks();injectAdminTab();
+  applyLang(); // Applique la langue à chaque chargement du dashboard
   // Admin auto-upgrade
   if(isAdmin()&&S.data.plan!=='app'){S.data.plan='app';setDoc(doc(DB,'users',S.user.uid),{plan:'app'},{merge:true}).catch(()=>{});}
 }
@@ -1028,6 +1061,7 @@ function checkPublicRoute(){
 
 /* ═══ INIT ═══ */
 buildLangGrid();
+applyLang(); // Applique la langue sauvegardée dès le démarrage
 
 getRedirectResult(AUTH).then(async result=>{
   if(!result)return;
