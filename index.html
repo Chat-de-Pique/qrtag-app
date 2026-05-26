@@ -611,7 +611,34 @@ function applyLang(){
   // ── RTL (arabe) ──
   document.documentElement.dir=LANGS[LANG]?.rtl?'rtl':'ltr';
 
-  // ── Re-render blocs si dashboard actif ──
+  // ── Labels add-panel ──
+  const blockNames={
+    fr:{text:'Message texte',link:'Lien cliquable',photo:'Photo / GIF',video:'Vidéo / GIF'},
+    en:{text:'Text message',link:'Clickable link',photo:'Photo / GIF',video:'Video / GIF'},
+    es:{text:'Mensaje de texto',link:'Enlace',photo:'Foto / GIF',video:'Vídeo / GIF'},
+    de:{text:'Textnachricht',link:'Link',photo:'Foto / GIF',video:'Video / GIF'},
+    it:{text:'Messaggio',link:'Link',photo:'Foto / GIF',video:'Video / GIF'},
+    pt:{text:'Mensagem',link:'Link',photo:'Foto / GIF',video:'Vídeo / GIF'},
+    ru:{text:'Сообщение',link:'Ссылка',photo:'Фото / GIF',video:'Видео / GIF'},
+    ar:{text:'رسالة نصية',link:'رابط',photo:'صورة / GIF',video:'فيديو / GIF'},
+    zh:{text:'文字消息',link:'链接',photo:'图片 / GIF',video:'视频 / GIF'},
+    ja:{text:'メッセージ',link:'リンク',photo:'写真 / GIF',video:'動画 / GIF'},
+    ko:{text:'메시지',link:'링크',photo:'사진 / GIF',video:'동영상 / GIF'},
+    nl:{text:'Tekstbericht',link:'Link',photo:'Foto / GIF',video:'Video / GIF'},
+    pl:{text:'Wiadomość',link:'Link',photo:'Zdjęcie / GIF',video:'Film / GIF'},
+    tr:{text:'Mesaj',link:'Bağlantı',photo:'Fotoğraf / GIF',video:'Video / GIF'},
+    sv:{text:'Textmeddelande',link:'Länk',photo:'Foto / GIF',video:'Video / GIF'},
+    da:{text:'Tekstbesked',link:'Link',photo:'Foto / GIF',video:'Video / GIF'},
+    hi:{text:'संदेश',link:'लिंक',photo:'फ़ोटो / GIF',video:'वीडियो / GIF'},
+    vi:{text:'Tin nhắn',link:'Liên kết',photo:'Ảnh / GIF',video:'Video / GIF'},
+    th:{text:'ข้อความ',link:'ลิงก์',photo:'รูปภาพ / GIF',video:'วิดีโอ / GIF'},
+    uk:{text:'Повідомлення',link:'Посилання',photo:'Фото / GIF',video:'Відео / GIF'},
+  };
+  const bn=blockNames[LANG]||blockNames.fr;
+  if($('lbl-add-text'))  $('lbl-add-text').textContent=bn.text;
+  if($('lbl-add-link'))  $('lbl-add-link').textContent=bn.link;
+  if($('lbl-add-photo')) $('lbl-add-photo').textContent=bn.photo;
+  if($('lbl-add-video')) $('lbl-add-video').textContent=bn.video;
   if($('s-dashboard')?.classList.contains('active')&&S.profile) renderBlocks();
 }
 
@@ -843,9 +870,8 @@ function hideProg(progId){const p=$(progId);if(p)setTimeout(()=>p.style.display=
 
 window.uploadAvatar=async input=>{
   const file=input.files[0];if(!file)return;
-  showProg('av-prog','av-bar',20);
+  showProg('av-prog','av-bar',30);
   try{
-    showProg('av-prog','av-bar',50);
     const url=await uploadToCloudinary(file);
     showProg('av-prog','av-bar',100);hideProg('av-prog');
     S.profile.avatar=url;$('p-av').value=url;
@@ -991,7 +1017,7 @@ async function renderPublicPage(uid_,isPreview=false){
   }catch(e){$('pub-content').innerHTML='<div style="text-align:center;padding:80px">Profil introuvable</div>';return;}
   const{profile:p,username}=pd;
 
-  if(p.visible===false&&!isPreview){
+  if(p.showProfile===false&&!isPreview){
     $('pub-content').innerHTML=`<div style="min-height:100vh;background:#111;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;text-align:center;padding:20px;font-family:system-ui"><div style="font-size:60px">🔒</div><h2 style="margin:12px 0">${esc(t('privateMsg'))}</h2></div>`;
     return;
   }
