@@ -736,6 +736,13 @@ window.dupBlock=id=>{
   S.profile.blocks.splice(S.profile.blocks.findIndex(b=>b.id===id)+1,0,copy);
   renderBlocks();saveProfile();showToast('⧉ Bloc dupliqué');
 };
+/* ── Sans fond / bouton (bare mode) ── */
+window.toggleBare=id=>{
+  const b=S.profile.blocks.find(b=>b.id===id);if(!b)return;
+  b.bare=!b.bare;
+  renderBlocks();saveProfile();
+  showToast(b.bare?'◻ Sans style':'▣ Avec style');
+};
 
 const BLOCK_META={
   text:  {icon:'📝',label:'Message',   color:'text'},
@@ -801,6 +808,7 @@ function renderBlocks(){
         <button class="block-action-btn" onclick="moveBlock('${b.id}','up')" ${first?'style="opacity:.3;pointer-events:none"':''} title="Monter">↑</button>
         <button class="block-action-btn" onclick="moveBlock('${b.id}','down')" ${last?'style="opacity:.3;pointer-events:none"':''} title="Descendre">↓</button>
         <button class="block-action-btn" onclick="dupBlock('${b.id}')" title="Dupliquer">⧉</button>
+        <button class="block-action-btn${b.bare?' on':''}" onclick="toggleBare('${b.id}')" title="${b.bare?'Avec style':'Sans fond/bouton'}" style="${b.bare?'background:var(--accent-soft);border-color:var(--accent);color:var(--accent-dark)':''}">${b.bare?'◻':'▣'}</button>
         <button class="block-del" onclick="removeBlock('${b.id}')">🗑</button>
       </div>
     </div>
@@ -1074,8 +1082,14 @@ async function renderPublicPage(uid_,isPreview=false){
   const avatarHtml=(showP&&p.avatar)?`<img src="${esc(p.avatar)}" class="pub-avatar" style="border:3px solid ${accent};background:#fff" onerror="this.style.display='none'">` :'';
   const blocksHtml=(p.blocks||[]).filter(b=>!b.hidden).map(b=>{
     const bStyle=`margin-bottom:${gap}`;
-    if(b.type==='text'&&b.content)return`<div class="pub-block" style="${bStyle}"><div style="background:${card};border-radius:${br}px;padding:16px 18px;box-shadow:${shd}"><p style="color:${txt};font-size:${fs}px;line-height:1.7;white-space:pre-wrap;text-align:${align}">${parseFmt(b.content)}</p></div></div>`;
-    if(b.type==='link'&&b.content)return`<div class="pub-block" style="${bStyle}"><a href="${esc(b.content)}" style="display:block;background:${accent};color:#000;border-radius:${br}px;padding:15px 20px;text-align:center;text-decoration:none;font-size:${fs}px;font-weight:800;box-shadow:0 4px 20px ${accent}55" target="_blank" rel="noopener">🔗 ${esc(b.label||b.content)}</a></div>`;
+    if(b.type==='text'&&b.content){
+      if(b.bare)return`<div class="pub-block" style="${bStyle}"><p style="color:${txt};font-size:${fs}px;line-height:1.7;white-space:pre-wrap;text-align:${align}">${parseFmt(b.content)}</p></div>`;
+      return`<div class="pub-block" style="${bStyle}"><div style="background:${card};border-radius:${br}px;padding:16px 18px;box-shadow:${shd}"><p style="color:${txt};font-size:${fs}px;line-height:1.7;white-space:pre-wrap;text-align:${align}">${parseFmt(b.content)}</p></div></div>`;
+    }
+    if(b.type==='link'&&b.content){
+      if(b.bare)return`<div class="pub-block" style="${bStyle}"><a href="${esc(b.content)}" style="color:${accent};font-size:${fs}px;font-weight:700;text-decoration:underline;display:block;text-align:${align}" target="_blank" rel="noopener">🔗 ${esc(b.label||b.content)}</a></div>`;
+      return`<div class="pub-block" style="${bStyle}"><a href="${esc(b.content)}" style="display:block;background:${accent};color:#000;border-radius:${br}px;padding:15px 20px;text-align:center;text-decoration:none;font-size:${fs}px;font-weight:800;box-shadow:0 4px 20px ${accent}55" target="_blank" rel="noopener">🔗 ${esc(b.label||b.content)}</a></div>`;
+    }
     if(b.type==='photo'&&b.content)return`<div class="pub-block" style="${bStyle}"><div style="border-radius:${br}px;overflow:hidden;background:#fff;box-shadow:${shd}"><img src="${esc(b.content)}" style="width:100%;display:block" onerror="this.parentElement.parentElement.style.display='none'"></div></div>`;
     if(b.type==='video'&&b.content){
       if(b.content.startsWith('data:video/')||(b.isCloud&&b.content))return`<div class="pub-block" style="${bStyle}"><video src="${esc(b.content)}" controls playsinline style="width:100%;border-radius:${br}px;display:block;background:#000;box-shadow:${shd}"></video></div>`;
@@ -1086,6 +1100,7 @@ async function renderPublicPage(uid_,isPreview=false){
     if(b.type==='social'&&b.content){
       const sp=SOCIAL_PLATFORMS[b.platform||'instagram']||SOCIAL_PLATFORMS.instagram;
       const isLight=sp.color==='#FFFC00'||sp.color==='#FFD600';
+      if(b.bare)return`<div class="pub-block" style="${bStyle}"><a href="${esc(b.content)}" style="color:${sp.color};font-size:${fs}px;font-weight:700;text-decoration:underline;display:block;text-align:${align}" target="_blank" rel="noopener">${sp.icon} ${esc(sp.label)}</a></div>`;
       return`<div class="pub-block" style="${bStyle}"><a href="${esc(b.content)}" style="display:flex;align-items:center;justify-content:center;gap:9px;background:${sp.color};color:${isLight?'#000':'#fff'};border-radius:${br}px;padding:14px 20px;text-decoration:none;font-size:${fs}px;font-weight:800;box-shadow:0 4px 20px ${sp.color}66" target="_blank" rel="noopener">${sp.icon} ${esc(sp.label)}</a></div>`;
     }
     return'';
