@@ -187,7 +187,32 @@
     .pub-name{text-align:center;font-size:26px;font-weight:900;margin-bottom:6px;}
     .pub-bio{text-align:center;font-size:14px;opacity:.7;margin-bottom:24px;line-height:1.5;}
     .pub-block{margin-bottom:12px;}
-    /* ── Panneau Avancé ── */
+    /* ── Bouton Aperçu flottant (FAB) ── */
+    .fab-preview{position:fixed;bottom:24px;right:16px;z-index:100;background:var(--accent);color:#000;border:none;border-radius:30px;padding:13px 20px;font-size:14px;font-weight:900;cursor:pointer;box-shadow:0 6px 24px rgba(255,214,0,.5);display:none;align-items:center;gap:7px;transition:transform .15s,box-shadow .15s;}
+    .fab-preview:active{transform:scale(.95);}
+    .fab-preview:hover{box-shadow:0 8px 30px rgba(255,214,0,.65);transform:translateY(-1px);}
+    #s-dashboard.active .fab-preview{display:flex;}
+    /* ── Tiroir aperçu (bottom sheet) ── */
+    .pub-sheet{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-radius:22px 22px 0 0;box-shadow:0 -6px 30px rgba(0,0,0,.15);z-index:20;transition:transform .35s cubic-bezier(.4,0,.2,1);max-height:72vh;display:flex;flex-direction:column;}
+    .pub-sheet.collapsed{transform:translateY(calc(100% - 52px));}
+    .pub-sheet-handle{padding:14px 18px;display:flex;align-items:center;gap:10px;cursor:pointer;flex-shrink:0;}
+    .pub-sheet-handle::before{content:'';width:36px;height:4px;background:var(--border);border-radius:2px;position:absolute;top:8px;left:50%;transform:translateX(-50%);}
+    .pub-sheet-handle span{font-size:13px;font-weight:800;flex:1;}
+    .pub-sheet-body{padding:4px 16px 40px;overflow-y:auto;}
+    .sheet-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);gap:10px;}
+    .sheet-row:last-child{border:none;}
+    .sheet-lbl{font-size:13px;font-weight:600;flex-shrink:0;}
+    .sheet-val{font-size:11px;color:var(--muted);min-width:30px;text-align:right;flex-shrink:0;}
+    .sheet-range{flex:1;accent-color:var(--accent);cursor:pointer;max-width:110px;}
+    .block-vis-row{display:flex;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);gap:8px;}
+    .block-vis-row:last-child{border:none;}
+    .block-vis-label{font-size:13px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;opacity:1;transition:opacity .2s;}
+    .block-vis-label.hidden{opacity:.35;text-decoration:line-through;}
+    .block-vis-btn{background:none;border:1.5px solid var(--border);border-radius:8px;padding:4px 9px;cursor:pointer;font-size:14px;transition:all .15s;flex-shrink:0;}
+    .block-vis-btn:hover{border-color:var(--accent);background:var(--accent-soft);}
+    /* padding-bottom sur pub-wrap quand le tiroir est visible */
+    .pub-wrap{padding-bottom:80px;}
+    /* ── Panneau Avancé (style tab, conservé pour renderAdvanced) ── */
     .adv-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);gap:12px;}
     .adv-row:last-of-type{border:none;}
     .adv-row-info{flex-shrink:0;}
@@ -350,38 +375,6 @@
       </div>
     </div>
 
-    <!-- AVANCÉ -->
-    <div class="card">
-      <div class="card-title">✨ Avancé</div>
-      <div class="adv-row">
-        <div class="adv-row-info"><div>Taille du texte</div><small id="val-fontsize">15px</small></div>
-        <input type="range" id="adv-fontsize" min="12" max="24" step="1" value="15" oninput="onAdv('fontSize',+this.value)">
-      </div>
-      <div class="adv-row">
-        <div class="adv-row-info"><div>Alignement du texte</div></div>
-        <div class="align-btns">
-          <button id="align-left"   class="align-btn on" onclick="onAdv('textAlign','left')"   title="Gauche">◀</button>
-          <button id="align-center" class="align-btn"    onclick="onAdv('textAlign','center')" title="Centre">▮</button>
-          <button id="align-right"  class="align-btn"    onclick="onAdv('textAlign','right')"  title="Droite">▶</button>
-        </div>
-      </div>
-      <div class="adv-row">
-        <div class="adv-row-info"><div>Arrondi des boutons</div><small id="val-radius">14px</small></div>
-        <input type="range" id="adv-radius" min="0" max="30" step="1" value="14" oninput="onAdv('btnRadius',+this.value)">
-      </div>
-      <div class="adv-row">
-        <div class="adv-row-info"><div>Ombre portée</div><small id="val-shadow">Normale</small></div>
-        <input type="range" id="adv-shadow" min="0" max="3" step="1" value="1" oninput="onAdv('shadowStrength',+this.value)">
-      </div>
-      <div class="adv-row">
-        <div class="adv-row-info"><div>Espacement blocs</div><small id="val-spacing">12px</small></div>
-        <input type="range" id="adv-spacing" min="4" max="32" step="2" value="12" oninput="onAdv('blockSpacing',+this.value)">
-      </div>
-      <div style="margin-top:10px">
-        <label class="lbl">CSS personnalisé <small style="font-weight:400;color:var(--muted)">(utilisateurs avancés)</small></label>
-        <textarea id="adv-css" class="block-inp" rows="3" placeholder=".pub-name { letter-spacing: 3px; }" oninput="onAdv('customCSS',this.value)" style="font-family:'Courier New',monospace;font-size:12px;margin-bottom:0"></textarea>
-      </div>
-    </div>
 
     <div id="tab-qr" class="tab-pane">
       <div id="qr-locked" class="plan-lock">
@@ -430,6 +423,15 @@
     <button class="pub-share-btn" onclick="sharePublicPage()">🔗 Partager</button>
   </div>
   <div id="pub-content"></div>
+
+  <!-- Tiroir de personnalisation (visible uniquement en aperçu) -->
+  <div class="pub-sheet collapsed" id="pub-sheet" style="display:none">
+    <div class="pub-sheet-handle" onclick="toggleSheet()">
+      <span>✨ Personnaliser l'aperçu</span>
+      <span id="sheet-arrow" style="font-size:16px;transition:transform .3s">↑</span>
+    </div>
+    <div class="pub-sheet-body" id="pub-sheet-body"></div>
+  </div>
 </div>
 
 <div id="s-legal" class="screen">
@@ -448,6 +450,7 @@
 </div>
 
 <div id="toast"></div>
+<button class="fab-preview" onclick="showPreview()">👁 <span id="fab-preview-lbl">Aperçu</span></button>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://unpkg.com/qr-code-styling@1.6.0-rc.1/lib/qr-code-styling.js"></script>
 <script type="module">
@@ -556,7 +559,7 @@ const SOCIAL_PLATFORMS={
   threads:  {label:'Threads',    icon:'🧵',color:'#111111'},
   bereal:   {label:'BeReal',     icon:'📷',color:'#111111'},
 };
-const DEFAULT_PROFILE={displayName:'',bio:'',avatar:'',template:'blanc',font:'sans',primaryColor:'#FFD600',bgColor:'#ffffff',textColor:'#1a1a1a',blocks:[],showProfile:true,fontSize:15,textAlign:'left',btnRadius:14,shadowStrength:1,blockSpacing:12,customCSS:''};
+const DEFAULT_PROFILE={displayName:'',bio:'',avatar:'',template:'blanc',font:'sans',primaryColor:'#FFD600',bgColor:'#ffffff',textColor:'#1a1a1a',blocks:[],showProfile:true,fontSize:15,textAlign:'left',btnRadius:14,shadowStrength:1,blockSpacing:12};
 
 const S={user:null,data:null,profile:null,saveTimer:null,qrObj:null,dark:false};
 const $=id=>document.getElementById(id);
@@ -589,6 +592,7 @@ function applyLang(){
   if($('lbl-forgot'))      $('lbl-forgot').textContent=t('forgotPw');
   if($('vis-label'))       $('vis-label').textContent=S.profile?.showProfile!==false?t('profileShown'):t('profileHidden');
   if($('lbl-preview'))     $('lbl-preview').textContent=t('preview');
+  if($('fab-preview-lbl')) $('fab-preview-lbl').textContent=t('preview');
   if($('tab-lbl-content')) $('tab-lbl-content').textContent=t('tabContent');
   if($('tab-lbl-style'))   $('tab-lbl-style').textContent=t('tabStyle');
   if($('tab-lbl-qr'))      $('tab-lbl-qr').textContent=t('tabQr');
@@ -894,7 +898,6 @@ function renderAdvanced(){
   const br=$('adv-radius');     if(br){br.value=p.btnRadius||14;const v=$('val-radius');if(v)v.textContent=(p.btnRadius||14)+'px';}
   const sh=$('adv-shadow');     if(sh){sh.value=p.shadowStrength??1;const v=$('val-shadow');if(v)v.textContent=SHADOW_LABELS[p.shadowStrength??1]||'Normale';}
   const sp=$('adv-spacing');    if(sp){sp.value=p.blockSpacing||12;const v=$('val-spacing');if(v)v.textContent=(p.blockSpacing||12)+'px';}
-  const css=$('adv-css');       if(css)css.value=p.customCSS||'';
   // Alignement
   ['left','center','right'].forEach(a=>{
     const b=$('align-'+a);if(b)b.classList.toggle('on',(p.textAlign||'left')===a);
@@ -902,13 +905,85 @@ function renderAdvanced(){
 }
 window.onAdv=(k,v)=>{
   S.profile[k]=v;
-  // Mettre à jour le label en direct
+  // Mettre à jour les labels dans l'onglet style (si ouvert)
   if(k==='fontSize'){const el=$('val-fontsize');if(el)el.textContent=v+'px';}
   if(k==='btnRadius'){const el=$('val-radius');if(el)el.textContent=v+'px';}
   if(k==='shadowStrength'){const el=$('val-shadow');if(el)el.textContent=SHADOW_LABELS[v]||'Normale';}
   if(k==='blockSpacing'){const el=$('val-spacing');if(el)el.textContent=v+'px';}
   if(k==='textAlign'){['left','center','right'].forEach(a=>{const b=$('align-'+a);if(b)b.classList.toggle('on',a===v);});}
+  // Re-rendu en direct si l'aperçu est actif
+  if($('s-public')?.classList.contains('active')){
+    clearTimeout(S._previewTimer);
+    S._previewTimer=setTimeout(()=>{syncForm();renderPublicPage(S.user?.uid,true);},120);
+  }
   clearTimeout(S.saveTimer);S.saveTimer=setTimeout(saveProfile,800);
+};
+
+/* ── Tiroir aperçu ── */
+let _sheetOpen=false;
+window.toggleSheet=()=>{
+  _sheetOpen=!_sheetOpen;
+  const sheet=$('pub-sheet');
+  if(sheet) sheet.classList.toggle('collapsed',!_sheetOpen);
+  const arrow=$('sheet-arrow');
+  if(arrow){arrow.textContent=_sheetOpen?'↓':'↑';arrow.style.transform=_sheetOpen?'rotate(0)':'rotate(0)';}
+};
+
+function renderSheet(){
+  const body=$('pub-sheet-body');if(!body||!S.profile)return;
+  const p=S.profile;
+  const SL=['Aucune','Normale','Forte','Très forte'];
+  const blocks=p.blocks||[];
+  const BICONS={text:'📝',link:'🔗',photo:'🖼️',video:'🎥',social:'📲'};
+
+  body.innerHTML=`
+    <div class="sheet-row">
+      <span class="sheet-lbl">Taille texte</span>
+      <input class="sheet-range" type="range" min="12" max="24" step="1" value="${p.fontSize||15}" oninput="onAdv('fontSize',+this.value);this.nextElementSibling.textContent=this.value+'px'">
+      <span class="sheet-val">${p.fontSize||15}px</span>
+    </div>
+    <div class="sheet-row">
+      <span class="sheet-lbl">Alignement</span>
+      <div class="align-btns">
+        <button class="align-btn${(p.textAlign||'left')==='left'?' on':''}" onclick="onAdv('textAlign','left');this.parentElement.querySelectorAll('.align-btn').forEach(b=>b.classList.remove('on'));this.classList.add('on')">◀</button>
+        <button class="align-btn${(p.textAlign||'left')==='center'?' on':''}" onclick="onAdv('textAlign','center');this.parentElement.querySelectorAll('.align-btn').forEach(b=>b.classList.remove('on'));this.classList.add('on')">▮</button>
+        <button class="align-btn${(p.textAlign||'left')==='right'?' on':''}" onclick="onAdv('textAlign','right');this.parentElement.querySelectorAll('.align-btn').forEach(b=>b.classList.remove('on'));this.classList.add('on')">▶</button>
+      </div>
+    </div>
+    <div class="sheet-row">
+      <span class="sheet-lbl">Arrondi boutons</span>
+      <input class="sheet-range" type="range" min="0" max="30" step="1" value="${p.btnRadius!==undefined?p.btnRadius:14}" oninput="onAdv('btnRadius',+this.value);this.nextElementSibling.textContent=this.value+'px'">
+      <span class="sheet-val">${p.btnRadius!==undefined?p.btnRadius:14}px</span>
+    </div>
+    <div class="sheet-row">
+      <span class="sheet-lbl">Ombre</span>
+      <input class="sheet-range" type="range" min="0" max="3" step="1" value="${p.shadowStrength!==undefined?p.shadowStrength:1}" oninput="onAdv('shadowStrength',+this.value);this.nextElementSibling.textContent=['Aucune','Normale','Forte','Très forte'][this.value]">
+      <span class="sheet-val" style="min-width:56px">${SL[p.shadowStrength!==undefined?p.shadowStrength:1]}</span>
+    </div>
+    <div class="sheet-row">
+      <span class="sheet-lbl">Espacement</span>
+      <input class="sheet-range" type="range" min="4" max="32" step="2" value="${p.blockSpacing||12}" oninput="onAdv('blockSpacing',+this.value);this.nextElementSibling.textContent=this.value+'px'">
+      <span class="sheet-val">${p.blockSpacing||12}px</span>
+    </div>
+    ${blocks.length?`
+    <div style="font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;padding:12px 0 4px">Blocs — afficher / masquer</div>
+    ${blocks.map(b=>{
+      const icon=BICONS[b.type]||'📦';
+      const lbl=esc(b.label||b.content?.slice(0,22)||(b.type==='social'?b.platform:b.type)||'—');
+      return`<div class="block-vis-row">
+        <span class="block-vis-label${b.hidden?' hidden':''}">${icon} ${lbl}</span>
+        <button class="block-vis-btn" onclick="toggleBlockVis('${b.id}')">${b.hidden?'🙈':'👁'}</button>
+      </div>`;
+    }).join('')}
+    `:''}
+  `;
+}
+
+window.toggleBlockVis=id=>{
+  const b=S.profile.blocks.find(b=>b.id===id);if(!b)return;
+  b.hidden=!b.hidden;
+  saveProfile();
+  syncForm();renderPublicPage(S.user?.uid,true);
 };
 window.selectTpl=id=>{const tpl=TEMPLATES[id];S.profile.template=id;S.profile.bgColor=tpl.bg;S.profile.textColor=tpl.text;S.profile.primaryColor=tpl.accent;renderStyleTab();saveProfile();};
 window.selectFont=id=>{S.profile.font=id;renderStyleTab();saveProfile();};
@@ -972,6 +1047,7 @@ async function loadUsers(){
 async function renderPublicPage(uid_,isPreview=false){
   showScreen('public');
   $('pub-back-bar').style.display=isPreview?'flex':'none';
+  const _sheet=$('pub-sheet');if(_sheet)_sheet.style.display=isPreview?'block':'none';
   $('pub-content').innerHTML='<div style="text-align:center;padding:80px;color:#aaa">Chargement…</div>';
   let pd;
   try{
@@ -995,9 +1071,8 @@ async function renderPublicPage(uid_,isPreview=false){
   const shadows = ['none','0 4px 20px rgba(0,0,0,.12)','0 8px 30px rgba(0,0,0,.25)','0 12px 40px rgba(0,0,0,.4)'];
   const shd     = shadows[p.shadowStrength!==undefined?p.shadowStrength:1];
   const gap     = (p.blockSpacing||12)+'px';
-  const customCSS = p.customCSS||'';
   const avatarHtml=(showP&&p.avatar)?`<img src="${esc(p.avatar)}" class="pub-avatar" style="border:3px solid ${accent};background:#fff" onerror="this.style.display='none'">` :'';
-  const blocksHtml=(p.blocks||[]).map(b=>{
+  const blocksHtml=(p.blocks||[]).filter(b=>!b.hidden).map(b=>{
     const bStyle=`margin-bottom:${gap}`;
     if(b.type==='text'&&b.content)return`<div class="pub-block" style="${bStyle}"><div style="background:${card};border-radius:${br}px;padding:16px 18px;box-shadow:${shd}"><p style="color:${txt};font-size:${fs}px;line-height:1.7;white-space:pre-wrap;text-align:${align}">${parseFmt(b.content)}</p></div></div>`;
     if(b.type==='link'&&b.content)return`<div class="pub-block" style="${bStyle}"><a href="${esc(b.content)}" style="display:block;background:${accent};color:#000;border-radius:${br}px;padding:15px 20px;text-align:center;text-decoration:none;font-size:${fs}px;font-weight:800;box-shadow:0 4px 20px ${accent}55" target="_blank" rel="noopener">🔗 ${esc(b.label||b.content)}</a></div>`;
@@ -1015,9 +1090,7 @@ async function renderPublicPage(uid_,isPreview=false){
     }
     return'';
   }).join('');
-  // Injection CSS personnalisé
-  const styleTag = customCSS ? `<style>${customCSS.replace(/<\/style>/gi,'')}</style>` : '';
-  $('pub-content').innerHTML=styleTag+`<div style="min-height:100vh;background:${bg};font-family:${fontObj.css}">
+  $('pub-content').innerHTML=`<div style="min-height:100vh;background:${bg};font-family:${fontObj.css}">
     <div class="pub-wrap">
       ${showP&&(p.avatar||p.displayName||p.bio)?`<div style="text-align:${align};margin-bottom:28px">${avatarHtml}${p.displayName||username?`<h1 class="pub-name" style="color:${txt};font-size:${Math.round(fs*1.6)}px">${esc(p.displayName||username)}</h1>`:''}${p.bio?`<p class="pub-bio" style="color:${txt};font-size:${fs}px">${esc(p.bio)}</p>`:''}</div>`:''}
       ${blocksHtml||`<div style="text-align:center;padding:50px 0;opacity:.35;color:${txt}"><div style="font-size:48px">📭</div><p style="margin-top:8px">${t('noContent')}</p></div>`}
@@ -1031,7 +1104,15 @@ window.sharePublicPage=async()=>{
   if(navigator.share){try{await navigator.share({title:'Mon QRTag',url});return;}catch(e){}}
   navigator.clipboard?.writeText(url).then(()=>showToast('📋 URL copiée !'));
 };
-window.showPreview=()=>{syncForm();renderPublicPage(S.user?.uid,true);};
+window.showPreview=()=>{
+  _sheetOpen=false;
+  syncForm();
+  renderPublicPage(S.user?.uid,true);
+  const sheet=$('pub-sheet');
+  if(sheet){sheet.style.display='block';sheet.classList.add('collapsed');}
+  const arrow=$('sheet-arrow');if(arrow)arrow.textContent='↑';
+  setTimeout(renderSheet,120);
+};
 
 /* ═══ NOTIFICATIONS PUSH (FCM) ═══ */
 
