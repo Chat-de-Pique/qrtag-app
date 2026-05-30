@@ -747,6 +747,7 @@ window.toggleBare=id=>{
   b.bare=!b.bare;
   renderBlocks();saveProfile();
   showToast(b.bare?'◻ Sans style':'▣ Avec style');
+  if($('s-public')?.classList.contains('active')){syncForm();renderPublicPage(S.user?.uid,true);}
 };
 
 const BLOCK_META={
@@ -985,6 +986,7 @@ function renderSheet(){
       const lbl=esc(b.label||b.content?.slice(0,22)||(b.type==='social'?b.platform:b.type)||'—');
       return`<div class="block-vis-row">
         <span class="block-vis-label${b.hidden?' hidden':''}">${icon} ${lbl}</span>
+        <button class="block-vis-btn" onclick="toggleBare('${b.id}')" title="${b.bare?'Avec style':'Sans fond'}" style="${b.bare?'border-color:var(--accent);background:var(--accent-soft);color:var(--accent-dark)':''}">${b.bare?'◻':'▣'}</button>
         <button class="block-vis-btn" onclick="toggleBlockVis('${b.id}')">${b.hidden?'🙈':'👁'}</button>
       </div>`;
     }).join('')}
