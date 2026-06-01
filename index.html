@@ -176,7 +176,7 @@
     #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
     #flash{display:none;background:#f0fff4;color:#0a0;padding:8px 13px;border-radius:10px;font-size:12px;font-weight:700;margin-bottom:10px;text-align:center;border:1px solid #afa;}
     body.dark #flash{background:#002a00;}
-    #s-public{min-height:100vh;}
+    #s-public{min-height:100vh;display:flex;flex-direction:column;}
     .pub-back-bar{position:sticky;top:0;padding:10px 16px;background:rgba(255,255,255,.92);backdrop-filter:blur(12px);z-index:10;border-bottom:1px solid rgba(0,0,0,.08);display:flex;align-items:center;gap:8px;}
     body.dark .pub-back-bar{background:rgba(17,17,17,.92);}
     .pub-back-btn{background:var(--surface2);border:1.5px solid var(--border);border-radius:9px;padding:7px 14px;cursor:pointer;font-size:13px;font-weight:700;color:var(--text);}
@@ -206,7 +206,7 @@
     body.dark .settings-item.danger:hover{background:#2a0000;}
     .settings-divider{height:1px;background:var(--border);margin:3px 0;}
     /* ── Tiroir aperçu (bottom sheet) ── */
-    .pub-sheet{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-radius:22px 22px 0 0;box-shadow:0 -6px 30px rgba(0,0,0,.15);z-index:20;transition:transform .35s cubic-bezier(.4,0,.2,1);max-height:72vh;display:flex;flex-direction:column;}
+    .pub-sheet{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-radius:22px 22px 0 0;box-shadow:0 -6px 30px rgba(0,0,0,.15);z-index:20;transition:transform .35s cubic-bezier(.4,0,.2,1);max-height:55vh;display:flex;flex-direction:column;}
     .pub-sheet.collapsed{transform:translateY(calc(100% - 52px));}
     .pub-sheet-handle{padding:14px 18px;display:flex;align-items:center;gap:10px;cursor:pointer;flex-shrink:0;}
     .pub-sheet-handle::before{content:'';width:36px;height:4px;background:var(--border);border-radius:2px;position:absolute;top:8px;left:50%;transform:translateX(-50%);}
@@ -869,7 +869,7 @@ function renderBlocks(){
         <button class="fmt-btn" onmousedown="event.preventDefault();richFmt('italic','${b.id}')" title="Italique"><i>I</i></button>
         <button class="fmt-btn" onmousedown="event.preventDefault();richFmt('underline','${b.id}')" title="Souligné"><u>U</u></button>
         <input type="color" class="fmt-color-swatch" title="Couleur du texte sélectionné" onmousedown="event.preventDefault()" onchange="richColor(this.value,'${b.id}')">
-        <select class="fmt-font-sel" onmousedown="event.preventDefault()" onchange="richFont(this.value,'${b.id}')" title="Police pour la sélection"><option value="">Police…</option>${fontOpts}</select>
+        <select class="fmt-font-sel" onfocus="saveRichSel('${b.id}')" onmousedown="saveRichSel('${b.id}')" onchange="richFont(this.value,'${b.id}');this.value=''" title="Police pour la sélection"><option value="">Police…</option>${fontOpts}</select>
         <button class="fmt-btn" onclick="openEmoji('${b.id}')" title="Emoji">😀</button>
       </div>
       <div id="re-${b.id}" class="rich-editor" contenteditable="true"
@@ -924,6 +924,11 @@ function renderBlocks(){
 }
 
 /* ── Éditeur riche WYSIWYG ── */
+// Sauvegarde la sélection avant que le focus parte vers le select
+window.saveRichSel=id=>{
+  const sel=window.getSelection();
+  if(sel&&sel.rangeCount>0)S._savedRange={id,range:sel.getRangeAt(0).cloneRange()};
+};
 window.richFmt=(cmd,id)=>{
   const editor=document.getElementById('re-'+id);
   if(editor) editor.focus();
@@ -943,6 +948,13 @@ window.richFont=(fontFamily,id)=>{
   const editor=document.getElementById('re-'+id);
   if(!editor)return;
   editor.focus();
+  // Restaurer la sélection sauvegardée avant l'ouverture du dropdown
+  if(S._savedRange&&S._savedRange.id===id){
+    const sel=window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(S._savedRange.range);
+    S._savedRange=null;
+  }
   const sel=window.getSelection();
   if(sel&&sel.rangeCount&&!sel.isCollapsed){
     // Applique à la sélection
@@ -1088,7 +1100,10 @@ window.toggleSheet=()=>{
   const sheet=$('pub-sheet');
   if(sheet) sheet.classList.toggle('collapsed',!_sheetOpen);
   const arrow=$('sheet-arrow');
-  if(arrow){arrow.textContent=_sheetOpen?'↓':'↑';arrow.style.transform=_sheetOpen?'rotate(0)':'rotate(0)';}
+  if(arrow) arrow.textContent=_sheetOpen?'↓':'↑';
+  // Décaler le contenu vers le haut quand le tiroir est ouvert
+  const pc=$('pub-content');
+  if(pc) pc.style.paddingBottom=_sheetOpen?'56vh':'80px';
 };
 
 function renderSheet(){
@@ -1253,6 +1268,9 @@ async function renderPublicPage(uid_,isPreview=false){
   const fontObj=FONTS.find(f=>f.id===p.font)||FONTS[0];
   const bg=tpl.bg2?`linear-gradient(135deg,${p.bgColor||tpl.bg},${tpl.bg2})`:p.bgColor||tpl.bg;
   const txt=p.textColor||tpl.text,accent=p.primaryColor||tpl.accent,card=tpl.bg2?'rgba(255,255,255,.16)':tpl.card;
+  // Logo adaptatif : calculé avant le template literal
+  const _logoDark=isColorDark(p.bgColor||tpl.bg);
+  const _logoStyle=_logoDark?'mix-blend-mode:screen':'filter:invert(1) brightness(0)';
   const showP=p.showProfile!==false;
   // ── Styles avancés ──
   const fs      = p.fontSize||15;
@@ -1301,7 +1319,7 @@ async function renderPublicPage(uid_,isPreview=false){
       ${blocksHtml||`<div style="text-align:center;padding:50px 0;opacity:.35;color:${txt}"><div style="font-size:48px">📭</div><p style="margin-top:8px">${t('noContent')}</p></div>`}
     </div>
     <div style="padding:20px 16px 28px;text-align:center">
-      <img src="" alt="Chat de Pique" style="width:42px;height:42px;object-fit:contain;opacity:.5;display:block;margin:0 auto 8px;${isColorDark(p.bgColor||tpl.bg)?'mix-blend-mode:screen':'filter:invert(1);mix-blend-mode:multiply'}">
+      <img src="" alt="Chat de Pique" style="width:42px;height:42px;object-fit:contain;opacity:.5;display:block;margin:0 auto 8px;${_logoStyle}">
       <div style="font-size:11px;opacity:.45;line-height:2;color:${txt}">
         <strong style="opacity:.8">QRTag par Chat de Pique Création</strong><br>
         <a href="https://www.instagram.com/chatdepique" target="_blank" rel="noopener" style="color:${txt};text-decoration:none;margin-right:12px">Instagram</a><a href="https://chatdepique.com" target="_blank" rel="noopener" style="color:${txt};text-decoration:none">Boutique</a>
@@ -1486,7 +1504,7 @@ async function renderPublicPage(uid_,isPreview=false){
     #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
     #flash{display:none;background:#f0fff4;color:#0a0;padding:8px 13px;border-radius:10px;font-size:12px;font-weight:700;margin-bottom:10px;text-align:center;border:1px solid #afa;}
     body.dark #flash{background:#002a00;}
-    #s-public{min-height:100vh;}
+    #s-public{min-height:100vh;display:flex;flex-direction:column;}
     .pub-back-bar{position:sticky;top:0;padding:10px 16px;background:rgba(255,255,255,.92);backdrop-filter:blur(12px);z-index:10;border-bottom:1px solid rgba(0,0,0,.08);display:flex;align-items:center;gap:8px;}
     body.dark .pub-back-bar{background:rgba(17,17,17,.92);}
     .pub-back-btn{background:var(--surface2);border:1.5px solid var(--border);border-radius:9px;padding:7px 14px;cursor:pointer;font-size:13px;font-weight:700;color:var(--text);}
@@ -1516,7 +1534,7 @@ async function renderPublicPage(uid_,isPreview=false){
     body.dark .settings-item.danger:hover{background:#2a0000;}
     .settings-divider{height:1px;background:var(--border);margin:3px 0;}
     /* ── Tiroir aperçu (bottom sheet) ── */
-    .pub-sheet{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-radius:22px 22px 0 0;box-shadow:0 -6px 30px rgba(0,0,0,.15);z-index:20;transition:transform .35s cubic-bezier(.4,0,.2,1);max-height:72vh;display:flex;flex-direction:column;}
+    .pub-sheet{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-radius:22px 22px 0 0;box-shadow:0 -6px 30px rgba(0,0,0,.15);z-index:20;transition:transform .35s cubic-bezier(.4,0,.2,1);max-height:55vh;display:flex;flex-direction:column;}
     .pub-sheet.collapsed{transform:translateY(calc(100% - 52px));}
     .pub-sheet-handle{padding:14px 18px;display:flex;align-items:center;gap:10px;cursor:pointer;flex-shrink:0;}
     .pub-sheet-handle::before{content:'';width:36px;height:4px;background:var(--border);border-radius:2px;position:absolute;top:8px;left:50%;transform:translateX(-50%);}
@@ -2169,7 +2187,7 @@ function renderBlocks(){
         <button class="fmt-btn" onmousedown="event.preventDefault();richFmt('italic','${b.id}')" title="Italique"><i>I</i></button>
         <button class="fmt-btn" onmousedown="event.preventDefault();richFmt('underline','${b.id}')" title="Souligné"><u>U</u></button>
         <input type="color" class="fmt-color-swatch" title="Couleur du texte sélectionné" onmousedown="event.preventDefault()" onchange="richColor(this.value,'${b.id}')">
-        <select class="fmt-font-sel" onmousedown="event.preventDefault()" onchange="richFont(this.value,'${b.id}')" title="Police pour la sélection"><option value="">Police…</option>${fontOpts}</select>
+        <select class="fmt-font-sel" onfocus="saveRichSel('${b.id}')" onmousedown="saveRichSel('${b.id}')" onchange="richFont(this.value,'${b.id}');this.value=''" title="Police pour la sélection"><option value="">Police…</option>${fontOpts}</select>
         <button class="fmt-btn" onclick="openEmoji('${b.id}')" title="Emoji">😀</button>
       </div>
       <div id="re-${b.id}" class="rich-editor" contenteditable="true"
@@ -2224,6 +2242,11 @@ function renderBlocks(){
 }
 
 /* ── Éditeur riche WYSIWYG ── */
+// Sauvegarde la sélection avant que le focus parte vers le select
+window.saveRichSel=id=>{
+  const sel=window.getSelection();
+  if(sel&&sel.rangeCount>0)S._savedRange={id,range:sel.getRangeAt(0).cloneRange()};
+};
 window.richFmt=(cmd,id)=>{
   const editor=document.getElementById('re-'+id);
   if(editor) editor.focus();
@@ -2243,6 +2266,13 @@ window.richFont=(fontFamily,id)=>{
   const editor=document.getElementById('re-'+id);
   if(!editor)return;
   editor.focus();
+  // Restaurer la sélection sauvegardée avant l'ouverture du dropdown
+  if(S._savedRange&&S._savedRange.id===id){
+    const sel=window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(S._savedRange.range);
+    S._savedRange=null;
+  }
   const sel=window.getSelection();
   if(sel&&sel.rangeCount&&!sel.isCollapsed){
     // Applique à la sélection
@@ -2388,7 +2418,10 @@ window.toggleSheet=()=>{
   const sheet=$('pub-sheet');
   if(sheet) sheet.classList.toggle('collapsed',!_sheetOpen);
   const arrow=$('sheet-arrow');
-  if(arrow){arrow.textContent=_sheetOpen?'↓':'↑';arrow.style.transform=_sheetOpen?'rotate(0)':'rotate(0)';}
+  if(arrow) arrow.textContent=_sheetOpen?'↓':'↑';
+  // Décaler le contenu vers le haut quand le tiroir est ouvert
+  const pc=$('pub-content');
+  if(pc) pc.style.paddingBottom=_sheetOpen?'56vh':'80px';
 };
 
 function renderSheet(){
@@ -2553,6 +2586,9 @@ async function renderPublicPage(uid_,isPreview=false){
   const fontObj=FONTS.find(f=>f.id===p.font)||FONTS[0];
   const bg=tpl.bg2?`linear-gradient(135deg,${p.bgColor||tpl.bg},${tpl.bg2})`:p.bgColor||tpl.bg;
   const txt=p.textColor||tpl.text,accent=p.primaryColor||tpl.accent,card=tpl.bg2?'rgba(255,255,255,.16)':tpl.card;
+  // Logo adaptatif : calculé avant le template literal
+  const _logoDark=isColorDark(p.bgColor||tpl.bg);
+  const _logoStyle=_logoDark?'mix-blend-mode:screen':'filter:invert(1) brightness(0)';
   const showP=p.showProfile!==false;
   // ── Styles avancés ──
   const fs      = p.fontSize||15;
@@ -2623,6 +2659,7 @@ window.showPreview=()=>{
   const sheet=$('pub-sheet');
   if(sheet){sheet.style.display='block';sheet.classList.add('collapsed');}
   const arrow=$('sheet-arrow');if(arrow)arrow.textContent='↑';
+  const pc=$('pub-content');if(pc)pc.style.paddingBottom='80px';
   setTimeout(renderSheet,120);
 };
 
