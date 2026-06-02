@@ -601,6 +601,25 @@ const SOCIAL_PLATFORMS={
   threads:  {label:'Threads',    icon:'🧵',color:'#111111'},
   bereal:   {label:'BeReal',     icon:'📷',color:'#111111'},
 };
+
+// Logos SVG (blanc, pour boutons colorés)
+const SOCIAL_SVG={
+  instagram:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1.2" fill="white" stroke="none"/></svg>`,
+  tiktok:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M19.6 3h-3.2c-.3 2.5-2.4 4.5-4.9 4.7V11c1.6-.1 3.1-.6 4.3-1.5V16c0 3.3-2.7 6-6 6s-6-2.7-6-6 2.7-6 6-6v3.2c-1.5 0-2.8 1.3-2.8 2.8s1.3 2.8 2.8 2.8 2.8-1.3 2.8-2.8V3h3.2c.3 0 3.8 0 3.8 0z"/></svg>`,
+  twitter:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M18.3 5.7L13.1 11.5 19.2 18.3h-3.3L11.5 13.5 6.9 18.3H3.7l5.7-6.2L3.6 5.7H7l4.2 4.6 4.3-4.6z"/></svg>`,
+  youtube:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M21.6 7.2c-.2-.8-.8-1.4-1.5-1.5C18.8 5.4 12 5.4 12 5.4S5.2 5.4 3.9 5.7c-.7.2-1.3.8-1.5 1.5C2.1 8.5 2 10 2 12s.1 3.5.4 4.8c.2.7.8 1.3 1.5 1.5C5.2 18.6 12 18.6 12 18.6s6.8 0 8.1-.3c.7-.2 1.3-.8 1.5-1.5.3-1.3.4-2.8.4-4.8s-.1-3.5-.4-4.8zM10 15V9l6 3-6 3z"/></svg>`,
+  facebook:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M18 2h-3c-1.3 0-2.6.5-3.5 1.5C10.6 4.4 10 5.7 10 7v3H7v4h3v8h4v-8h3l1-4h-4V7c0-.3.1-.6.3-.8.2-.2.4-.3.7-.3h3V2z"/></svg>`,
+  linkedin:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z"/><circle cx="4" cy="4" r="2"/></svg>`,
+  snapchat:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#000"><path d="M12 2C7.6 2 4 5.5 4 10v.5c-.3.7-.8 1-1.4 1.2-.4.1-.7.4-.6.8.1.4.5.6.9.7.5.1 1 .3 1.4.8.2.3.3.7.1 1-.2.6-.6 1.1-.7 1.3-.1.3 0 .7.3.8.5.2 1 .4 1.6.4.5 0 1-.2 1.4-.4.3-.2.7-.3 1.2-.3.4 0 .8.1 1.2.3 1 .7 2.1 1 3.2 1s2.2-.3 3.2-1c.4-.2.8-.3 1.2-.3s.8.1 1.2.3c.4.2.9.4 1.4.4.6 0 1.1-.2 1.6-.4.3-.1.4-.5.3-.8-.1-.2-.5-.7-.7-1.3-.2-.3-.1-.7.1-1 .4-.5.9-.7 1.4-.8.4-.1.8-.3.9-.7.1-.4-.2-.7-.6-.8-.6-.2-1.1-.5-1.4-1.2V10C20 5.5 16.4 2 12 2z"/></svg>`,
+  discord:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M20.3 4.4C18.8 3.7 17.1 3.2 15.4 3l-.2.4c1.6.4 3 .9 4.3 1.7-1.9-1.1-4.1-1.9-7.5-1.9s-5.6.8-7.5 1.9C5.8 4.1 7.2 3.6 8.8 3.2L8.6 2.8c-1.7.3-3.4.8-4.9 1.6C1.4 8 .8 11.4 1 14.8c1.6 1.3 3.2 2.2 4.9 2.7l.8-1.1c-1.1-.5-2-1.1-2.8-1.9 1 .7 2.4 1.4 4.2 1.9l.2-1c-1.9-.6-3.2-1.4-4.1-2.4 0 0 2.2 1 7.8 1s7.8-1 7.8-1c-.9 1-2.2 1.8-4.1 2.4l.2 1c1.8-.5 3.2-1.2 4.2-1.9-.8.8-1.7 1.4-2.8 1.9l.8 1.1c1.7-.5 3.3-1.4 4.9-2.7.3-3.4-.3-6.8-2.7-10.4zM8.5 12.7c-.8 0-1.5-.7-1.5-1.5s.7-1.5 1.5-1.5 1.5.7 1.5 1.5-.7 1.5-1.5 1.5zm7 0c-.8 0-1.5-.7-1.5-1.5s.7-1.5 1.5-1.5 1.5.7 1.5 1.5-.7 1.5-1.5 1.5z"/></svg>`,
+  twitch:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M4 2L2 6v14h5v2h3l2-2h3l4-4V2H4zm15 9l-3 3h-3l-2 2v-2H7V4h12v7z"/><path d="M14 6h2v5h-2zM10 6h2v5h-2z"/></svg>`,
+  spotify:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm4.6 14.8c-.2.3-.6.4-.9.2-2.4-1.5-5.4-1.8-8.9-1-.4.1-.7-.2-.8-.5-.1-.4.2-.7.5-.8 3.8-.9 7.2-.5 9.9 1.2.3.1.4.5.2.9zm1.2-2.7c-.2.3-.7.5-1 .2-2.7-1.7-6.8-2.2-10-1.2-.4.1-.8-.1-.9-.5-.1-.4.1-.8.5-.9 3.6-1.1 8.1-.6 11.2 1.4.4.2.5.7.2 1zm.1-2.8c-3.2-1.9-8.5-2.1-11.5-1.2-.5.1-1-.2-1.1-.6-.1-.5.2-1 .6-1.1C9.2 7.9 14.9 8.1 18.4 10.2c.4.2.6.8.3 1.2-.2.4-.7.5-1.1.3z"/></svg>`,
+  github:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.5 2 2 6.5 2 12c0 4.4 2.9 8.1 6.8 9.4.5.1.7-.2.7-.5v-1.8c-2.8.6-3.4-1.2-3.4-1.2-.5-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.6 1 1.6 1 .9 1.6 2.4 1.1 3 .9.1-.7.4-1.1.6-1.4-2.2-.3-4.6-1.1-4.6-5 0-1.1.4-2 1-2.7-.1-.3-.4-1.3.1-2.7 0 0 .8-.3 2.8 1 .8-.2 1.7-.3 2.5-.3.8 0 1.7.1 2.5.3 2-1.3 2.8-1 2.8-1 .5 1.4.2 2.4.1 2.7.6.7 1 1.6 1 2.7 0 3.9-2.4 4.7-4.6 4.9.4.3.7 1 .7 2v2.9c0 .3.2.6.7.5 4-1.3 6.8-5 6.8-9.4C22 6.5 17.5 2 12 2z"/></svg>`,
+  whatsapp:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M17.5 14.4c-.3-.1-1.8-.9-2-1-.3-.1-.4-.1-.6.1l-.9 1.1c-.2.2-.3.2-.6.1-1.4-.6-2.4-1.4-3.2-2.6-.2-.3 0-.4.1-.6l.5-.7c.2-.2.2-.4.1-.5L9.9 8.6c-.2-.4-.4-.3-.5-.3H8.9c-.2 0-.5.1-.8.5S7 10 7 11.6c0 1.6 1 3.2 1.2 3.4.2.2 1.6 2.5 3.9 3.4 1.7.7 2.4.8 2.9.7.7-.1 1.8-.8 2.2-1.5l.4-1.5c-.1 0-.1-.1.1-.1l-.2.4zM12 2C6.5 2 2 6.5 2 12c0 1.9.5 3.6 1.4 5.1L2 22l5.1-1.4C8.6 21.5 10.3 22 12 22c5.5 0 10-4.5 10-10S17.5 2 12 2z"/></svg>`,
+  pinterest:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.5 2 2 6.5 2 12c0 4.2 2.5 7.8 6.1 9.4 0-.7 0-1.7.2-2.5l1.3-5.6s-.3-.6-.3-1.4c0-1.9 1.1-3.3 2.4-3.3 1.1 0 1.6.8 1.6 1.8 0 1.1-.7 2.7-1.1 4.2-.3 1.2.6 2.2 1.8 2.2 2.1 0 3.4-2.4 3.4-5.2 0-2.5-1.8-4.4-4.5-4.4-3.1 0-5 2.3-5 4.7 0 .9.3 1.8.7 2.3.1.1.1.3.1.4l-.3 1.3c-.1.3-.3.4-.5.3-1.5-.7-2.4-2.5-2.4-4.1C5.5 9 8.3 6 12.7 6c3.6 0 5.9 2.5 5.9 5.5 0 3.7-2.6 6.5-6.1 6.5-1.3 0-2.4-.6-2.8-1.3L8.9 20c-.3 1.1-.9 2.1-1.4 2.9.8.2 1.6.3 2.5.3 5.5 0 10-4.5 10-10S17.5 2 12 2z"/></svg>`,
+  threads:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm3.8 11.4c-.1 2.6-1.8 4.1-4.5 4.1-2.8 0-4.8-2-4.8-4.8 0-2.8 1.9-4.9 4.8-5h.1c1.5 0 2.8.5 3.7 1.5l-1.2 1.2c-.6-.7-1.5-1-2.5-1C9.6 9.4 8.5 10.7 8.5 12.7c0 2.1 1.2 3.2 3 3.2 1.5 0 2.5-.8 2.7-2.2H12v-1.6h3.7c.1.5.1.9.1 1.3z"/></svg>`,
+  bereal:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><rect x="2" y="6" width="14" height="12" rx="2"/><circle cx="9" cy="12" r="3"/><rect x="17" y="9" width="5" height="6" rx="1"/><circle cx="19.5" cy="12" r="1.5"/></svg>`,
+};
 const DEFAULT_PROFILE={displayName:'',bio:'',avatar:'',template:'blanc',font:'sans',primaryColor:'#FFD600',bgColor:'#ffffff',textColor:'#1a1a1a',blocks:[],showProfile:true,fontSize:15,textAlign:'left',btnRadius:14,shadowStrength:1,blockSpacing:12};
 
 const S={user:null,data:null,profile:null,saveTimer:null,qrObj:null,dark:false};
@@ -673,6 +692,9 @@ window.showScreen=id=>{
   $('s-'+id).classList.add('active');
   const fab=document.querySelector('.fab-preview');
   if(fab) fab.style.display=id==='dashboard'?'flex':'none';
+  // Cacher la bottom sheet quand on quitte l'aperçu
+  const sheet=$('pub-sheet');
+  if(sheet&&id!=='public') sheet.style.display='none';
   if(id==='dashboard')refreshDash();
 };
 window.showToast=msg=>{const el=$('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2600);};
@@ -758,9 +780,10 @@ function syncForm(){
 
 window.toggleVisibility=async()=>{
   if(!S.profile)return;
+  syncForm(); // S'assurer que les dernières valeurs du formulaire sont dans S.profile
   S.profile.showProfile=!S.profile.showProfile;
   updateVisUI();await saveProfile();
-  showToast(S.profile.showProfile?'👤 '+t('profileShown'):'🙈 '+t('profileHidden'));
+  showToast(S.profile.showProfile?'👤 '+t('profileShown'):'🙈 Profil masqué — blocs toujours visibles');
 };
 function updateVisUI(){
   const v=S.profile?.showProfile!==false;
@@ -1260,7 +1283,7 @@ async function renderPublicPage(uid_,isPreview=false){
   const txt=p.textColor||tpl.text,accent=p.primaryColor||tpl.accent,card=tpl.bg2?'rgba(255,255,255,.16)':tpl.card;
   // Logo adaptatif : calculé avant le template literal
   const _logoDark=isColorDark(p.bgColor||tpl.bg);
-  const _logoStyle=_logoDark?'mix-blend-mode:screen':'filter:invert(1) brightness(0)';
+  const _logoStyle=_logoDark?'mix-blend-mode:screen':'filter:invert(1)';
   const showP=p.showProfile!==false;
   // ── Styles avancés ──
   const fs      = p.fontSize||15;
@@ -1298,14 +1321,17 @@ async function renderPublicPage(uid_,isPreview=false){
       const isLight=sp.color==='#FFFC00'||sp.color==='#FFD600';
       const bFsS=(b.style&&b.style.fontSize)||fs;
       const bAlignS=(b.style&&b.style.textAlign)||align;
-      if(b.bare)return`<div class="pub-block" style="${bStyle}"><a href="${esc(b.content)}" style="color:${sp.color};font-size:${bFsS}px;font-weight:700;text-decoration:underline;display:block;text-align:${bAlignS}" target="_blank" rel="noopener">${sp.icon} ${esc(sp.label)}</a></div>`;
-      return`<div class="pub-block" style="${bStyle}"><a href="${esc(b.content)}" style="display:flex;align-items:center;justify-content:center;gap:9px;background:${sp.color};color:${isLight?'#000':'#fff'};border-radius:${br}px;padding:14px 20px;text-decoration:none;font-size:${bFsS}px;font-weight:800;box-shadow:0 4px 20px ${sp.color}66" target="_blank" rel="noopener">${sp.icon} ${esc(sp.label)}</a></div>`;
+      const svgIcon=SOCIAL_SVG[b.platform||'instagram']?`<img src="data:image/svg+xml,${encodeURIComponent(SOCIAL_SVG[b.platform||'instagram'])}" style="width:${Math.max(16,bFsS*1.1)}px;height:${Math.max(16,bFsS*1.1)}px;vertical-align:middle;flex-shrink:0" alt="">`:sp.icon;
+      if(b.bare)return`<div class="pub-block" style="${bStyle}"><a href="${esc(b.content)}" style="color:${sp.color};font-size:${bFsS}px;font-weight:700;text-decoration:underline;display:flex;align-items:center;gap:7px;justify-content:${bAlignS==='center'?'center':bAlignS==='right'?'flex-end':'flex-start'}" target="_blank" rel="noopener">${svgIcon} ${esc(sp.label)}</a></div>`;
+      return`<div class="pub-block" style="${bStyle}"><a href="${esc(b.content)}" style="display:flex;align-items:center;justify-content:center;gap:9px;background:${sp.color};color:${isLight?'#000':'#fff'};border-radius:${br}px;padding:14px 20px;text-decoration:none;font-size:${bFsS}px;font-weight:800;box-shadow:0 4px 20px ${sp.color}66" target="_blank" rel="noopener">${svgIcon} ${esc(sp.label)}</a></div>`;
     }
     return'';
   }).join('');
   $('pub-content').innerHTML=`<div style="min-height:100%;background:${bg};font-family:${fontObj.css}">
     <div class="pub-wrap">
-      ${showP&&(p.avatar||p.displayName||p.bio)?`<div style="text-align:${align};margin-bottom:28px">${avatarHtml}${p.displayName||username?`<h1 class="pub-name" style="color:${txt};font-size:${Math.round(fs*1.6)}px">${esc(p.displayName||username)}</h1>`:''}${p.bio?`<p class="pub-bio" style="color:${txt};font-size:${fs}px">${esc(p.bio)}</p>`:''}</div>`:''}
+      ${(showP||isPreview)&&(p.avatar||p.displayName||p.bio)?`<div style="text-align:${align};margin-bottom:28px;position:relative">
+        ${!showP&&isPreview?`<div style="position:absolute;top:-8px;left:50%;transform:translateX(-50%);background:#ff9800;color:#000;font-size:10px;font-weight:800;padding:2px 10px;border-radius:20px;white-space:nowrap;z-index:1">🙈 Masqué publiquement</div>`:''}
+        ${avatarHtml}${p.displayName||username?`<h1 class="pub-name" style="color:${txt};font-size:${Math.round(fs*1.6)}px;opacity:${showP?1:.45}">${esc(p.displayName||username)}</h1>`:''}${p.bio?`<p class="pub-bio" style="color:${txt};font-size:${fs}px;opacity:${showP?0.7:.35}">${esc(p.bio)}</p>`:''}</div>`:''}
       ${blocksHtml||`<div style="text-align:center;padding:50px 0;opacity:.35;color:${txt}"><div style="font-size:48px">📭</div><p style="margin-top:8px">${t('noContent')}</p></div>`}
     </div>
     <div style="padding:20px 16px 28px;text-align:center">
@@ -1313,7 +1339,6 @@ async function renderPublicPage(uid_,isPreview=false){
       <div style="font-size:11px;opacity:.5;line-height:2;color:${txt}">
         <strong>QRTag par Chat de Pique Création</strong><br>
         <a href="https://www.instagram.com/chatdepique" target="_blank" rel="noopener" style="color:${txt};text-decoration:none;margin-right:12px">Instagram</a><a href="https://chatdepique.com" target="_blank" rel="noopener" style="color:${txt};text-decoration:none">Boutique</a><br>
-        <span style="opacity:.6;font-size:10px">${t('poweredBy')}</span>
       </div>
     </div>
   </div>`;
