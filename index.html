@@ -330,6 +330,10 @@
           <button class="settings-item" onclick="openLangFromMenu()">
             🌐 <span id="lang-menu-lbl">Langue</span>
           </button>
+          <button class="settings-item" id="notif-menu-item" onclick="toggleNotifFromMenu()" style="display:none">
+            <span id="notif-menu-icon">🔕</span>
+            <span id="notif-menu-lbl">Notifications</span>
+          </button>
           <div class="settings-divider"></div>
           <button class="settings-item danger" onclick="doLogout()">
             🚪 <span id="logout-menu-lbl">Déconnexion</span>
@@ -344,10 +348,7 @@
       <span id="vis-label">Profil masqué</span>
     </div>
     <div class="action-spacer"></div>
-    <div class="action-pill" id="notif-toggle" onclick="toggleNotifications()" title="Notifications push" style="display:none">
-      <span id="notif-icon">🔕</span>
-      <span id="notif-label">Notifs</span>
-    </div>
+
     <div class="action-pill" onclick="showPreview()" style="background:var(--accent);border-color:var(--accent);color:#000;font-weight:800">
       👁 <span id="lbl-preview">Aperçu</span>
     </div>
@@ -1374,22 +1375,24 @@ window.showPreview=()=>{
 
 // Afficher/masquer le bouton notif selon support navigateur
 function initNotifButton(){
-  const btn=$('notif-toggle');
-  if(!btn)return;
+  const item=$('notif-menu-item');
+  if(!item)return;
   const supported='Notification'in window&&!!MESSAGING&&VAPID_KEY!=='YOUR_VAPID_KEY_HERE';
-  btn.style.display=supported?'flex':'none';
+  item.style.display=supported?'flex':'none';
   updateNotifUI();
 }
 
 function updateNotifUI(){
-  const btn=$('notif-toggle'),icon=$('notif-icon'),lbl=$('notif-label');
-  if(!btn)return;
+  const item=$('notif-menu-item'),icon=$('notif-menu-icon'),lbl=$('notif-menu-lbl');
+  if(!item)return;
   const enabled=Notification.permission==='granted'&&!!S.data?.fcmTokens?.length;
-  btn.classList.toggle('on',enabled);
   if(icon) icon.textContent=enabled?'🔔':'🔕';
-  if(lbl)  lbl.textContent=enabled?'Notifs ON':'Notifs';
+  if(lbl)  lbl.textContent=enabled?'Notifications ON':'Notifications';
+  item.style.fontWeight=enabled?'800':'600';
+  item.style.color=enabled?'var(--accent-dark)':'';
 }
 
+window.toggleNotifFromMenu=()=>{closeSettings();window.toggleNotifications();};
 window.toggleNotifications=async()=>{
   if(!MESSAGING||!S.user)return;
   const enabled=Notification.permission==='granted'&&!!S.data?.fcmTokens?.length;
@@ -1414,6 +1417,10 @@ window.toggleNotifications=async()=>{
       if(!token){showToast('❌ Impossible d\'obtenir le token');return;}
       await updateDoc(doc(DB,'users',S.user.uid),{fcmTokens:arrayUnion(token)});
       if(S.data){S.data.fcmTokens=[...(S.data.fcmTokens||[]),token];}
+      // Forcer la mise à jour immédiate
+      if(!S.data)S.data={};
+      if(!S.data.fcmTokens)S.data.fcmTokens=[];
+      if(!S.data.fcmTokens.includes(token))S.data.fcmTokens.push(token);
       updateNotifUI();
       showToast('🔔 Notifications activées !');
     }catch(e){
