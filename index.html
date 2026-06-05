@@ -180,7 +180,6 @@
     #s-public.preview-mode{height:100vh;overflow:hidden;display:flex !important;flex-direction:column;}
     #s-public.preview-mode .pub-back-bar{flex-shrink:0;position:relative;}
     #s-public.preview-mode #pub-content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;}
-    #s-public.preview-mode .pub-sheet{background:var(--surface);border-radius:22px 22px 0 0;box-shadow:0 -6px 30px rgba(0,0,0,.15);flex-shrink:0;max-height:55vh;overflow:hidden;display:none;flex-direction:column;transition:max-height .35s cubic-bezier(.4,0,.2,1);}
     .pub-back-bar{position:sticky;top:0;padding:10px 16px;background:rgba(255,255,255,.92);backdrop-filter:blur(12px);z-index:10;border-bottom:1px solid rgba(0,0,0,.08);display:flex;align-items:center;gap:8px;}
     body.dark .pub-back-bar{background:rgba(17,17,17,.92);}
     .pub-back-btn{background:var(--surface2);border:1.5px solid var(--border);border-radius:9px;padding:7px 14px;cursor:pointer;font-size:13px;font-weight:700;color:var(--text);}
@@ -210,9 +209,9 @@
     body.dark .settings-item.danger:hover{background:#2a0000;}
     .settings-divider{height:1px;background:var(--border);margin:3px 0;}
     /* ── Tiroir aperçu (bottom sheet) ── */
-    .pub-sheet{background:var(--surface);border-radius:22px 22px 0 0;box-shadow:0 -6px 30px rgba(0,0,0,.15);flex-shrink:0;max-height:55vh;overflow:hidden;display:none;flex-direction:column;transition:max-height .35s cubic-bezier(.4,0,.2,1);}
-    .pub-sheet.collapsed{max-height:52px;}
-    .pub-sheet-handle{padding:14px 18px;display:flex;align-items:center;gap:10px;cursor:pointer;flex-shrink:0;}
+    .pub-sheet{background:var(--surface);border-radius:22px 22px 0 0;box-shadow:0 -6px 30px rgba(0,0,0,.15);flex-shrink:0;max-height:52px;overflow:hidden;flex-direction:column;transition:max-height .35s cubic-bezier(.4,0,.2,1);display:none;}
+    .pub-sheet.open{max-height:55vh;}
+    .pub-sheet-handle{padding:14px 18px;display:flex;align-items:center;gap:10px;cursor:pointer;flex-shrink:0;position:relative;}
     .pub-sheet-handle::before{content:'';width:36px;height:4px;background:var(--border);border-radius:2px;position:absolute;top:8px;left:50%;transform:translateX(-50%);}
     .pub-sheet-handle span{font-size:13px;font-weight:800;flex:1;}
     .pub-sheet-body{padding:4px 16px 32px;overflow-y:auto;flex:1;}
@@ -466,7 +465,7 @@
   <div id="pub-content"></div>
 
   <!-- Tiroir de personnalisation (visible uniquement en aperçu) -->
-  <div class="pub-sheet collapsed" id="pub-sheet" style="display:none">
+  <div class="pub-sheet" id="pub-sheet" style="display:none">
     <div class="pub-sheet-handle" onclick="toggleSheet()">
       <span>✨ Personnaliser l'aperçu</span>
       <span id="sheet-arrow" style="font-size:16px;transition:transform .3s">↑</span>
@@ -512,7 +511,7 @@ const MESSAGING=(()=>{try{return getMessaging(APP);}catch(e){return null;}})();
 
 // ⚠️  Remplace par ta clé VAPID :
 // Firebase Console → Ton projet → Paramètres → Cloud Messaging → Certificats Web Push → Générer
-const VAPID_KEY = 'YOUR_VAPID_KEY_HERE';
+const VAPID_KEY = 'BEIzjWHHxKiWtShJuJe-uXaRVWluTXJqT9xxn8aSHvgFG9zsxdzBBQZSyB_L5sGK-rbnJquyPp5FvJquhimgWAA';
 
 /* LANGUES */
 const LANGS={
@@ -698,7 +697,7 @@ window.showScreen=id=>{
   if(id!=='public'){
     $('s-public').classList.remove('preview-mode');
     const sheet=$('pub-sheet');
-    if(sheet){sheet.classList.add('collapsed');_sheetOpen=false;}
+    if(sheet){sheet.style.display='none';sheet.classList.remove('open');_sheetOpen=false;}
   }
   if(id==='dashboard')refreshDash();
 };
@@ -1116,7 +1115,7 @@ let _sheetOpen=false;
 window.toggleSheet=()=>{
   _sheetOpen=!_sheetOpen;
   const sheet=$('pub-sheet');
-  if(sheet) sheet.classList.toggle('collapsed',!_sheetOpen);
+  if(sheet) sheet.classList.toggle('open',_sheetOpen);
   const arrow=$('sheet-arrow');
   if(arrow) arrow.textContent=_sheetOpen?'↓':'↑';
 };
@@ -1267,7 +1266,7 @@ async function loadUsers(){
 async function renderPublicPage(uid_,isPreview=false){
   showScreen('public');
   $('pub-back-bar').style.display=isPreview?'flex':'none';
-  const _sheet=$('pub-sheet');if(_sheet)_sheet.style.display=isPreview?'block':'none';
+  const _sheet=$('pub-sheet');if(_sheet)_sheet.style.display=isPreview?'flex':'none';
   $('pub-content').innerHTML='<div style="text-align:center;padding:80px;color:#aaa">Chargement…</div>';
   let pd;
   try{
@@ -1275,7 +1274,15 @@ async function renderPublicPage(uid_,isPreview=false){
     else{const s=await getDoc(doc(DB,'users',uid_));if(!s.exists())throw 0;pd=s.data();}
   }catch(e){$('pub-content').innerHTML='<div style="text-align:center;padding:80px">Profil introuvable</div>';return;}
   const{profile:p,username}=pd;
-  if(!isPreview){try{updateDoc(doc(DB,'users',uid_),{visits:increment(1)}).catch(()=>{});}catch(e){}}
+  if(!isPreview){
+    try{updateDoc(doc(DB,'users',uid_),{visits:increment(1)}).catch(()=>{});}catch(e){}
+    // Notifier le propriétaire du profil via Netlify Function
+    fetch('https://sweet-klepon-c56502.netlify.app/.netlify/functions/notify',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({uid:uid_})
+    }).catch(()=>{});
+  }
   if(p.showProfile===false&&!isPreview){
     $('pub-content').innerHTML=`<div style="min-height:100vh;background:#111;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;text-align:center;padding:20px;font-family:system-ui"><div style="font-size:60px">🔒</div><h2 style="margin:12px 0">${esc(t('privateMsg'))}</h2></div>`;return;
   }
@@ -1332,7 +1339,7 @@ async function renderPublicPage(uid_,isPreview=false){
     }
     return'';
   }).join('');
-  $('pub-content').innerHTML=`<div style="min-height:100%;background:${bg};font-family:${fontObj.css}">
+  $('pub-content').innerHTML=`<div style="min-height:${isPreview?'auto':'100vh'};background:${bg};font-family:${fontObj.css}">
     <div class="pub-wrap">
       ${showP&&(p.avatar||p.displayName||p.bio)?`<div style="text-align:${align};margin-bottom:28px">${avatarHtml}${p.displayName||username?`<h1 class="pub-name" style="color:${txt};font-size:${Math.round(fs*1.6)}px">${esc(p.displayName||username)}</h1>`:''}${p.bio?`<p class="pub-bio" style="color:${txt};font-size:${fs}px">${esc(p.bio)}</p>`:''}</div>`:''}
       ${blocksHtml||`<div style="text-align:center;padding:50px 0;opacity:.35;color:${txt}"><div style="font-size:48px">📭</div><p style="margin-top:8px">${t('noContent')}</p></div>`}
@@ -1355,10 +1362,10 @@ window.sharePublicPage=async()=>{
 window.showPreview=()=>{
   _sheetOpen=false;
   syncForm();
+  $('s-public').classList.add('preview-mode'); // layout CSS actif AVANT le rendu
   renderPublicPage(S.user?.uid,true);
-  $('s-public').classList.add('preview-mode');
   const sheet=$('pub-sheet');
-  if(sheet) sheet.classList.add('collapsed');
+  if(sheet) sheet.classList.remove('open');
   const arrow=$('sheet-arrow');if(arrow)arrow.textContent='↑';
   setTimeout(renderSheet,120);
 };
