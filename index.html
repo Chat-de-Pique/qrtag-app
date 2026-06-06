@@ -1244,16 +1244,19 @@ window.selectFont=id=>{S.profile.font=id;renderStyleTab();saveProfile();};
 window.onColor=(k,v)=>{S.profile[k]=v;clearTimeout(S.saveTimer);S.saveTimer=setTimeout(saveProfile,800);};
 
 function getPublicUrl(){return`${location.origin}${location.pathname}#p=${S.user.uid}`;}
-// SVG inline coloré — évite le rendu blanc sur blanc des data URI
+// CSS mask — méthode la plus fiable, aucun problème de couleur ou de rendu
 function getSVGIcon(platform, color, size){
   const raw=SOCIAL_SVG[platform]||'';
   if(!raw)return null;
-  return raw
-    .replace(/fill="white"/g,`fill="${color}"`)
-    .replace(/stroke="white"/g,`stroke="${color}"`)
-    .replace(/fill="#000"/g,`fill="${color}"`)
-    .replace(/fill="#000000"/g,`fill="${color}"`)
-    .replace('<svg ',`<svg width="${size}" height="${size}" style="flex-shrink:0;display:inline-block;vertical-align:middle" `);
+  // Normaliser le SVG pour le masque (tout en noir opaque)
+  const maskSvg=raw
+    .replace(/fill="white"/g,'fill="black"')
+    .replace(/stroke="white"/g,'stroke="black"')
+    .replace(/fill="#000"/g,'fill="black"')
+    .replace(/fill="#000000"/g,'fill="black"');
+  const uri='data:image/svg+xml,'+encodeURIComponent(maskSvg);
+  const s=size+'px';
+  return `<span style="display:inline-flex;width:${s};height:${s};flex-shrink:0;background-color:${color};-webkit-mask:url('${uri}') center/contain no-repeat;mask:url('${uri}') center/contain no-repeat"></span>`;
 }
 function isColorDark(hex){
   if(!hex||!hex.startsWith('#'))return false;
