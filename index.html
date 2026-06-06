@@ -500,6 +500,24 @@
 </div>
 
 <div id="toast"></div>
+<div id="notif-blocked-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:500;align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)this.style.display='none'">
+  <div style="background:var(--surface);border-radius:20px;padding:24px;max-width:360px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.4)">
+    <div style="font-size:32px;margin-bottom:12px">🔔</div>
+    <h3 style="font-size:17px;font-weight:900;margin-bottom:8px">Notifications bloquées</h3>
+    <p style="font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:16px">Ton navigateur a bloqué les notifications pour ce site. Pour les activer :</p>
+    <div style="background:var(--surface2);border-radius:12px;padding:14px;font-size:13px;line-height:2;margin-bottom:16px">
+      <strong>Sur ordinateur :</strong><br>
+      1. Clique sur le 🔒 dans la barre d'adresse<br>
+      2. Notifications → <strong>Autoriser</strong><br>
+      3. Recharge la page<br><br>
+      <strong>Sur mobile Chrome :</strong><br>
+      1. ⋮ Menu → Paramètres<br>
+      2. Paramètres du site → Notifications<br>
+      3. Trouve ce site → <strong>Autoriser</strong>
+    </div>
+    <button onclick="document.getElementById('notif-blocked-modal').style.display='none'" style="width:100%;padding:13px;background:var(--accent);color:#000;border:none;border-radius:12px;font-size:15px;font-weight:800;cursor:pointer">Compris</button>
+  </div>
+</div>
 <button class="fab-preview" onclick="showPreview()">👁 <span id="fab-preview-lbl">Aperçu</span></button>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://unpkg.com/qr-code-styling@1.6.0-rc.1/lib/qr-code-styling.js"></script>
@@ -614,24 +632,6 @@ const SOCIAL_PLATFORMS={
   bereal:   {label:'BeReal',     icon:'📷',color:'#111111'},
 };
 
-// Logos SVG (blanc, pour boutons colorés)
-const SOCIAL_SVG={
-  instagram:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1.2" fill="white" stroke="none"/></svg>`,
-  tiktok:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M19.6 3h-3.2c-.3 2.5-2.4 4.5-4.9 4.7V11c1.6-.1 3.1-.6 4.3-1.5V16c0 3.3-2.7 6-6 6s-6-2.7-6-6 2.7-6 6-6v3.2c-1.5 0-2.8 1.3-2.8 2.8s1.3 2.8 2.8 2.8 2.8-1.3 2.8-2.8V3h3.2c.3 0 3.8 0 3.8 0z"/></svg>`,
-  twitter:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M18.3 5.7L13.1 11.5 19.2 18.3h-3.3L11.5 13.5 6.9 18.3H3.7l5.7-6.2L3.6 5.7H7l4.2 4.6 4.3-4.6z"/></svg>`,
-  youtube:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M21.6 7.2c-.2-.8-.8-1.4-1.5-1.5C18.8 5.4 12 5.4 12 5.4S5.2 5.4 3.9 5.7c-.7.2-1.3.8-1.5 1.5C2.1 8.5 2 10 2 12s.1 3.5.4 4.8c.2.7.8 1.3 1.5 1.5C5.2 18.6 12 18.6 12 18.6s6.8 0 8.1-.3c.7-.2 1.3-.8 1.5-1.5.3-1.3.4-2.8.4-4.8s-.1-3.5-.4-4.8zM10 15V9l6 3-6 3z"/></svg>`,
-  facebook:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M18 2h-3c-1.3 0-2.6.5-3.5 1.5C10.6 4.4 10 5.7 10 7v3H7v4h3v8h4v-8h3l1-4h-4V7c0-.3.1-.6.3-.8.2-.2.4-.3.7-.3h3V2z"/></svg>`,
-  linkedin:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z"/><circle cx="4" cy="4" r="2"/></svg>`,
-  snapchat:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#000"><path d="M12 2C7.6 2 4 5.5 4 10v.5c-.3.7-.8 1-1.4 1.2-.4.1-.7.4-.6.8.1.4.5.6.9.7.5.1 1 .3 1.4.8.2.3.3.7.1 1-.2.6-.6 1.1-.7 1.3-.1.3 0 .7.3.8.5.2 1 .4 1.6.4.5 0 1-.2 1.4-.4.3-.2.7-.3 1.2-.3.4 0 .8.1 1.2.3 1 .7 2.1 1 3.2 1s2.2-.3 3.2-1c.4-.2.8-.3 1.2-.3s.8.1 1.2.3c.4.2.9.4 1.4.4.6 0 1.1-.2 1.6-.4.3-.1.4-.5.3-.8-.1-.2-.5-.7-.7-1.3-.2-.3-.1-.7.1-1 .4-.5.9-.7 1.4-.8.4-.1.8-.3.9-.7.1-.4-.2-.7-.6-.8-.6-.2-1.1-.5-1.4-1.2V10C20 5.5 16.4 2 12 2z"/></svg>`,
-  discord:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M20.3 4.4C18.8 3.7 17.1 3.2 15.4 3l-.2.4c1.6.4 3 .9 4.3 1.7-1.9-1.1-4.1-1.9-7.5-1.9s-5.6.8-7.5 1.9C5.8 4.1 7.2 3.6 8.8 3.2L8.6 2.8c-1.7.3-3.4.8-4.9 1.6C1.4 8 .8 11.4 1 14.8c1.6 1.3 3.2 2.2 4.9 2.7l.8-1.1c-1.1-.5-2-1.1-2.8-1.9 1 .7 2.4 1.4 4.2 1.9l.2-1c-1.9-.6-3.2-1.4-4.1-2.4 0 0 2.2 1 7.8 1s7.8-1 7.8-1c-.9 1-2.2 1.8-4.1 2.4l.2 1c1.8-.5 3.2-1.2 4.2-1.9-.8.8-1.7 1.4-2.8 1.9l.8 1.1c1.7-.5 3.3-1.4 4.9-2.7.3-3.4-.3-6.8-2.7-10.4zM8.5 12.7c-.8 0-1.5-.7-1.5-1.5s.7-1.5 1.5-1.5 1.5.7 1.5 1.5-.7 1.5-1.5 1.5zm7 0c-.8 0-1.5-.7-1.5-1.5s.7-1.5 1.5-1.5 1.5.7 1.5 1.5-.7 1.5-1.5 1.5z"/></svg>`,
-  twitch:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M4 2L2 6v14h5v2h3l2-2h3l4-4V2H4zm15 9l-3 3h-3l-2 2v-2H7V4h12v7z"/><path d="M14 6h2v5h-2zM10 6h2v5h-2z"/></svg>`,
-  spotify:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm4.6 14.8c-.2.3-.6.4-.9.2-2.4-1.5-5.4-1.8-8.9-1-.4.1-.7-.2-.8-.5-.1-.4.2-.7.5-.8 3.8-.9 7.2-.5 9.9 1.2.3.1.4.5.2.9zm1.2-2.7c-.2.3-.7.5-1 .2-2.7-1.7-6.8-2.2-10-1.2-.4.1-.8-.1-.9-.5-.1-.4.1-.8.5-.9 3.6-1.1 8.1-.6 11.2 1.4.4.2.5.7.2 1zm.1-2.8c-3.2-1.9-8.5-2.1-11.5-1.2-.5.1-1-.2-1.1-.6-.1-.5.2-1 .6-1.1C9.2 7.9 14.9 8.1 18.4 10.2c.4.2.6.8.3 1.2-.2.4-.7.5-1.1.3z"/></svg>`,
-  github:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.5 2 2 6.5 2 12c0 4.4 2.9 8.1 6.8 9.4.5.1.7-.2.7-.5v-1.8c-2.8.6-3.4-1.2-3.4-1.2-.5-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.6 1 1.6 1 .9 1.6 2.4 1.1 3 .9.1-.7.4-1.1.6-1.4-2.2-.3-4.6-1.1-4.6-5 0-1.1.4-2 1-2.7-.1-.3-.4-1.3.1-2.7 0 0 .8-.3 2.8 1 .8-.2 1.7-.3 2.5-.3.8 0 1.7.1 2.5.3 2-1.3 2.8-1 2.8-1 .5 1.4.2 2.4.1 2.7.6.7 1 1.6 1 2.7 0 3.9-2.4 4.7-4.6 4.9.4.3.7 1 .7 2v2.9c0 .3.2.6.7.5 4-1.3 6.8-5 6.8-9.4C22 6.5 17.5 2 12 2z"/></svg>`,
-  whatsapp:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M17.5 14.4c-.3-.1-1.8-.9-2-1-.3-.1-.4-.1-.6.1l-.9 1.1c-.2.2-.3.2-.6.1-1.4-.6-2.4-1.4-3.2-2.6-.2-.3 0-.4.1-.6l.5-.7c.2-.2.2-.4.1-.5L9.9 8.6c-.2-.4-.4-.3-.5-.3H8.9c-.2 0-.5.1-.8.5S7 10 7 11.6c0 1.6 1 3.2 1.2 3.4.2.2 1.6 2.5 3.9 3.4 1.7.7 2.4.8 2.9.7.7-.1 1.8-.8 2.2-1.5l.4-1.5c-.1 0-.1-.1.1-.1l-.2.4zM12 2C6.5 2 2 6.5 2 12c0 1.9.5 3.6 1.4 5.1L2 22l5.1-1.4C8.6 21.5 10.3 22 12 22c5.5 0 10-4.5 10-10S17.5 2 12 2z"/></svg>`,
-  pinterest:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.5 2 2 6.5 2 12c0 4.2 2.5 7.8 6.1 9.4 0-.7 0-1.7.2-2.5l1.3-5.6s-.3-.6-.3-1.4c0-1.9 1.1-3.3 2.4-3.3 1.1 0 1.6.8 1.6 1.8 0 1.1-.7 2.7-1.1 4.2-.3 1.2.6 2.2 1.8 2.2 2.1 0 3.4-2.4 3.4-5.2 0-2.5-1.8-4.4-4.5-4.4-3.1 0-5 2.3-5 4.7 0 .9.3 1.8.7 2.3.1.1.1.3.1.4l-.3 1.3c-.1.3-.3.4-.5.3-1.5-.7-2.4-2.5-2.4-4.1C5.5 9 8.3 6 12.7 6c3.6 0 5.9 2.5 5.9 5.5 0 3.7-2.6 6.5-6.1 6.5-1.3 0-2.4-.6-2.8-1.3L8.9 20c-.3 1.1-.9 2.1-1.4 2.9.8.2 1.6.3 2.5.3 5.5 0 10-4.5 10-10S17.5 2 12 2z"/></svg>`,
-  threads:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm3.8 11.4c-.1 2.6-1.8 4.1-4.5 4.1-2.8 0-4.8-2-4.8-4.8 0-2.8 1.9-4.9 4.8-5h.1c1.5 0 2.8.5 3.7 1.5l-1.2 1.2c-.6-.7-1.5-1-2.5-1C9.6 9.4 8.5 10.7 8.5 12.7c0 2.1 1.2 3.2 3 3.2 1.5 0 2.5-.8 2.7-2.2H12v-1.6h3.7c.1.5.1.9.1 1.3z"/></svg>`,
-  bereal:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><rect x="2" y="6" width="14" height="12" rx="2"/><circle cx="9" cy="12" r="3"/><rect x="17" y="9" width="5" height="6" rx="1"/><circle cx="19.5" cy="12" r="1.5"/></svg>`,
-};
 const QR_STYLES={
   street:{
     label:'Street',desc:'Capsules arrondies',
@@ -1244,19 +1244,16 @@ window.selectFont=id=>{S.profile.font=id;renderStyleTab();saveProfile();};
 window.onColor=(k,v)=>{S.profile[k]=v;clearTimeout(S.saveTimer);S.saveTimer=setTimeout(saveProfile,800);};
 
 function getPublicUrl(){return`${location.origin}${location.pathname}#p=${S.user.uid}`;}
-// CSS mask — méthode la plus fiable, aucun problème de couleur ou de rendu
-function getSVGIcon(platform, color, size){
-  const raw=SOCIAL_SVG[platform]||'';
-  if(!raw)return null;
-  // Normaliser le SVG pour le masque (tout en noir opaque)
-  const maskSvg=raw
-    .replace(/fill="white"/g,'fill="black"')
-    .replace(/stroke="white"/g,'stroke="black"')
-    .replace(/fill="#000"/g,'fill="black"')
-    .replace(/fill="#000000"/g,'fill="black"');
-  const uri='data:image/svg+xml,'+encodeURIComponent(maskSvg);
-  const s=size+'px';
-  return `<span style="display:inline-flex;width:${s};height:${s};flex-shrink:0;background-color:${color};-webkit-mask:url('${uri}') center/contain no-repeat;mask:url('${uri}') center/contain no-repeat"></span>`;
+// Vrais logos via Simple Icons CDN (logos officiels des plateformes)
+const SI_SLUGS={instagram:'instagram',tiktok:'tiktok',twitter:'x',
+  youtube:'youtube',facebook:'facebook',linkedin:'linkedin',
+  snapchat:'snapchat',discord:'discord',twitch:'twitch',
+  spotify:'spotify',github:'github',whatsapp:'whatsapp',
+  pinterest:'pinterest',threads:'threads',bereal:'bereal'};
+
+function getSILogo(platform, hexColor){
+  const slug=SI_SLUGS[platform]||platform;
+  return`https://cdn.simpleicons.org/${slug}/${hexColor.replace('#','')}`;
 }
 function isColorDark(hex){
   if(!hex||!hex.startsWith('#'))return false;
@@ -1413,11 +1410,11 @@ async function renderPublicPage(uid_,isPreview=false){
       const isLight=sp.color==='#FFFC00'||sp.color==='#FFD600';
       const bFsS=(b.style&&b.style.fontSize)||fs;
       const bAlignS=(b.style&&b.style.textAlign)||align;
-      // Couleur icône : blanc sur fond sombre, noir sur fond clair
       const _spLight=!isColorDark(sp.color);
-      const _iconColor=_spLight?'#000000':'#ffffff';
       const _iconSize=Math.max(18,Math.round(bFsS*1.15));
-      const svgIcon=getSVGIcon(b.platform||'instagram',_iconColor,_iconSize)||sp.icon;
+      // Vrai logo depuis Simple Icons CDN
+      const _logoColor=_spLight?'000000':'ffffff';
+      const svgIcon=`<img src="${getSILogo(b.platform||'instagram',_logoColor)}" width="${_iconSize}" height="${_iconSize}" style="flex-shrink:0;vertical-align:middle" alt="" loading="lazy">`;
       if(b.bare)return`<div class="pub-block" style="${bStyle}"><a href="${esc(b.content)}" style="color:${sp.color};font-size:${bFsS}px;font-weight:700;text-decoration:underline;display:flex;align-items:center;gap:7px;justify-content:${bAlignS==='center'?'center':bAlignS==='right'?'flex-end':'flex-start'}" target="_blank" rel="noopener">${svgIcon} ${esc(sp.label)}</a></div>`;
       return`<div class="pub-block" style="${bStyle}"><a href="${esc(b.content)}" style="display:flex;align-items:center;justify-content:center;gap:9px;background:${sp.color};color:${_spLight?'#000':'#fff'};border-radius:${br}px;padding:14px 20px;text-decoration:none;font-size:${bFsS}px;font-weight:800;box-shadow:0 4px 20px ${sp.color}66" target="_blank" rel="noopener">${svgIcon} ${esc(sp.label)}</a></div>`;
     }
@@ -1491,6 +1488,12 @@ window.toggleNotifications=async()=>{
   }else{
     // ── Activer ──
     try{
+      // Vérifier si déjà bloqué avant même de demander
+      if(Notification.permission==='denied'){
+        $('notif-blocked-modal').style.display='flex';
+        closeSettings();
+        return;
+      }
       const perm=await Notification.requestPermission();
       if(perm!=='granted'){showToast('❌ Permission refusée dans les réglages');return;}
       const token=await getToken(MESSAGING,{
