@@ -144,6 +144,14 @@
     .qr-url-text{font-size:11px;color:var(--text2);word-break:break-all;flex:1;font-family:'Courier New',monospace;line-height:1.4;}
     .qr-copy-btn{flex-shrink:0;padding:5px 10px;border:1.5px solid var(--border);border-radius:8px;background:var(--surface);cursor:pointer;font-size:13px;transition:all .15s;}
     .qr-copy-btn:hover{border-color:var(--accent);background:var(--accent-soft);}
+    .qr-style-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px;}
+    .qr-style-card{background:var(--surface2);border:2px solid var(--border);border-radius:12px;padding:8px 4px 6px;text-align:center;cursor:pointer;transition:all .15s;}
+    .qr-style-card.on{border-color:var(--accent);background:var(--accent-soft);}
+    .qr-style-card:hover{border-color:var(--accent);}
+    .qr-style-mini{width:68px;height:68px;margin:0 auto 5px;border-radius:6px;overflow:hidden;display:flex;align-items:center;justify-content:center;}
+    .qr-style-mini canvas{width:68px !important;height:68px !important;}
+    .qr-style-name{font-size:10px;font-weight:800;color:var(--text2);margin-bottom:2px;}
+    .qr-style-desc{font-size:9px;color:var(--muted);line-height:1.3;}
     .qr-note{background:var(--accent-soft);border-radius:10px;padding:10px 13px;font-size:12px;font-weight:600;margin-bottom:12px;border:1px solid rgba(255,214,0,.4);text-align:left;}
     .plan-lock{background:var(--surface2);border-radius:var(--radius);padding:24px;text-align:center;border:2px dashed var(--border);}
     .plan-lock .lock-icon{font-size:38px;margin-bottom:10px;}
@@ -426,7 +434,8 @@
       </div>
       <div id="qr-unlocked" style="display:none">
         <div class="qr-section">
-          <div class="card-title" style="justify-content:center;margin-bottom:14px">📲 Ton QR Code</div>
+          <div class="card-title" style="justify-content:center;margin-bottom:12px">📲 Ton QR Code</div>
+          <div class="qr-style-grid" id="qr-style-grid"></div>
           <div id="qr-display"></div>
           <div class="qr-url-box">
             <span class="qr-url-text" id="qr-url-text"></span>
@@ -623,7 +632,37 @@ const SOCIAL_SVG={
   threads:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm3.8 11.4c-.1 2.6-1.8 4.1-4.5 4.1-2.8 0-4.8-2-4.8-4.8 0-2.8 1.9-4.9 4.8-5h.1c1.5 0 2.8.5 3.7 1.5l-1.2 1.2c-.6-.7-1.5-1-2.5-1C9.6 9.4 8.5 10.7 8.5 12.7c0 2.1 1.2 3.2 3 3.2 1.5 0 2.5-.8 2.7-2.2H12v-1.6h3.7c.1.5.1.9.1 1.3z"/></svg>`,
   bereal:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><rect x="2" y="6" width="14" height="12" rx="2"/><circle cx="9" cy="12" r="3"/><rect x="17" y="9" width="5" height="6" rx="1"/><circle cx="19.5" cy="12" r="1.5"/></svg>`,
 };
-const DEFAULT_PROFILE={displayName:'',bio:'',avatar:'',template:'blanc',font:'sans',primaryColor:'#FFD600',bgColor:'#ffffff',textColor:'#1a1a1a',blocks:[],showProfile:true,fontSize:15,textAlign:'left',btnRadius:14,shadowStrength:1,blockSpacing:12};
+const QR_STYLES={
+  street:{
+    label:'Street',desc:'Capsules arrondies',
+    dotsOptions:{type:'rounded',color:'#000000'},
+    cornersSquareOptions:{type:'extra-rounded',color:'#000000'},
+    cornersDotOptions:{type:'dot',color:'#000000'},
+    backgroundOptions:{color:'#ffffff'},qrOptions:{errorCorrectionLevel:'H'}
+  },
+  classic:{
+    label:'Classique',desc:'Pixels standard',
+    dotsOptions:{type:'square',color:'#000000'},
+    cornersSquareOptions:{type:'square',color:'#000000'},
+    cornersDotOptions:{type:'square',color:'#000000'},
+    backgroundOptions:{color:'#ffffff'},qrOptions:{errorCorrectionLevel:'H'}
+  },
+  circles:{
+    label:'Cercles',desc:'Ronds épais · sérigraphie',
+    dotsOptions:{type:'dots',color:'#000000'},
+    cornersSquareOptions:{type:'extra-rounded',color:'#000000'},
+    cornersDotOptions:{type:'dot',color:'#000000'},
+    backgroundOptions:{color:'#ffffff'},qrOptions:{errorCorrectionLevel:'H'}
+  },
+  classy:{
+    label:'Géo',desc:'Trèfles arrondis',
+    dotsOptions:{type:'classy-rounded',color:'#000000'},
+    cornersSquareOptions:{type:'extra-rounded',color:'#000000'},
+    cornersDotOptions:{type:'dot',color:'#000000'},
+    backgroundOptions:{color:'#ffffff'},qrOptions:{errorCorrectionLevel:'H'}
+  }
+};
+const DEFAULT_PROFILE={displayName:'',bio:'',avatar:'',template:'blanc',font:'sans',primaryColor:'#FFD600',bgColor:'#ffffff',textColor:'#1a1a1a',blocks:[],showProfile:true,fontSize:15,textAlign:'left',btnRadius:14,shadowStrength:1,blockSpacing:12,qrStyle:'street'};
 
 const S={user:null,data:null,profile:null,saveTimer:null,qrObj:null,dark:false};
 const $=id=>document.getElementById(id);
@@ -1205,12 +1244,58 @@ window.selectFont=id=>{S.profile.font=id;renderStyleTab();saveProfile();};
 window.onColor=(k,v)=>{S.profile[k]=v;clearTimeout(S.saveTimer);S.saveTimer=setTimeout(saveProfile,800);};
 
 function getPublicUrl(){return`${location.origin}${location.pathname}#p=${S.user.uid}`;}
+// SVG inline coloré — évite le rendu blanc sur blanc des data URI
+function getSVGIcon(platform, color, size){
+  const raw=SOCIAL_SVG[platform]||'';
+  if(!raw)return null;
+  return raw
+    .replace(/fill="white"/g,`fill="${color}"`)
+    .replace(/stroke="white"/g,`stroke="${color}"`)
+    .replace(/fill="#000"/g,`fill="${color}"`)
+    .replace(/fill="#000000"/g,`fill="${color}"`)
+    .replace('<svg ',`<svg width="${size}" height="${size}" style="flex-shrink:0;display:inline-block;vertical-align:middle" `);
+}
 function isColorDark(hex){
   if(!hex||!hex.startsWith('#'))return false;
   const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
   return(0.299*r+0.587*g+0.114*b)/255<0.5;
 }
 
+function renderQRWithStyle(url,styleId){
+  const c=$('qr-display');c.innerHTML='';
+  if(typeof QRCodeStyling==='undefined'){
+    new QRCode(c,{text:url,width:210,height:210,colorDark:'#000000',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.H});
+    return;
+  }
+  const {label,desc,...opts}=QR_STYLES[styleId]||QR_STYLES.street;
+  S.qrObj=new QRCodeStyling({width:210,height:210,type:'canvas',data:url,...opts});
+  S.qrObj.append(c);
+}
+function renderQRStyleGrid(url){
+  const grid=$('qr-style-grid');if(!grid)return;
+  const cur=S.profile?.qrStyle||'street';
+  grid.innerHTML=Object.entries(QR_STYLES).map(([id,s])=>
+    `<div class="qr-style-card${cur===id?' on':''}" onclick="selectQRStyle('${id}')">
+      <div class="qr-style-mini" id="qrm-${id}"></div>
+      <div class="qr-style-name">${s.label}</div>
+      <div class="qr-style-desc">${s.desc}</div>
+    </div>`
+  ).join('');
+  if(typeof QRCodeStyling!=='undefined'){
+    Object.entries(QR_STYLES).forEach(([id,s])=>{
+      const el=document.getElementById('qrm-'+id);
+      if(!el)return;
+      const {label,desc,...opts}=s;
+      new QRCodeStyling({width:68,height:68,type:'canvas',data:url,...opts}).append(el);
+    });
+  }
+}
+window.selectQRStyle=id=>{
+  if(!S.profile)return;
+  S.profile.qrStyle=id;
+  renderQR();
+  saveProfile();
+};
 function renderQR(){
   if(!S.user)return;
   const isApp=S.data?.plan==='app';
@@ -1219,14 +1304,8 @@ function renderQR(){
   if(!isApp)return;
   const url=getPublicUrl();
   const urlEl=$('qr-url-text');if(urlEl)urlEl.textContent=url;
-  const c=$('qr-display');c.innerHTML='';
-  const dark=S.profile?.textColor||'#111111';
-  if(typeof QRCodeStyling!=='undefined'){
-    S.qrObj=new QRCodeStyling({width:210,height:210,type:'canvas',data:url,dotsOptions:{type:'rounded',color:dark},cornersSquareOptions:{type:'extra-rounded',color:dark},cornersDotOptions:{type:'dot',color:dark},backgroundOptions:{color:S.profile?.bgColor||'#ffffff'}});
-    S.qrObj.append(c);
-  }else{
-    new QRCode(c,{text:url,width:210,height:210,colorDark:dark,colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.H});
-  }
+  renderQRStyleGrid(url);
+  renderQRWithStyle(url,S.profile?.qrStyle||'street');
 }
 window.downloadQR=()=>{if(S.qrObj?.download)S.qrObj.download({name:'qrtag-qrcode',extension:'png'});};
 window.copyQrUrl=()=>{const url=getPublicUrl();if(navigator.clipboard){navigator.clipboard.writeText(url).then(()=>showToast('📋 URL copiée !'));}else showToast(url);};
@@ -1331,12 +1410,13 @@ async function renderPublicPage(uid_,isPreview=false){
       const isLight=sp.color==='#FFFC00'||sp.color==='#FFD600';
       const bFsS=(b.style&&b.style.fontSize)||fs;
       const bAlignS=(b.style&&b.style.textAlign)||align;
-      // Couleur de l'icône : blanc sur fond sombre, noir sur fond clair (Snapchat etc.)
-      const _iconColor=isLight?'%23000000':'white';
-      const _rawSVG=(SOCIAL_SVG[b.platform||'instagram']||'').replace(/fill="white"/g,`fill="${_iconColor}"`).replace(/stroke="white"/g,`stroke="${_iconColor}"`).replace(/fill="%23000"/g,`fill="${_iconColor}"`);
-      const svgIcon=_rawSVG?`<img src="data:image/svg+xml,${encodeURIComponent(_rawSVG)}" style="width:${Math.max(16,bFsS*1.1)}px;height:${Math.max(16,bFsS*1.1)}px;vertical-align:middle;flex-shrink:0" alt="">`:sp.icon;
+      // Couleur icône : blanc sur fond sombre, noir sur fond clair
+      const _spLight=!isColorDark(sp.color);
+      const _iconColor=_spLight?'#000000':'#ffffff';
+      const _iconSize=Math.max(18,Math.round(bFsS*1.15));
+      const svgIcon=getSVGIcon(b.platform||'instagram',_iconColor,_iconSize)||sp.icon;
       if(b.bare)return`<div class="pub-block" style="${bStyle}"><a href="${esc(b.content)}" style="color:${sp.color};font-size:${bFsS}px;font-weight:700;text-decoration:underline;display:flex;align-items:center;gap:7px;justify-content:${bAlignS==='center'?'center':bAlignS==='right'?'flex-end':'flex-start'}" target="_blank" rel="noopener">${svgIcon} ${esc(sp.label)}</a></div>`;
-      return`<div class="pub-block" style="${bStyle}"><a href="${esc(b.content)}" style="display:flex;align-items:center;justify-content:center;gap:9px;background:${sp.color};color:${isLight?'#000':'#fff'};border-radius:${br}px;padding:14px 20px;text-decoration:none;font-size:${bFsS}px;font-weight:800;box-shadow:0 4px 20px ${sp.color}66" target="_blank" rel="noopener">${svgIcon} ${esc(sp.label)}</a></div>`;
+      return`<div class="pub-block" style="${bStyle}"><a href="${esc(b.content)}" style="display:flex;align-items:center;justify-content:center;gap:9px;background:${sp.color};color:${_spLight?'#000':'#fff'};border-radius:${br}px;padding:14px 20px;text-decoration:none;font-size:${bFsS}px;font-weight:800;box-shadow:0 4px 20px ${sp.color}66" target="_blank" rel="noopener">${svgIcon} ${esc(sp.label)}</a></div>`;
     }
     return'';
   }).join('');
@@ -1424,7 +1504,7 @@ window.toggleNotifications=async()=>{
       updateNotifUI();
       showToast('🔔 Notifications activées !');
     }catch(e){
-      if(e.code==='messaging/permission-blocked')showToast('❌ Notifications bloquées — autorise-les dans les réglages du navigateur');
+      if(e.code==='messaging/permission-blocked'){showToast('❌ Notifs bloquées');setTimeout(()=>showToast('👉 chrome://settings/content/notifications → autorise ce site'),2800);}
       else showToast('❌ Erreur : '+e.message);
     }
   }
