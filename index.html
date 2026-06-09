@@ -1425,7 +1425,9 @@ async function renderPublicPage(uid_,isPreview=false){
       const bAlignS=(b.style&&b.style.textAlign)||align;
       const _spLight=!isColorDark(sp.color);
       const _iconSize=Math.max(18,Math.round(bFsS*1.15));
-      const _iconColor=_spLight?'#000000':'#ffffff';
+      // Bare = pas de fond coloré → icône en couleur brand sur fond page
+      // Bouton = fond coloré → icône blanche (ou noire si couleur claire)
+      const _iconColor=b.bare ? sp.color : (_spLight?'#000000':'#ffffff');
       const _brandSVG=getBrandSVG(b.platform||'instagram',_iconColor,_iconSize);
       const svgIcon=_brandSVG||`<span style="font-size:${_iconSize}px">${sp.icon}</span>`;
       if(b.bare)return`<div class="pub-block" style="${bStyle}"><a href="${esc(b.content)}" style="color:${sp.color};font-size:${bFsS}px;font-weight:700;text-decoration:underline;display:flex;align-items:center;gap:7px;justify-content:${bAlignS==='center'?'center':bAlignS==='right'?'flex-end':'flex-start'}" target="_blank" rel="noopener">${svgIcon} ${esc(sp.label)}</a></div>`;
