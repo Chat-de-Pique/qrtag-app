@@ -663,33 +663,34 @@ const SOCIAL_PLATFORMS={
 };
 
 const QR_STYLES={
+  street:{
+    label:'Street',desc:'Barres + coins carrés',
+    dotsOptions:{type:'rounded',color:'#000000'},
+    cornersSquareOptions:{type:'square',color:'#000000'},
+    backgroundOptions:{color:'#ffffff'},
+    qrOptions:{errorCorrectionLevel:'H'}
+  },
   smooth:{
     label:'Smooth',desc:'Ovales arrondis',
     dotsOptions:{type:'extra-rounded',color:'#000000'},
     cornersSquareOptions:{type:'extra-rounded',color:'#000000'},
-    cornersDotOptions:{type:'dot',color:'#000000'},
-    backgroundOptions:{color:'#ffffff'},qrOptions:{errorCorrectionLevel:'H'}
-  },
-  street:{
-    label:'Street',desc:'Capsules + coins carrés',
-    dotsOptions:{type:'rounded',color:'#000000'},
-    cornersSquareOptions:{type:'square',color:'#000000'},
-    cornersDotOptions:{type:'square',color:'#000000'},
-    backgroundOptions:{color:'#ffffff'},qrOptions:{errorCorrectionLevel:'H'}
+    backgroundOptions:{color:'#ffffff'},
+    qrOptions:{errorCorrectionLevel:'H'}
   },
   geo:{
     label:'Géo',desc:'Formes organiques',
     dotsOptions:{type:'classy-rounded',color:'#000000'},
     cornersSquareOptions:{type:'extra-rounded',color:'#000000'},
-    cornersDotOptions:{type:'dot',color:'#000000'},
-    backgroundOptions:{color:'#ffffff'},qrOptions:{errorCorrectionLevel:'H'}
+    backgroundOptions:{color:'#ffffff'},
+    qrOptions:{errorCorrectionLevel:'H'}
   },
   classic:{
     label:'Classique',desc:'Pixels standard',
     dotsOptions:{type:'square',color:'#000000'},
     cornersSquareOptions:{type:'square',color:'#000000'},
     cornersDotOptions:{type:'square',color:'#000000'},
-    backgroundOptions:{color:'#ffffff'},qrOptions:{errorCorrectionLevel:'H'}
+    backgroundOptions:{color:'#ffffff'},
+    qrOptions:{errorCorrectionLevel:'H'}
   }
 };
 const DEFAULT_PROFILE={displayName:'',bio:'',avatar:'',template:'blanc',font:'sans',primaryColor:'#FFD600',bgColor:'#ffffff',textColor:'#1a1a1a',blocks:[],showProfile:true,fontSize:15,textAlign:'left',btnRadius:14,shadowStrength:1,blockSpacing:12,qrStyle:'street'};
@@ -1361,8 +1362,11 @@ function renderQR(){
   if(!isApp)return;
   const url=getPublicUrl();
   const urlEl=$('qr-url-text');if(urlEl)urlEl.textContent=url;
+  // Forcer 'street' si le style sauvegardé n'existe plus
+  const safeStyle=QR_STYLES[S.profile?.qrStyle]?S.profile.qrStyle:'street';
+  if(S.profile&&safeStyle!==S.profile.qrStyle)S.profile.qrStyle=safeStyle;
   renderQRStyleGrid(url);
-  renderQRWithStyle(url,S.profile?.qrStyle||'street');
+  renderQRWithStyle(url,safeStyle);
 }
 window.downloadQR=()=>{
   if(!S.user)return;
