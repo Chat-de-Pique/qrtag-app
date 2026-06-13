@@ -144,12 +144,12 @@
     .qr-url-text{font-size:11px;color:var(--text2);word-break:break-all;flex:1;font-family:'Courier New',monospace;line-height:1.4;}
     .qr-copy-btn{flex-shrink:0;padding:5px 10px;border:1.5px solid var(--border);border-radius:8px;background:var(--surface);cursor:pointer;font-size:13px;transition:all .15s;}
     .qr-copy-btn:hover{border-color:var(--accent);background:var(--accent-soft);}
-    .qr-style-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px;}
+    .qr-style-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px;}
     .qr-style-card{background:var(--surface2);border:2px solid var(--border);border-radius:12px;padding:8px 4px 6px;text-align:center;cursor:pointer;transition:all .15s;}
     .qr-style-card.on{border-color:var(--accent);background:var(--accent-soft);}
     .qr-style-card:hover{border-color:var(--accent);}
-    .qr-style-mini{width:68px;height:68px;margin:0 auto 5px;border-radius:6px;overflow:hidden;display:flex;align-items:center;justify-content:center;}
-    .qr-style-mini canvas{width:68px !important;height:68px !important;}
+    .qr-style-mini{width:80px;height:80px;margin:0 auto 6px;border-radius:6px;overflow:hidden;display:flex;align-items:center;justify-content:center;}
+    .qr-style-mini canvas{width:80px !important;height:80px !important;}
     .qr-style-name{font-size:10px;font-weight:800;color:var(--text2);margin-bottom:2px;}
     .qr-style-desc{font-size:9px;color:var(--muted);line-height:1.3;}
     .qr-note{background:var(--accent-soft);border-radius:10px;padding:10px 13px;font-size:12px;font-weight:600;margin-bottom:12px;border:1px solid rgba(255,214,0,.4);text-align:left;}
@@ -670,10 +670,11 @@ const QR_STYLES={
     backgroundOptions:{color:'#ffffff'},
     qrOptions:{errorCorrectionLevel:'H'}
   },
-  smooth:{
-    label:'Smooth',desc:'Ovales arrondis',
-    dotsOptions:{type:'extra-rounded',color:'#000000'},
-    cornersSquareOptions:{type:'extra-rounded',color:'#000000'},
+  dots:{
+    label:'Ronds',desc:'Cercles partout',
+    dotsOptions:{type:'dots',color:'#000000'},
+    cornersSquareOptions:{type:'dot',color:'#000000'},
+    cornersDotOptions:{type:'dot',color:'#000000'},
     backgroundOptions:{color:'#ffffff'},
     qrOptions:{errorCorrectionLevel:'H'}
   },
@@ -685,7 +686,7 @@ const QR_STYLES={
     qrOptions:{errorCorrectionLevel:'H'}
   },
   classic:{
-    label:'Classique',desc:'Pixels standard',
+    label:'Classique',desc:'Carrés standard',
     dotsOptions:{type:'square',color:'#000000'},
     cornersSquareOptions:{type:'square',color:'#000000'},
     cornersDotOptions:{type:'square',color:'#000000'},
@@ -1344,7 +1345,7 @@ function renderQRStyleGrid(url){
       const el=document.getElementById('qrm-'+id);
       if(!el)return;
       const {label,desc,...opts}=s;
-      new QRCodeStyling({width:68,height:68,type:'canvas',data:url,...opts}).append(el);
+      new QRCodeStyling({width:80,height:80,type:'canvas',data:url,...opts}).append(el);
     });
   }
 }
