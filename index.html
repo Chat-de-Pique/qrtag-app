@@ -548,6 +548,7 @@
 <button class="fab-preview" onclick="showPreview()">👁 <span id="fab-preview-lbl">Aperçu</span></button>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://unpkg.com/qr-code-styling@1.6.0-rc.1/lib/qr-code-styling.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 <script type="module">
 import{initializeApp}from'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
 import{getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,signOut,onAuthStateChanged,GoogleAuthProvider,signInWithRedirect,getRedirectResult,sendPasswordResetEmail,setPersistence,browserLocalPersistence,browserSessionPersistence}from'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
@@ -664,9 +665,11 @@ const SOCIAL_PLATFORMS={
 
 const QR_STYLES={
   street:{
-    label:'Street',desc:'Barres + coins carrés',
+    label:'Street',desc:'Lignes + coin arrondi',
+    eyeBall:'lines',
     dotsOptions:{type:'rounded',color:'#000000'},
-    cornersSquareOptions:{type:'square',color:'#000000'},
+    cornersSquareOptions:{type:'extra-rounded',color:'#000000'},
+    cornersDotOptions:{type:'square',color:'#000000'},
     backgroundOptions:{color:'#ffffff'},
     qrOptions:{errorCorrectionLevel:'H'}
   },
@@ -682,6 +685,7 @@ const QR_STYLES={
     label:'Géo',desc:'Formes organiques',
     dotsOptions:{type:'classy-rounded',color:'#000000'},
     cornersSquareOptions:{type:'extra-rounded',color:'#000000'},
+    cornersDotOptions:{type:'dot',color:'#000000'},
     backgroundOptions:{color:'#ffffff'},
     qrOptions:{errorCorrectionLevel:'H'}
   },
@@ -694,6 +698,67 @@ const QR_STYLES={
     qrOptions:{errorCorrectionLevel:'H'}
   }
 };
+
+// ── Post-traitement canvas : remplace l'œil central par 3 barres horizontales ──
+function getQRModuleCount(data,ec){
+  const q=qrcode(0,ec); // 0 = auto-détection de version, identique à qr-code-styling
+  q.addData(data);
+  q.make();
+  return q.getModuleCount();
+}
+function roundRectPath(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.arcTo(x+w,y,x+w,y+h,r);
+  ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r);
+  ctx.arcTo(x,y,x+w,y,r);
+  ctx.closePath();
+}
+function drawLineEyes(ctx,size,margin,moduleCount,fg,bg){
+  const ms=(size-2*margin)/moduleCount;
+  const eyeSize=ms*3;
+  const positions=[
+    [margin+2*ms, margin+2*ms],                 // haut-gauche
+    [margin+(moduleCount-5)*ms, margin+2*ms],   // haut-droit
+    [margin+2*ms, margin+(moduleCount-5)*ms],   // bas-gauche
+  ];
+  positions.forEach(([x,y])=>{
+    ctx.fillStyle=bg;
+    ctx.fillRect(x-0.5,y-0.5,eyeSize+1,eyeSize+1); // efface l'ancien œil
+    const barH=eyeSize/3*0.62;
+    const gap=(eyeSize-3*barH)/2;
+    ctx.fillStyle=fg;
+    for(let i=0;i<3;i++){
+      const by=y+i*(barH+gap);
+      roundRectPath(ctx,x,by,eyeSize,barH,barH/2);
+      ctx.fill();
+    }
+  });
+}
+// Génère un QR stylé sur canvas, avec post-traitement éventuel et logo central
+async function renderStyledQR(container,url,styleId,size,withLogo){
+  container.innerHTML='';
+  const cfg=QR_STYLES[styleId]||QR_STYLES.street;
+  const {label,desc,eyeBall,...opts}=cfg;
+  const margin=Math.max(4,Math.round(size*0.04));
+  const logoOpts=(withLogo&&S.profile?.avatar)?{image:S.profile.avatar,imageOptions:{crossOrigin:'anonymous',margin:Math.round(size*0.02),imageSize:0.25,hideBackgroundDots:true}}:{};
+  const qr=new QRCodeStyling({width:size,height:size,type:'canvas',data:url,margin,...opts,...logoOpts});
+  const holder=document.createElement('div');
+  qr.append(holder);
+  await new Promise(r=>setTimeout(r,150));
+  const canvas=holder.querySelector('canvas');
+  if(!canvas)return null;
+  if(eyeBall==='lines'){
+    try{
+      const ctx=canvas.getContext('2d');
+      const moduleCount=getQRModuleCount(url,'H');
+      drawLineEyes(ctx,size,margin,moduleCount,opts.dotsOptions?.color||'#000000',opts.backgroundOptions?.color||'#ffffff');
+    }catch(e){console.warn('drawLineEyes:',e);}
+  }
+  container.appendChild(canvas);
+  return canvas;
+}
 const DEFAULT_PROFILE={displayName:'',bio:'',avatar:'',template:'blanc',font:'sans',primaryColor:'#FFD600',bgColor:'#ffffff',textColor:'#1a1a1a',blocks:[],showProfile:true,fontSize:15,textAlign:'left',btnRadius:14,shadowStrength:1,blockSpacing:12,qrStyle:'street'};
 
 const S={user:null,data:null,profile:null,saveTimer:null,qrObj:null,dark:false};
@@ -1319,18 +1384,16 @@ function isColorDark(hex){
   return(0.299*r+0.587*g+0.114*b)/255<0.5;
 }
 
-function renderQRWithStyle(url,styleId){
+async function renderQRWithStyle(url,styleId){
   const c=$('qr-display');c.innerHTML='';
   if(typeof QRCodeStyling==='undefined'){
     new QRCode(c,{text:url,width:210,height:210,colorDark:'#000000',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.H});
     return;
   }
-  const {label,desc,...opts}=QR_STYLES[styleId]||QR_STYLES.street;
-  const _logoCenter=S.profile?.avatar?{image:S.profile.avatar,imageOptions:{crossOrigin:'anonymous',margin:5,imageSize:0.25,hideBackgroundDots:true}}:{};
-  S.qrObj=new QRCodeStyling({width:210,height:210,type:'canvas',data:url,...opts,..._logoCenter});
-  S.qrObj.append(c);
+  const canvas=await renderStyledQR(c,url,styleId,210,true);
+  S.qrObj=canvas;
 }
-function renderQRStyleGrid(url){
+async function renderQRStyleGrid(url){
   const grid=$('qr-style-grid');if(!grid)return;
   const cur=S.profile?.qrStyle||'street';
   grid.innerHTML=Object.entries(QR_STYLES).map(([id,s])=>
@@ -1341,12 +1404,11 @@ function renderQRStyleGrid(url){
     </div>`
   ).join('');
   if(typeof QRCodeStyling!=='undefined'){
-    Object.entries(QR_STYLES).forEach(([id,s])=>{
+    for(const id of Object.keys(QR_STYLES)){
       const el=document.getElementById('qrm-'+id);
-      if(!el)return;
-      const {label,desc,...opts}=s;
-      new QRCodeStyling({width:80,height:80,type:'canvas',data:url,...opts}).append(el);
-    });
+      if(!el)continue;
+      renderStyledQR(el,url,id,80,false);
+    }
   }
 }
 window.selectQRStyle=id=>{
@@ -1355,7 +1417,7 @@ window.selectQRStyle=id=>{
   renderQR();
   saveProfile();
 };
-function renderQR(){
+async function renderQR(){
   if(!S.user)return;
   const isApp=S.data?.plan==='app';
   $('qr-locked').style.display=isApp?'none':'block';
@@ -1363,17 +1425,25 @@ function renderQR(){
   if(!isApp)return;
   const url=getPublicUrl();
   const urlEl=$('qr-url-text');if(urlEl)urlEl.textContent=url;
-  // Forcer 'street' si le style sauvegardé n'existe plus
   const safeStyle=QR_STYLES[S.profile?.qrStyle]?S.profile.qrStyle:'street';
   if(S.profile&&safeStyle!==S.profile.qrStyle)S.profile.qrStyle=safeStyle;
   renderQRStyleGrid(url);
-  renderQRWithStyle(url,safeStyle);
+  await renderQRWithStyle(url,safeStyle);
 }
-window.downloadQR=()=>{
+window.downloadQR=async()=>{
   if(!S.user)return;
-  const {label,desc,...opts}=QR_STYLES[S.profile?.qrStyle||'street']||QR_STYLES.street;
-  const _lc=S.profile?.avatar?{image:S.profile.avatar,imageOptions:{crossOrigin:'anonymous',margin:5,imageSize:0.25,hideBackgroundDots:true}}:{};
-  new QRCodeStyling({width:1024,height:1024,type:'canvas',data:getPublicUrl(),...opts,..._lc}).download({name:'qrtag-qrcode',extension:'png'});
+  const styleId=QR_STYLES[S.profile?.qrStyle]?S.profile.qrStyle:'street';
+  const tmp=document.createElement('div');
+  tmp.style.position='fixed';tmp.style.left='-9999px';
+  document.body.appendChild(tmp);
+  const canvas=await renderStyledQR(tmp,getPublicUrl(),styleId,1024,true);
+  if(canvas){
+    const a=document.createElement('a');
+    a.href=canvas.toDataURL('image/png');
+    a.download='qrtag-qrcode.png';
+    a.click();
+  }
+  tmp.remove();
 };
 window.copyQrUrl=()=>{const url=getPublicUrl();if(navigator.clipboard){navigator.clipboard.writeText(url).then(()=>showToast('📋 URL copiée !'));}else showToast(url);};
 
