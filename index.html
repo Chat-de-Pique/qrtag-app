@@ -233,6 +233,18 @@
     .block-vis-label{font-size:13px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;opacity:1;transition:opacity .2s;}
     .block-vis-label.hidden{opacity:.35;text-decoration:line-through;}
     .block-vis-btn{background:none;border:1.5px solid var(--border);border-radius:8px;padding:4px 9px;cursor:pointer;font-size:14px;transition:all .15s;flex-shrink:0;}
+    .block-style-panel{max-height:0;overflow:hidden;transition:max-height .25s ease,opacity .2s;opacity:0;background:var(--surface2);border-radius:10px;}
+    .block-style-panel.open{max-height:400px;opacity:1;margin-bottom:8px;}
+    .bsp-inner{padding:10px 10px 4px;}
+    .bsp-row{display:flex;align-items:center;gap:8px;padding:6px 0;}
+    .bsp-lbl{font-size:11px;font-weight:700;color:var(--text2);width:54px;flex-shrink:0;}
+    .bsp-range{flex:1;height:4px;accent-color:var(--accent);}
+    .bsp-val{font-size:11px;color:var(--muted);min-width:38px;text-align:right;flex-shrink:0;}
+    .bsp-align{display:flex;gap:4px;flex:1;}
+    .bsp-ab{flex:1;padding:5px 0;border:1.5px solid var(--border);border-radius:7px;background:var(--surface);cursor:pointer;font-size:13px;color:var(--text2);transition:all .15s;line-height:1;}
+    .bsp-ab.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-dark);}
+    .bsp-color-input{width:36px;height:28px;border:1.5px solid var(--border);border-radius:7px;background:none;cursor:pointer;padding:2px;flex-shrink:0;}
+    .bsp-reset{font-size:10px;color:var(--muted);background:none;border:none;cursor:pointer;text-decoration:underline;padding:0;flex-shrink:0;}
     .block-vis-btn:hover{border-color:var(--accent);background:var(--accent-soft);}
     .pub-wrap{padding-bottom:24px;}
 
@@ -1319,6 +1331,7 @@ function renderSheet(){
           <button class="block-vis-btn" onclick="toggleBlockVis('${b.id}')">${b.hidden?'🙈':'👁'}</button>
         </div>
         <div class="block-style-panel" id="bsp-${b.id}">
+          <div class="bsp-inner">
           <div class="bsp-row">
             <span class="bsp-lbl">Taille</span>
             <input class="bsp-range" type="range" min="0" max="96" step="1" value="${bFs||0}"
@@ -1333,6 +1346,19 @@ function renderSheet(){
               <button class="bsp-ab${bAlign==='right'?' on':''}" onmousedown="event.preventDefault();setBlockStyle('${b.id}','textAlign','right')">▶</button>
               <button class="bsp-ab${!bAlign?' on':''}" onmousedown="event.preventDefault();setBlockStyle('${b.id}','textAlign',null)" title="Défaut">↺</button>
             </div>
+          </div>
+          ${b.type==='social'?`<div class="bsp-row">
+            <span class="bsp-lbl">Couleur</span>
+            <input class="bsp-color-input" type="color" value="${(b.style&&b.style.color)||SOCIAL_PLATFORMS[b.platform||'instagram']?.color||'#000000'}"
+              onchange="setBlockStyle('${b.id}','color',this.value)">
+            ${b.style&&b.style.color?`<button class="bsp-reset" onclick="setBlockStyle('${b.id}','color',null);renderSheet()">Réinitialiser</button>`:`<span class="bsp-val" style="text-align:left">marque</span>`}
+          </div>`:''}
+          <div class="bsp-row">
+            <span class="bsp-lbl">Fond</span>
+            <input class="bsp-color-input" type="color" value="${(b.style&&b.style.bgColor)||'#ffffff'}"
+              onchange="setBlockStyle('${b.id}','bgColor',this.value)">
+            ${b.style&&b.style.bgColor?`<button class="bsp-reset" onclick="setBlockStyle('${b.id}','bgColor',null);renderSheet()">Réinitialiser</button>`:`<span class="bsp-val" style="text-align:left">défaut</span>`}
+          </div>
           </div>
         </div>
       </div>`;
@@ -1541,7 +1567,8 @@ async function renderPublicPage(uid_,isPreview=false){
   const gap     = (p.blockSpacing||12)+'px';
   const avatarHtml=(showP&&p.avatar)?`<img src="${esc(p.avatar)}" class="pub-avatar" style="border:3px solid ${accent};background:#fff" onerror="this.style.display='none'">` :'';
   const blocksHtml=(p.blocks||[]).filter(b=>!b.hidden).map(b=>{
-    const bStyle=`margin-bottom:${gap}`;
+    const _bg=b.style&&b.style.bgColor;
+    const bStyle=`margin-bottom:${gap}${_bg?`;background:${_bg};border-radius:${br}px;padding:10px`:''}`;
     if(b.type==='text'&&b.content){
       const htmlContent=parseFmt(b.content);
       const bFsv=(b.style&&b.style.fontSize)||fs;
@@ -1565,18 +1592,19 @@ async function renderPublicPage(uid_,isPreview=false){
     }
     if(b.type==='social'&&b.content){
       const sp=SOCIAL_PLATFORMS[b.platform||'instagram']||SOCIAL_PLATFORMS.instagram;
-      const isLight=sp.color==='#FFFC00'||sp.color==='#FFD600';
+      const _spColor=(b.style&&b.style.color)||sp.color;
+      const isLight=_spColor==='#FFFC00'||_spColor==='#FFD600';
       const bFsS=(b.style&&b.style.fontSize)||fs;
       const bAlignS=(b.style&&b.style.textAlign)||align;
-      const _spLight=!isColorDark(sp.color);
+      const _spLight=!isColorDark(_spColor);
       const _iconSize=Math.max(18,Math.round(bFsS*1.15));
-      // Bare = pas de fond coloré → icône en couleur brand sur fond page
+      // Bare = pas de fond coloré → icône en couleur (perso ou brand) sur fond page
       // Bouton = fond coloré → icône blanche (ou noire si couleur claire)
-      const _iconColor=b.bare ? sp.color : (_spLight?'#000000':'#ffffff');
+      const _iconColor=b.bare ? _spColor : (_spLight?'#000000':'#ffffff');
       const _brandSVG=getBrandSVG(b.platform||'instagram',_iconColor,_iconSize);
       const svgIcon=_brandSVG||`<span style="font-size:${_iconSize}px">${sp.icon}</span>`;
-      if(b.bare)return`<div class="pub-block" style="${bStyle}"><a href="${esc(b.content)}" style="color:${sp.color};font-size:${bFsS}px;font-weight:700;text-decoration:underline;display:flex;align-items:center;gap:7px;justify-content:${bAlignS==='center'?'center':bAlignS==='right'?'flex-end':'flex-start'}" target="_blank" rel="noopener">${svgIcon} ${esc(sp.label)}</a></div>`;
-      return`<div class="pub-block" style="${bStyle}"><a href="${esc(b.content)}" style="display:flex;align-items:center;justify-content:center;gap:9px;background:${sp.color};color:${_spLight?'#000':'#fff'};border-radius:${br}px;padding:14px 20px;text-decoration:none;font-size:${bFsS}px;font-weight:800;box-shadow:0 4px 20px ${sp.color}66" target="_blank" rel="noopener">${svgIcon} ${esc(sp.label)}</a></div>`;
+      if(b.bare)return`<div class="pub-block" style="${bStyle}"><a href="${esc(b.content)}" style="color:${_spColor};font-size:${bFsS}px;font-weight:700;text-decoration:underline;display:flex;align-items:center;gap:7px;justify-content:${bAlignS==='center'?'center':bAlignS==='right'?'flex-end':'flex-start'}" target="_blank" rel="noopener">${svgIcon} ${esc(sp.label)}</a></div>`;
+      return`<div class="pub-block" style="${bStyle}"><a href="${esc(b.content)}" style="display:flex;align-items:center;justify-content:center;gap:9px;background:${_bg||_spColor};color:${_spLight?'#000':'#fff'};border-radius:${br}px;padding:14px 20px;text-decoration:none;font-size:${bFsS}px;font-weight:800;box-shadow:0 4px 20px ${_spColor}66" target="_blank" rel="noopener">${svgIcon} ${esc(sp.label)}</a></div>`;
     }
     return'';
   }).join('');
