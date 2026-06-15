@@ -245,6 +245,12 @@
     .bsp-ab.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-dark);}
     .bsp-color-input{width:36px;height:28px;border:1.5px solid var(--border);border-radius:7px;background:none;cursor:pointer;padding:2px;flex-shrink:0;}
     .bsp-reset{font-size:10px;color:var(--muted);background:none;border:none;cursor:pointer;text-decoration:underline;padding:0;flex-shrink:0;}
+    .sheet-num,.bsp-num{width:54px;flex-shrink:0;border:1.5px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);font-size:12px;font-weight:700;padding:5px 4px;text-align:center;font-family:inherit;}
+    .sheet-num:focus,.bsp-num:focus{border-color:var(--accent);outline:none;}
+    .bg-img-row{display:flex;align-items:center;gap:8px;margin-top:8px;}
+    .bg-img-preview{width:44px;height:44px;border-radius:8px;object-fit:cover;border:1.5px solid var(--border);flex-shrink:0;background:var(--surface2);}
+    .bg-img-btn{flex:1;padding:9px;border:1.5px solid var(--border);border-radius:9px;background:var(--surface2);color:var(--text2);font-size:12px;font-weight:700;cursor:pointer;text-align:center;}
+    .bg-img-remove{font-size:11px;color:var(--danger,#e5484d);background:none;border:none;cursor:pointer;text-decoration:underline;flex-shrink:0;}
     .block-vis-btn:hover{border-color:var(--accent);background:var(--accent-soft);}
     .pub-wrap{padding-bottom:24px;}
 
@@ -458,6 +464,13 @@
         <div class="accordion-body" style="padding-bottom:4px">
           <div class="color-row"><div class="color-row-info"><div id="lbl-c1">Couleur principale</div><small id="lbl-c1s">Boutons &amp; liens</small></div><input type="color" id="c-accent" oninput="onColor('primaryColor',this.value)"></div>
           <div class="color-row"><div class="color-row-info"><div id="lbl-c2">Fond de page</div><small id="lbl-c2s">Arrière-plan</small></div><input type="color" id="c-bg" oninput="onColor('bgColor',this.value)"></div>
+          <div class="bg-img-row">
+            <img class="bg-img-preview" id="bg-img-preview" src="" style="display:none">
+            <label class="bg-img-btn" for="bg-img-input">🖼️ Image de fond (optionnel)</label>
+            <input type="file" id="bg-img-input" accept="image/*" style="display:none" onchange="uploadBgImage(this)">
+            <button class="bg-img-remove" id="bg-img-remove" style="display:none" onclick="removeBgImage()">Retirer</button>
+          </div>
+          <div class="upload-progress" id="bg-img-prog" style="display:none"><div class="upload-progress-bar" id="bg-img-bar"></div></div>
           <div class="color-row"><div class="color-row-info"><div id="lbl-c3">Texte</div><small id="lbl-c3s">Couleur principale</small></div><input type="color" id="c-text" oninput="onColor('textColor',this.value)"></div>
         </div>
       </div>
@@ -1206,6 +1219,30 @@ window.uploadAvatar=async input=>{
   try{const url=await uploadToCloudinary(file);showProg('av-prog','av-bar',100);hideProg('av-prog');S.profile.avatar=url;$('p-av').value=url;updateAvatarPreview(url);await saveProfile();showToast('📸 Photo ajoutée !');}
   catch(e){showToast('❌ Erreur upload');hideProg('av-prog');}
 };
+window.uploadBgImage=async input=>{
+  const file=input.files[0];if(!file)return;showProg('bg-img-prog','bg-img-bar',30);
+  try{
+    const url=await uploadToCloudinary(file);
+    showProg('bg-img-prog','bg-img-bar',100);hideProg('bg-img-prog');
+    S.profile.bgImage=url;
+    updateBgImagePreview(url);
+    await saveProfile();
+    syncForm();renderPublicPage(S.user?.uid,true);
+    showToast('🖼️ Image de fond ajoutée !');
+  }catch(e){showToast('❌ Erreur upload');hideProg('bg-img-prog');}
+};
+window.removeBgImage=async()=>{
+  delete S.profile.bgImage;
+  updateBgImagePreview(null);
+  await saveProfile();
+  syncForm();renderPublicPage(S.user?.uid,true);
+  showToast('🗑️ Image de fond retirée');
+};
+function updateBgImagePreview(url){
+  const img=$('bg-img-preview'),btn=$('bg-img-remove');
+  if(url){img.src=url;img.style.display='block';if(btn)btn.style.display='inline';}
+  else{img.style.display='none';if(btn)btn.style.display='none';}
+}
 function updateAvatarPreview(url){
   const c=$('avatar-circle'),i=$('avatar-icon');
   if(url){c.style.backgroundImage=`url(${url})`;c.style.backgroundSize='cover';if(i)i.style.display='none';}
@@ -1234,6 +1271,7 @@ function renderStyleTab(){
   $('c-accent').value=p.primaryColor||'#FFD600';
   $('c-bg').value=p.bgColor||'#ffffff';
   $('c-text').value=p.textColor||'#1a1a1a';
+  updateBgImagePreview(p.bgImage||null);
   renderAdvanced();
 }
 /* ── Panneau avancé ── */
@@ -1285,8 +1323,9 @@ function renderSheet(){
   body.innerHTML=`
     <div class="sheet-row">
       <span class="sheet-lbl">Taille texte</span>
-      <input class="sheet-range" type="range" min="12" max="96" step="1" value="${p.fontSize||15}" oninput="onAdv('fontSize',+this.value);this.nextElementSibling.textContent=this.value+'px'">
+      <input class="sheet-range" type="range" id="rng-fontsize" min="12" max="96" step="1" value="${p.fontSize||15}" oninput="onAdv('fontSize',+this.value);this.nextElementSibling.textContent=this.value+'px';$('num-fontsize').value=this.value">
       <span class="sheet-val">${p.fontSize||15}px</span>
+      <input class="sheet-num" id="num-fontsize" type="number" min="12" max="96" value="${p.fontSize||15}" onchange="let v=Math.max(12,Math.min(96,+this.value||15));this.value=v;$('rng-fontsize').value=v;$('rng-fontsize').nextElementSibling.textContent=v+'px';onAdv('fontSize',v)">
     </div>
     <div class="sheet-row">
       <span class="sheet-lbl">Alignement</span>
@@ -1298,8 +1337,9 @@ function renderSheet(){
     </div>
     <div class="sheet-row">
       <span class="sheet-lbl">Arrondi boutons</span>
-      <input class="sheet-range" type="range" min="0" max="30" step="1" value="${p.btnRadius!==undefined?p.btnRadius:14}" oninput="onAdv('btnRadius',+this.value);this.nextElementSibling.textContent=this.value+'px'">
+      <input class="sheet-range" type="range" id="rng-radius" min="0" max="30" step="1" value="${p.btnRadius!==undefined?p.btnRadius:14}" oninput="onAdv('btnRadius',+this.value);this.nextElementSibling.textContent=this.value+'px';$('num-radius').value=this.value">
       <span class="sheet-val">${p.btnRadius!==undefined?p.btnRadius:14}px</span>
+      <input class="sheet-num" id="num-radius" type="number" min="0" max="30" value="${p.btnRadius!==undefined?p.btnRadius:14}" onchange="let v=Math.max(0,Math.min(30,+this.value||0));this.value=v;$('rng-radius').value=v;$('rng-radius').nextElementSibling.textContent=v+'px';onAdv('btnRadius',v)">
     </div>
     <div class="sheet-row">
       <span class="sheet-lbl">Ombre</span>
@@ -1308,8 +1348,9 @@ function renderSheet(){
     </div>
     <div class="sheet-row">
       <span class="sheet-lbl">Espacement</span>
-      <input class="sheet-range" type="range" min="4" max="32" step="2" value="${p.blockSpacing||12}" oninput="onAdv('blockSpacing',+this.value);this.nextElementSibling.textContent=this.value+'px'">
+      <input class="sheet-range" type="range" id="rng-spacing" min="4" max="32" step="2" value="${p.blockSpacing||12}" oninput="onAdv('blockSpacing',+this.value);this.nextElementSibling.textContent=this.value+'px';$('num-spacing').value=this.value">
       <span class="sheet-val">${p.blockSpacing||12}px</span>
+      <input class="sheet-num" id="num-spacing" type="number" min="4" max="32" value="${p.blockSpacing||12}" onchange="let v=Math.max(4,Math.min(32,+this.value||4));this.value=v;$('rng-spacing').value=v;$('rng-spacing').nextElementSibling.textContent=v+'px';onAdv('blockSpacing',v)">
     </div>
     <div style="font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;padding:12px 0 4px">Affichage public</div>
     <div class="block-vis-row">
@@ -1334,9 +1375,11 @@ function renderSheet(){
           <div class="bsp-inner">
           <div class="bsp-row">
             <span class="bsp-lbl">Taille</span>
-            <input class="bsp-range" type="range" min="0" max="96" step="1" value="${bFs||0}"
-              oninput="setBlockStyle('${b.id}','fontSize',+this.value||null);this.nextElementSibling.textContent=this.value>0?this.value+'px':'auto'">
+            <input class="bsp-range" type="range" id="rng-bsp-${b.id}" min="0" max="96" step="1" value="${bFs||0}"
+              oninput="setBlockStyle('${b.id}','fontSize',+this.value||null);this.nextElementSibling.textContent=this.value>0?this.value+'px':'auto';$('num-bsp-${b.id}').value=this.value">
             <span class="bsp-val">${bFs?bFs+'px':'auto'}</span>
+            <input class="bsp-num" id="num-bsp-${b.id}" type="number" min="0" max="96" value="${bFs||0}"
+              onchange="let v=Math.max(0,Math.min(96,+this.value||0));this.value=v;$('rng-bsp-${b.id}').value=v;$('rng-bsp-${b.id}').nextElementSibling.textContent=v>0?v+'px':'auto';setBlockStyle('${b.id}','fontSize',v||null)">
           </div>
           <div class="bsp-row">
             <span class="bsp-lbl">Align</span>
@@ -1608,7 +1651,8 @@ async function renderPublicPage(uid_,isPreview=false){
     }
     return'';
   }).join('');
-  $('pub-content').innerHTML=`<div style="min-height:${isPreview?'auto':'100vh'};background:${bg};font-family:${fontObj.css}">
+  const _bgImgStyle=p.bgImage?`background-image:url('${p.bgImage}');background-size:cover;background-position:center;background-attachment:fixed`:'';
+  $('pub-content').innerHTML=`<div style="min-height:${isPreview?'auto':'100vh'};background:${bg};${_bgImgStyle};font-family:${fontObj.css}">
     <div class="pub-wrap">
       ${showP&&(p.avatar||p.displayName||p.bio)?`<div style="text-align:${align};margin-bottom:28px">${avatarHtml}${p.displayName||username?`<h1 class="pub-name" style="color:${txt};font-size:${Math.round(fs*1.6)}px">${esc(p.displayName||username)}</h1>`:''}${p.bio?`<p class="pub-bio" style="color:${txt};font-size:${fs}px">${esc(p.bio)}</p>`:''}</div>`:''}
       ${blocksHtml||`<div style="text-align:center;padding:50px 0;opacity:.35;color:${txt}"><div style="font-size:48px">📭</div><p style="margin-top:8px">${t('noContent')}</p></div>`}
