@@ -529,7 +529,7 @@
   <!-- Tiroir de personnalisation (visible uniquement en aperçu) -->
   <div class="pub-sheet" id="pub-sheet" style="display:none">
     <div class="pub-sheet-handle" onclick="toggleSheet()">
-      <span>✨ Personnaliser l'aperçu</span>
+      <span>✨ Personnalisation +</span>
       <span id="sheet-arrow" style="font-size:16px;transition:transform .3s">↑</span>
     </div>
     <div class="pub-sheet-body" id="pub-sheet-body"></div>
@@ -1361,7 +1361,12 @@ function renderSheet(){
     <div style="font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;padding:12px 0 4px">Blocs — afficher / masquer</div>
     ${blocks.map(b=>{
       const icon=BICONS[b.type]||'📦';
-      const lbl=esc(b.label||b.content?.slice(0,22)||(b.type==='social'?b.platform:b.type)||'—');
+      const _typeLabels={text:'Texte',link:'Lien',photo:'Image',video:'Vidéo',social:'Réseau'};
+      const lbl=b.type==='social'
+        ? (SOCIAL_PLATFORMS[b.platform||'instagram']?.label||'Réseau')
+        : b.type==='link' && b.label ? esc(b.label.slice(0,22))
+        : b.type==='link' && b.content ? esc(b.content.slice(0,22))
+        : _typeLabels[b.type]||'Bloc';
       const bFs=(b.style&&b.style.fontSize)||0;
       const bAlign=(b.style&&b.style.textAlign)||'';
       return`<div style="margin-bottom:6px">
