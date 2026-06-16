@@ -223,11 +223,16 @@
     .pub-sheet-handle::before{content:'';width:36px;height:4px;background:var(--border);border-radius:2px;position:absolute;top:8px;left:50%;transform:translateX(-50%);}
     .pub-sheet-handle span{font-size:13px;font-weight:800;flex:1;}
     .pub-sheet-body{padding:4px 16px 32px;overflow-y:auto;flex:1;}
-    .sheet-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);gap:10px;}
+    .sheet-section{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;padding:14px 0 5px;margin-bottom:2px;}
+    .sheet-row{display:flex;align-items:center;padding:9px 0;border-bottom:1px solid var(--border);gap:10px;}
     .sheet-row:last-child{border:none;}
-    .sheet-lbl{font-size:13px;font-weight:600;flex-shrink:0;}
+    .sheet-lbl{font-size:12px;font-weight:700;color:var(--text2);flex-shrink:0;width:86px;}
+    .sheet-ctrl{display:flex;align-items:center;gap:7px;flex:1;}
+    .sheet-range{flex:1;accent-color:var(--accent);cursor:pointer;}
+    .sheet-badge{background:var(--surface2);border:1.5px solid var(--border);border-radius:20px;font-size:11px;font-weight:700;color:var(--text2);padding:2px 9px;flex-shrink:0;min-width:46px;text-align:center;}
     .sheet-val{font-size:11px;color:var(--muted);min-width:30px;text-align:right;flex-shrink:0;}
-    .sheet-range{flex:1;accent-color:var(--accent);cursor:pointer;max-width:110px;}
+    .sheet-num{width:52px;border:1.5px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);font-size:12px;font-weight:700;padding:4px;text-align:center;font-family:inherit;flex-shrink:0;}
+    .sheet-num:focus{border-color:var(--accent);outline:none;}
     .block-vis-row{display:flex;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);gap:8px;}
     .block-vis-row:last-child{border:none;}
     .block-vis-label{font-size:13px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;opacity:1;transition:opacity .2s;}
@@ -657,16 +662,17 @@ const FONTS=[
   {id:'punkcut',  name:'Punk découpe',     css:"'Special Elite',cursive",           sample:'Punk!'},
 ];
 const EMOJIS={
-  '😀 Visages':['😀','😂','🥰','😎','🤩','😏','🤔','😅','🥳','😍','🤗','😜','🙄','😴','🤑','😈','👿','😇','🥺','😭','😡','🤬','🥴','🤢','😤','🧟','🧛','🧙','🤓','🤥','😬','💀','👻','👽','🤖','😱','🤩','😻'],
-  '👋 Gestes':['👋','🤙','👌','✌️','🤞','💪','🙏','👏','❤️','🔥','⭐','✨','💫','🎉','💥','💯','🏆','👍','👎','🤘','🤟','☝️','👆','👇','👉','👈','🤝','💋','✋','🖖'],
-  '❤️ Amour':['❤️','🧡','💛','💚','💙','💜','🖤','🤍','🤎','💔','❣️','💕','💞','💓','💗','💖','💘','💝','💟','💌','😍','🥰','😘','💏','💑'],
-  '🎉 Fête':['🎉','🎊','🥳','🎈','🎁','🎀','🎆','🎇','✨','🎂','🍰','🥂','🍾','🎤','🎵','🎶','🎸','🥁','🎹','🎺','🎻','🎷','🎠','🎡','🎢','🎪','🎭','🎬','🎧'],
-  '🍕 Bouffe':['🍕','🍔','🌮','🍜','🍣','🍰','🎂','🍩','🍪','🍫','🍓','🍌','🍍','🥑','🍉','🍇','🍒','🧁','🍦','🥤','☕','🧃','🍺','🥂','🍾','🥐','🌯','🥪','🍟','🧀','🥚','🍳','🥩','🍗'],
-  '🐶 Animaux':['🐶','🐱','🐭','🐹','🐰','🦊','🐻','🐼','🐨','🐯','🦁','🐮','🐷','🐸','🐵','🦄','🐝','🦋','🐢','🦎','🐙','🦑','🦈','🐋','🦅','🦉','🦚','🦜','🐧','🦩','🐊','🐉'],
-  '🎮 Objets':['📱','💻','🎵','🎮','🎨','📸','🎬','🎤','🎸','⚡','💎','👑','🔮','🪄','💌','🔑','🛸','🎲','🃏','⚔️','🛡️','💣','🔭','🔬','💊','💡','🔦','📡'],
-  '🌸 Nature':['🌸','🌺','🌻','🍀','🌿','🌊','🌙','☀️','🌈','❄️','🌴','🦋','🌵','🍃','🌾','🍄','🌹','🌷','🌼','🌞','🌝','⛅','🌪️','🔥','🌋','🏔️','🏝️','🌅'],
-  '⚽ Sport':['⚽','🏀','🎾','🏈','⚾','🎱','🏊','🤸','🏋️','🧘','🏄','🚴','🤺','⛷️','🏂','🥊','🥋','🏹','🎣','🛹','🏇','🎿'],
-  '♾️ Symboles':['♾️','☮️','✝️','☯️','🔯','♻️','☢️','⚡','🔱','⚜️','🔰','💲','©️','®️','™️','⁉️','‼️','🚫','⛔','🆗','🆙','🆒','🆓'],
+'Visages':['😀','😃','😄','😁','😆','😅','🤣','😂','🙂','🙃','😉','😊','😇','🥰','😍','🤩','😘','😗','😚','😙','🥲','😋','😛','😜','🤪','😝','🤑','🤗','🤭','🤫','🤔','🤐','🤨','😐','😑','😶','😏','😒','🙄','😬','🤥','😌','😔','😪','🤤','😴','😷','🤒','🤕','🤢','🤮','🤧','🥵','🥶','🥴','😵','💫','🤯','🤠','🥳','🥸','😎','🤓','🧐','😕','😟','🙁','☹️','😮','😯','😲','😳','🥺','😦','😧','😨','😰','😥','😢','😭','😱','😖','😣','😞','😓','😩','😫','🥱','😤','😡','😠','🤬','😈','👿','💀','☠️','💩','🤡','👹','👺','👻','👽','👾','🤖'],
+'Gestes':['👋','🤚','🖐️','✋','🖖','🫱','🫲','🫳','🫴','👌','🤌','🤏','✌️','🤞','🫰','🤟','🤘','🤙','🖕','👈','👉','👆','🖕','👇','☝️','🫵','👍','👎','✊','👊','🤛','🤜','👏','🙌','🫶','👐','🤲','🤝','🙏','✍️','💅','🤳','💪','🦾','🦿','🦵','🦶','👂','🦻','👃','🫀','🫁','🧠','🦷','🦴','👀','👁️','👅','👄','💋','🩸'],
+'Personnes':['👶','🧒','👦','👧','🧑','👱','👨','🧔','👩','🧓','👴','👵','🙍','🙎','🙅','🙆','💁','🙋','🧏','🙇','🤦','🤷','👮','🕵️','💂','🥷','👷','🫅','🤴','👸','👳','👲','🧕','🤵','👰','🤰','🫄','🤱','👼','🎅','🤶','🦸','🦹','🧙','🧝','🧛','🧟','🧞','🧜','🧚','🧑‍⚕️','👫','👬','👭','💏','💑','👪'],
+'Amour':['❤️','🧡','💛','💚','💙','💜','🖤','🤍','🤎','💔','❤️‍🔥','❤️‍🩹','❣️','💕','💞','💓','💗','💖','💘','💝','💟','☮️','✝️','☯️','🕊️','💌','💍','💎','🌹','🌷'],
+'Bouffe':['🍎','🍊','🍋','🍇','🍓','🫐','🍈','🍑','🍒','🍍','🥭','🍅','🍆','🥑','🥦','🥕','🌽','🌶️','🧄','🧅','🥔','🍠','🥐','🥖','🫓','🥨','🧀','🥚','🍳','🧈','🥞','🧇','🥓','🌭','🍔','🍟','🍕','🌮','🌯','🫔','🥙','🧆','🥗','🥘','🫕','🍝','🍜','🍲','🍛','🍣','🍱','🥟','🦪','🍤','🍙','🍚','🍘','🍥','🥮','🍡','🧁','🎂','🍰','🍮','🍭','🍬','🍫','🍿','🍩','🍪','🌰','🍦','🍧','🍨','🍺','🍻','🥂','🍷','🍸','🍹','🧉','🍾','☕','🫖','🧃','🥤','🧋','🍼'],
+'Nature':['🌸','🌺','🌻','🌼','🌷','🌱','🌿','☘️','🍀','🎋','🎍','🍃','🍂','🍁','🪸','🌾','🪨','🌵','🎄','🌲','🌳','🌴','🪵','🌊','🌬️','🌀','🌈','⛅','🌤️','⛈️','🌧️','🌩️','❄️','🌨️','☃️','⛄','🔥','💧','🌊','🌙','⭐','🌟','💫','⚡','🌞','🌝','🌛','🌜','🌚','☀️','🌕','🌖','🌗','🌘','🌑','🌒','🌓','🌔'],
+'Animaux':['🐶','🐱','🐭','🐹','🐰','🦊','🐻','🐼','🐨','🐯','🦁','🐮','🐷','🐸','🐵','🙈','🙉','🙊','🐔','🐧','🐦','🦅','🦆','🦉','🦇','🐺','🐗','🐴','🦄','🐝','🪱','🐛','🦋','🐌','🐞','🐜','🦟','🦗','🕷️','🦂','🐢','🐍','🦎','🦖','🦕','🐙','🦑','🦐','🦞','🦀','🐡','🐠','🐟','🐬','🐳','🦈','🐊','🐅','🐆','🦓','🦍','🦧','🦣','🐘','🦛','🦏','🐪','🐫','🦒','🦘','🦬','🐃','🐂','🐄','🐎','🐖','🐏','🐑','🦙','🐐','🐓','🦃','🦤','🦚','🦜','🦢','🕊️'],
+'Sport':['⚽','🏀','🏈','⚾','🥎','🎾','🏐','🏉','🎱','🏓','🏸','🥊','🎯','🥅','⛳','🎣','🤿','🎽','🎿','🛷','🥌','🎲','🎮','🕹️','🏋️','🤼','🤸','⛹️','🤺','🏇','⛷️','🏂','🪂','🏄','🚣','🧗','🏊','🤽','🚴','🏆','🥇','🥈','🥉','🏅','🎖️'],
+'Voyage':['🚀','✈️','🛸','🚁','🛩️','🚂','🚃','🚄','🚅','🚇','🚊','🚞','🚝','🚍','🚎','🚐','🚑','🚒','🚓','🚕','🛻','🚌','🏎️','🚗','🚙','🛵','🏍️','🛺','🚲','🛴','🛹','🛼','🚏','🚦','🌍','🌎','🌏','🗺️','🧭','🏔️','⛰️','🌋','🗻','🏕️','🏖️','🏜️','🏝️','🏞️','🏟️','🏛️','🏗️','🧱','🏠','🏡','🏢','🏣','🏤','🏥','🏦','🏨','🏩','🏪','🏫','🏬','🏭','🗼','🗽','⛪','🕌','⛩️','🕍','🗿'],
+'Objets':['📱','💻','⌨️','🖥️','🖨️','🖱️','🖲️','💾','💿','📀','📷','📸','📹','🎥','📽️','🎞️','📞','☎️','📟','📠','📺','📻','🧭','⏱️','⏲️','⏰','🕰️','⌚','🪔','📡','🔋','🔌','💡','🔦','🕯️','🪣','🧰','🔧','🔩','⚙️','🪛','🔨','⛏️','🪚','🗡️','⚔️','🛡️','🪤','💊','💉','🩺','🩹','🩻','🪞','🛁','🪠','🧴','🧷','🧹','🧺','🧻','🪣','🧼','🪥','🛒','🎁','🎀','🪅','🎊','🎉','🪩','🎈','🎏','🎐','🎑','🎃','🎄','🎆','🎇','✨'],
+'Symboles':['❤️','💯','💢','💥','💫','💦','💨','🕳️','💬','👁️‍🗨️','💭','💤','🔔','🔕','🎵','🎶','🎼','🔇','🔈','🔉','🔊','📢','📣','📯','🔔','🃏','🀄','🎴','🔮','🔯','🧿','♠️','♥️','♦️','♣️','♟️','🔴','🟠','🟡','🟢','🔵','🟣','⚫','⚪','🟤','🔺','🔻','💠','🔷','🔹','🔶','🔸','▪️','▫️','◾','◽','◼️','◻️','🔲','🔳','🏳️','🏴','🚩','🎌','⛔','🚫','💲','©️','®️','™️','#️⃣','*️⃣','ℹ️','🔞','🔃','🔄','🔙','🔚','🔛','🔜','🔝']
 };
 const SOCIAL_PLATFORMS={
   instagram:{label:'Instagram',  icon:'📸',color:'#E1306C'},
@@ -1321,38 +1327,48 @@ function renderSheet(){
   const BICONS={text:'📝',link:'🔗',photo:'🖼️',video:'🎥',social:'📲'};
 
   body.innerHTML=`
+    <div class="sheet-section">Typographie</div>
     <div class="sheet-row">
-      <span class="sheet-lbl">Taille texte</span>
-      <input class="sheet-range" type="range" id="rng-fontsize" min="12" max="96" step="1" value="${p.fontSize||15}" oninput="onAdv('fontSize',+this.value);this.nextElementSibling.textContent=this.value+'px';$('num-fontsize').value=this.value">
-      <span class="sheet-val">${p.fontSize||15}px</span>
-      <input class="sheet-num" id="num-fontsize" type="number" min="12" max="96" value="${p.fontSize||15}" onchange="let v=Math.max(12,Math.min(96,+this.value||15));this.value=v;$('rng-fontsize').value=v;$('rng-fontsize').nextElementSibling.textContent=v+'px';onAdv('fontSize',v)">
-    </div>
-    <div class="sheet-row">
-      <span class="sheet-lbl">Alignement</span>
-      <div class="align-btns">
-        <button class="align-btn${(p.textAlign||'left')==='left'?' on':''}" onclick="onAdv('textAlign','left');this.parentElement.querySelectorAll('.align-btn').forEach(b=>b.classList.remove('on'));this.classList.add('on')">◀</button>
-        <button class="align-btn${(p.textAlign||'left')==='center'?' on':''}" onclick="onAdv('textAlign','center');this.parentElement.querySelectorAll('.align-btn').forEach(b=>b.classList.remove('on'));this.classList.add('on')">▮</button>
-        <button class="align-btn${(p.textAlign||'left')==='right'?' on':''}" onclick="onAdv('textAlign','right');this.parentElement.querySelectorAll('.align-btn').forEach(b=>b.classList.remove('on'));this.classList.add('on')">▶</button>
+      <span class="sheet-lbl">Taille</span>
+      <div class="sheet-ctrl">
+        <input class="sheet-range" type="range" id="rng-fontsize" min="12" max="96" step="1" value="${p.fontSize||15}" oninput="onAdv('fontSize',+this.value);$('badge-fontsize').textContent=this.value+'px';$('num-fontsize').value=this.value">
+        <span class="sheet-badge" id="badge-fontsize">${p.fontSize||15}px</span>
+        <input class="sheet-num" id="num-fontsize" type="number" min="12" max="96" value="${p.fontSize||15}" onchange="let v=Math.max(12,Math.min(96,+this.value||15));this.value=v;$('rng-fontsize').value=v;$('badge-fontsize').textContent=v+'px';onAdv('fontSize',v)">
       </div>
     </div>
     <div class="sheet-row">
-      <span class="sheet-lbl">Arrondi boutons</span>
-      <input class="sheet-range" type="range" id="rng-radius" min="0" max="30" step="1" value="${p.btnRadius!==undefined?p.btnRadius:14}" oninput="onAdv('btnRadius',+this.value);this.nextElementSibling.textContent=this.value+'px';$('num-radius').value=this.value">
-      <span class="sheet-val">${p.btnRadius!==undefined?p.btnRadius:14}px</span>
-      <input class="sheet-num" id="num-radius" type="number" min="0" max="30" value="${p.btnRadius!==undefined?p.btnRadius:14}" onchange="let v=Math.max(0,Math.min(30,+this.value||0));this.value=v;$('rng-radius').value=v;$('rng-radius').nextElementSibling.textContent=v+'px';onAdv('btnRadius',v)">
+      <span class="sheet-lbl">Alignement</span>
+      <div class="sheet-ctrl">
+        <button class="align-btn${(p.textAlign||'left')==='left'?' on':''}" onclick="onAdv('textAlign','left');this.parentElement.querySelectorAll('.align-btn').forEach(b=>b.classList.remove('on'));this.classList.add('on')" title="Gauche">←</button>
+        <button class="align-btn${(p.textAlign||'left')==='center'?' on':''}" onclick="onAdv('textAlign','center');this.parentElement.querySelectorAll('.align-btn').forEach(b=>b.classList.remove('on'));this.classList.add('on')" title="Centre">↔</button>
+        <button class="align-btn${(p.textAlign||'left')==='right'?' on':''}" onclick="onAdv('textAlign','right');this.parentElement.querySelectorAll('.align-btn').forEach(b=>b.classList.remove('on'));this.classList.add('on')" title="Droite">→</button>
+      </div>
+    </div>
+    <div class="sheet-section">Mise en page</div>
+    <div class="sheet-row">
+      <span class="sheet-lbl">Arrondi</span>
+      <div class="sheet-ctrl">
+        <input class="sheet-range" type="range" id="rng-radius" min="0" max="30" step="1" value="${p.btnRadius!==undefined?p.btnRadius:14}" oninput="onAdv('btnRadius',+this.value);$('badge-radius').textContent=this.value+'px';$('num-radius').value=this.value">
+        <span class="sheet-badge" id="badge-radius">${p.btnRadius!==undefined?p.btnRadius:14}px</span>
+        <input class="sheet-num" id="num-radius" type="number" min="0" max="30" value="${p.btnRadius!==undefined?p.btnRadius:14}" onchange="let v=Math.max(0,Math.min(30,+this.value||0));this.value=v;$('rng-radius').value=v;$('badge-radius').textContent=v+'px';onAdv('btnRadius',v)">
+      </div>
     </div>
     <div class="sheet-row">
       <span class="sheet-lbl">Ombre</span>
-      <input class="sheet-range" type="range" min="0" max="3" step="1" value="${p.shadowStrength!==undefined?p.shadowStrength:1}" oninput="onAdv('shadowStrength',+this.value);this.nextElementSibling.textContent=['Aucune','Normale','Forte','Très forte'][this.value]">
-      <span class="sheet-val" style="min-width:56px">${SL[p.shadowStrength!==undefined?p.shadowStrength:1]}</span>
+      <div class="sheet-ctrl">
+        <input class="sheet-range" type="range" min="0" max="3" step="1" value="${p.shadowStrength!==undefined?p.shadowStrength:1}" oninput="onAdv('shadowStrength',+this.value);$('badge-shadow').textContent=['Aucune','Légère','Forte','Max'][this.value]">
+        <span class="sheet-badge" id="badge-shadow" style="min-width:52px">${['Aucune','Légère','Forte','Max'][p.shadowStrength!==undefined?p.shadowStrength:1]}</span>
+      </div>
     </div>
     <div class="sheet-row">
       <span class="sheet-lbl">Espacement</span>
-      <input class="sheet-range" type="range" id="rng-spacing" min="4" max="32" step="2" value="${p.blockSpacing||12}" oninput="onAdv('blockSpacing',+this.value);this.nextElementSibling.textContent=this.value+'px';$('num-spacing').value=this.value">
-      <span class="sheet-val">${p.blockSpacing||12}px</span>
-      <input class="sheet-num" id="num-spacing" type="number" min="4" max="32" value="${p.blockSpacing||12}" onchange="let v=Math.max(4,Math.min(32,+this.value||4));this.value=v;$('rng-spacing').value=v;$('rng-spacing').nextElementSibling.textContent=v+'px';onAdv('blockSpacing',v)">
+      <div class="sheet-ctrl">
+        <input class="sheet-range" type="range" id="rng-spacing" min="4" max="32" step="2" value="${p.blockSpacing||12}" oninput="onAdv('blockSpacing',+this.value);$('badge-spacing').textContent=this.value+'px';$('num-spacing').value=this.value">
+        <span class="sheet-badge" id="badge-spacing">${p.blockSpacing||12}px</span>
+        <input class="sheet-num" id="num-spacing" type="number" min="4" max="32" value="${p.blockSpacing||12}" onchange="let v=Math.max(4,Math.min(32,+this.value||4));this.value=v;$('rng-spacing').value=v;$('badge-spacing').textContent=v+'px';onAdv('blockSpacing',v)">
+      </div>
     </div>
-    <div style="font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;padding:12px 0 4px">Affichage public</div>
+    <div class="sheet-section">Visibilité</div>
     <div class="block-vis-row">
       <span class="block-vis-label${p.hideProfile?' hidden':''}">👤 Profil (nom, bio, avatar)</span>
       <button class="block-vis-btn" onclick="toggleProfileVis()">${p.hideProfile?'🙈':'👁'}</button>
@@ -1361,7 +1377,7 @@ function renderSheet(){
     <div style="font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;padding:12px 0 4px">Blocs — afficher / masquer</div>
     ${blocks.map(b=>{
       const icon=BICONS[b.type]||'📦';
-      const _typeLabels={text:'Texte',link:'Lien',photo:'Image',video:'Vidéo',social:'Réseau'};
+      const _typeLabels={text:'Texte',link:'Lien',photo:'Visuel',video:'Visuel',social:'Réseau'};
       const lbl=b.type==='social'
         ? (SOCIAL_PLATFORMS[b.platform||'instagram']?.label||'Réseau')
         : b.type==='link' && b.label ? esc(b.label.slice(0,22))
