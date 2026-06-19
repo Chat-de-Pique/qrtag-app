@@ -269,6 +269,10 @@
     .rich-editor{min-height:90px;padding:10px 12px;background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;font-size:14px;line-height:1.7;outline:none;transition:border .2s;word-break:break-word;cursor:text;}
     .rich-editor:focus{border-color:var(--accent);}
     .rich-editor:empty::before{content:attr(data-placeholder);color:var(--muted);pointer-events:none;}
+    .rich-editor-mini{min-height:38px;padding:8px 10px;background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;font-size:14px;line-height:1.5;outline:none;transition:border .2s;word-break:break-word;cursor:text;}
+    .rich-editor-mini:focus{border-color:var(--accent);}
+    .rich-editor-mini:empty::before{content:attr(data-placeholder);color:var(--muted);pointer-events:none;}
+    .fmt-bar-mini{display:flex;gap:4px;margin-bottom:6px;}
     .fmt-bar{display:flex;gap:4px;margin-bottom:8px;flex-wrap:wrap;}
     .fmt-btn{padding:5px 9px;background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;color:var(--text2);font-weight:700;transition:all .15s;line-height:1.3;}
     .fmt-btn:hover{border-color:var(--accent);color:var(--accent-dark);}
@@ -427,13 +431,23 @@
           </div>
           <div class="avatar-info">
             <label class="lbl" id="lbl-dn">Nom affiché</label>
-            <input class="inp" id="p-dn" placeholder="Ton prénom, pseudo…" oninput="autoSave()" style="margin-bottom:0">
+            <div class="fmt-bar-mini">
+              <button class="fmt-btn" onmousedown="event.preventDefault();richFmtField('bold','re-dn')" title="Gras"><b>G</b></button>
+              <button class="fmt-btn" onmousedown="event.preventDefault();richFmtField('italic','re-dn')" title="Italique"><i>I</i></button>
+              <button class="fmt-btn" onmousedown="event.preventDefault();richFmtField('underline','re-dn')" title="Souligné"><u>U</u></button>
+            </div>
+            <div class="rich-editor-mini" id="re-dn" contenteditable="true" data-placeholder="Ton prénom, pseudo…" oninput="onRichField('displayName','re-dn')"></div>
           </div>
         </div>
         <input type="file" id="avatar-file" accept="image/*" onchange="uploadAvatar(this)">
         <div class="upload-progress" id="av-prog"><div class="upload-progress-bar" id="av-bar"></div></div>
         <label class="lbl" id="lbl-bio">Bio / Phrase d'accroche</label>
-        <textarea class="inp" id="p-bio" rows="2" placeholder="Une courte phrase sur toi…" oninput="autoSave()"></textarea>
+        <div class="fmt-bar-mini">
+          <button class="fmt-btn" onmousedown="event.preventDefault();richFmtField('bold','re-bio')" title="Gras"><b>G</b></button>
+          <button class="fmt-btn" onmousedown="event.preventDefault();richFmtField('italic','re-bio')" title="Italique"><i>I</i></button>
+          <button class="fmt-btn" onmousedown="event.preventDefault();richFmtField('underline','re-bio')" title="Souligné"><u>U</u></button>
+        </div>
+        <div class="rich-editor-mini" id="re-bio" contenteditable="true" data-placeholder="Une courte phrase sur toi…" style="min-height:54px;margin-bottom:10px" oninput="onRichField('bio','re-bio')"></div>
         <label class="lbl" id="lbl-url">URL d'image (optionnel)</label>
         <input class="inp" id="p-av" placeholder="https://…" oninput="autoSave()" style="margin-bottom:0">
       </div>
@@ -614,16 +628,16 @@ const VAPID_KEY = 'BEIzjWHHxKiWtShJuJe-uXaRVWluTXJqT9xxn8aSHvgFG9zsxdzBBQZSyB_L5
 /* LANGUES */
 const LANGS={
 fr:{f:'🇫🇷',n:'Français',connect:'Connexion',register:'Inscription',create:'Créer mon compte',poweredBy:'Propulsé par QR-MØØN',privateMsg:'Ce profil est temporairement privé.',noContent:'Aucun contenu pour le moment',tabContent:'Contenu',tabStyle:'Style',tabQr:'QR',
-typo:'Typographie',layout:'Mise en page',visibility:'Visibilité',colorAccent:'Couleur principale',colorBg:'Fond de page',colorText:'Texte',bgImageOpt:'Image de fond (optionnel)',sizeLabel:'Taille',alignLabel:'Alignement',radiusLabel:'Arrondi',shadowLabel:'Ombre',spacingLabel:'Espacement',colorLabel:'Couleur',bgLabel:'Fond',resetLabel:'Réinitialiser',brandColor:'marque',defaultColor:'défaut',autoplay:'Démarrage auto',scrollTop:'Haut de page',nameLabel:'Nom affiché',bioLabel:'Bio / Accroche',urlLabel:'URL image (optionnel)',myBlocks:'Mes blocs de contenu',addBlock:'+ Ajouter un bloc',cancel:'Annuler',profileShown:'Profil affiché',profileHidden:'Profil masqué',preview:'Aperçu',template:'Template',fontLabel:'Police',colors:'Couleurs',legal:'Mentions légales',remember:'Se souvenir de moi',forgotPw:'Mot de passe oublié ?',choosePhoto:'Choisir depuis le téléphone',pasteUrl:'…ou coller une URL',chooseVideo:'Vidéo ou GIF depuis le téléphone',saved:'Sauvegardé !',msgPlaceholder:'Écris ton message ici…',linkTitle:'Titre du lien',linkUrl:'URL du lien',namePh:'Ton prénom, pseudo…',bioPh:'Une courte phrase sur toi…',urlPh:'https://…',emailPh:'toi@email.com',addPanelTitle:'Quel type de bloc ?',addSocial:'Réseau social'},
+typo:'Typographie',layout:'Mise en page',visibility:'Visibilité',colorAccent:'Couleur principale',colorBg:'Fond de page',colorText:'Texte',bgImageOpt:'Image de fond (optionnel)',sizeLabel:'Taille',alignLabel:'Alignement',radiusLabel:'Arrondi',shadowLabel:'Ombre',spacingLabel:'Espacement',colorLabel:'Couleur',bgLabel:'Fond',resetLabel:'Réinitialiser',brandColor:'marque',defaultColor:'défaut',autoplay:'Démarrage auto',scrollTop:'Haut de page',nameLabel:'Nom affiché',bioLabel:'Bio / Accroche',urlLabel:'URL image (optionnel)',myBlocks:'Mes blocs de contenu',addBlock:'+ Ajouter un bloc',cancel:'Annuler',profileShown:'Profil affiché',profileHidden:'Profil masqué',preview:'Aperçu',template:'Template',fontLabel:'Police',colors:'Couleurs',legal:'Mentions légales',remember:'Se souvenir de moi',forgotPw:'Mot de passe oublié ?',choosePhoto:'Choisir depuis le téléphone',pasteUrl:'…ou coller une URL',chooseVideo:'Vidéo ou GIF depuis le téléphone',saved:'Sauvegardé !',msgPlaceholder:'Écris ton message ici…',linkTitle:'Titre du lien',linkUrl:'URL du lien',namePh:'Ton prénom, pseudo…',bioPh:'Une courte phrase sur toi…',urlPh:'https://…',emailPh:'toi@email.com',addPanelTitle:'Quel type de bloc ?',addSocial:'Réseau social',btnColorLbl:'Couleur boutons',btnColorSub:'Fond des boutons',linkColorLbl:'Couleur liens',linkColorSub:'Texte des liens',bgColorLbl:'Fond de page',bgColorSub:'Arrière-plan',textColorLbl:'Texte',textColorSub:'Couleur principale'},
 en:{f:'🇬🇧',n:'English',connect:'Sign In',register:'Sign Up',create:'Create account',poweredBy:'Powered by QR-MØØN',privateMsg:'This profile is temporarily private.',noContent:'No content yet',tabContent:'Content',tabStyle:'Style',tabQr:'QR',
-typo:'Typography',layout:'Layout',visibility:'Visibility',colorAccent:'Main color',colorBg:'Background',colorText:'Text',bgImageOpt:'Background image (optional)',sizeLabel:'Size',alignLabel:'Alignment',radiusLabel:'Radius',shadowLabel:'Shadow',spacingLabel:'Spacing',colorLabel:'Color',bgLabel:'Background',resetLabel:'Reset',brandColor:'brand',defaultColor:'default',autoplay:'Autoplay',scrollTop:'Top',nameLabel:'Display name',bioLabel:'Bio / Tagline',urlLabel:'Image URL (optional)',myBlocks:'My content blocks',addBlock:'+ Add block',cancel:'Cancel',profileShown:'Profile shown',profileHidden:'Profile hidden',preview:'Preview',template:'Template',fontLabel:'Font',colors:'Colors',legal:'Legal',remember:'Remember me',forgotPw:'Forgot password?',choosePhoto:'Choose from phone',pasteUrl:'…or paste a URL',chooseVideo:'Video or GIF from phone',saved:'Saved!',msgPlaceholder:'Write your message here…',linkTitle:'Link title',linkUrl:'Link URL',namePh:'Your name or nickname…',bioPh:'A short sentence about you…',urlPh:'https://…',emailPh:'you@email.com',addPanelTitle:'What type of block?',addSocial:'Social network'},
+typo:'Typography',layout:'Layout',visibility:'Visibility',colorAccent:'Main color',colorBg:'Background',colorText:'Text',bgImageOpt:'Background image (optional)',sizeLabel:'Size',alignLabel:'Alignment',radiusLabel:'Radius',shadowLabel:'Shadow',spacingLabel:'Spacing',colorLabel:'Color',bgLabel:'Background',resetLabel:'Reset',brandColor:'brand',defaultColor:'default',autoplay:'Autoplay',scrollTop:'Top',nameLabel:'Display name',bioLabel:'Bio / Tagline',urlLabel:'Image URL (optional)',myBlocks:'My content blocks',addBlock:'+ Add block',cancel:'Cancel',profileShown:'Profile shown',profileHidden:'Profile hidden',preview:'Preview',template:'Template',fontLabel:'Font',colors:'Colors',legal:'Legal',remember:'Remember me',forgotPw:'Forgot password?',choosePhoto:'Choose from phone',pasteUrl:'…or paste a URL',chooseVideo:'Video or GIF from phone',saved:'Saved!',msgPlaceholder:'Write your message here…',linkTitle:'Link title',linkUrl:'Link URL',namePh:'Your name or nickname…',bioPh:'A short sentence about you…',urlPh:'https://…',emailPh:'you@email.com',addPanelTitle:'What type of block?',addSocial:'Social network',btnColorLbl:'Button color',btnColorSub:'Button background',linkColorLbl:'Link color',linkColorSub:'Link text',bgColorLbl:'Page background',bgColorSub:'Background',textColorLbl:'Text',textColorSub:'Main color'},
 es:{f:'🇪🇸',n:'Español',connect:'Iniciar sesión',register:'Registrarse',create:'Crear cuenta',poweredBy:'Desarrollado por QR-MØØN',privateMsg:'Este perfil está temporalmente privado.',noContent:'Sin contenido aún',tabContent:'Contenido',tabStyle:'Estilo',tabQr:'QR',
-typo:'Tipografía',layout:'Diseño',visibility:'Visibilidad',colorAccent:'Color principal',colorBg:'Fondo',colorText:'Texto',bgImageOpt:'Imagen de fondo (opcional)',sizeLabel:'Tamaño',alignLabel:'Alineación',radiusLabel:'Radio',shadowLabel:'Sombra',spacingLabel:'Espaciado',colorLabel:'Color',bgLabel:'Fondo',resetLabel:'Restablecer',brandColor:'marca',defaultColor:'defecto',autoplay:'Autoplay',scrollTop:'Arriba',nameLabel:'Nombre',bioLabel:'Bio / Eslogan',urlLabel:'URL imagen',myBlocks:'Mis bloques',addBlock:'+ Agregar bloque',cancel:'Cancelar',profileShown:'Perfil visible',profileHidden:'Perfil oculto',preview:'Vista previa',template:'Plantilla',fontLabel:'Fuente',colors:'Colores',legal:'Aviso legal',remember:'Recordarme',forgotPw:'¿Olvidaste tu contraseña?',choosePhoto:'Elegir desde el teléfono',pasteUrl:'…o pegar una URL',chooseVideo:'Vídeo o GIF desde el teléfono',saved:'¡Guardado!',msgPlaceholder:'Escribe tu mensaje aquí…',linkTitle:'Título del enlace',linkUrl:'URL del enlace',namePh:'Tu nombre o apodo…',bioPh:'Una frase corta sobre ti…',urlPh:'https://…',emailPh:'tú@email.com',addPanelTitle:'¿Qué tipo de bloque?',addSocial:'Red social'},
+typo:'Tipografía',layout:'Diseño',visibility:'Visibilidad',colorAccent:'Color principal',colorBg:'Fondo',colorText:'Texto',bgImageOpt:'Imagen de fondo (opcional)',sizeLabel:'Tamaño',alignLabel:'Alineación',radiusLabel:'Radio',shadowLabel:'Sombra',spacingLabel:'Espaciado',colorLabel:'Color',bgLabel:'Fondo',resetLabel:'Restablecer',brandColor:'marca',defaultColor:'defecto',autoplay:'Autoplay',scrollTop:'Arriba',nameLabel:'Nombre',bioLabel:'Bio / Eslogan',urlLabel:'URL imagen',myBlocks:'Mis bloques',addBlock:'+ Agregar bloque',cancel:'Cancelar',profileShown:'Perfil visible',profileHidden:'Perfil oculto',preview:'Vista previa',template:'Plantilla',fontLabel:'Fuente',colors:'Colores',legal:'Aviso legal',remember:'Recordarme',forgotPw:'¿Olvidaste tu contraseña?',choosePhoto:'Elegir desde el teléfono',pasteUrl:'…o pegar una URL',chooseVideo:'Vídeo o GIF desde el teléfono',saved:'¡Guardado!',msgPlaceholder:'Escribe tu mensaje aquí…',linkTitle:'Título del enlace',linkUrl:'URL del enlace',namePh:'Tu nombre o apodo…',bioPh:'Una frase corta sobre ti…',urlPh:'https://…',emailPh:'tú@email.com',addPanelTitle:'¿Qué tipo de bloque?',addSocial:'Red social',btnColorLbl:'Color de botones',btnColorSub:'Fondo de botones',linkColorLbl:'Color de enlaces',linkColorSub:'Texto de enlaces',bgColorLbl:'Fondo de página',bgColorSub:'Fondo',textColorLbl:'Texto',textColorSub:'Color principal'},
 de:{f:'🇩🇪',n:'Deutsch',connect:'Anmelden',register:'Registrieren',create:'Konto erstellen',poweredBy:'Bereitgestellt von QR-MØØN',privateMsg:'Dieses Profil ist vorübergehend privat.',noContent:'Noch kein Inhalt',tabContent:'Inhalt',tabStyle:'Stil',tabQr:'QR',
-typo:'Typografie',layout:'Layout',visibility:'Sichtbarkeit',colorAccent:'Hauptfarbe',colorBg:'Hintergrund',colorText:'Text',bgImageOpt:'Hintergrundbild (optional)',sizeLabel:'Größe',alignLabel:'Ausrichtung',radiusLabel:'Radius',shadowLabel:'Schatten',spacingLabel:'Abstand',colorLabel:'Farbe',bgLabel:'Hintergrund',resetLabel:'Zurücksetzen',brandColor:'Marke',defaultColor:'Standard',autoplay:'Autoplay',scrollTop:'Nach oben',nameLabel:'Anzeigename',bioLabel:'Bio / Slogan',urlLabel:'Bild-URL',myBlocks:'Meine Blöcke',addBlock:'+ Block hinzufügen',cancel:'Abbrechen',profileShown:'Profil sichtbar',profileHidden:'Profil versteckt',preview:'Vorschau',template:'Vorlage',fontLabel:'Schrift',colors:'Farben',legal:'Impressum',remember:'Angemeldet bleiben',forgotPw:'Passwort vergessen?',choosePhoto:'Vom Handy wählen',pasteUrl:'…oder URL einfügen',chooseVideo:'Video oder GIF vom Handy',saved:'Gespeichert!',msgPlaceholder:'Schreib deine Nachricht…',linkTitle:'Link-Titel',linkUrl:'Link-URL',namePh:'Dein Name oder Spitzname…',bioPh:'Ein kurzer Satz über dich…',urlPh:'https://…',emailPh:'du@email.com',addPanelTitle:'Welcher Blocktyp?',addSocial:'Soziales Netzwerk'},
+typo:'Typografie',layout:'Layout',visibility:'Sichtbarkeit',colorAccent:'Hauptfarbe',colorBg:'Hintergrund',colorText:'Text',bgImageOpt:'Hintergrundbild (optional)',sizeLabel:'Größe',alignLabel:'Ausrichtung',radiusLabel:'Radius',shadowLabel:'Schatten',spacingLabel:'Abstand',colorLabel:'Farbe',bgLabel:'Hintergrund',resetLabel:'Zurücksetzen',brandColor:'Marke',defaultColor:'Standard',autoplay:'Autoplay',scrollTop:'Nach oben',nameLabel:'Anzeigename',bioLabel:'Bio / Slogan',urlLabel:'Bild-URL',myBlocks:'Meine Blöcke',addBlock:'+ Block hinzufügen',cancel:'Abbrechen',profileShown:'Profil sichtbar',profileHidden:'Profil versteckt',preview:'Vorschau',template:'Vorlage',fontLabel:'Schrift',colors:'Farben',legal:'Impressum',remember:'Angemeldet bleiben',forgotPw:'Passwort vergessen?',choosePhoto:'Vom Handy wählen',pasteUrl:'…oder URL einfügen',chooseVideo:'Video oder GIF vom Handy',saved:'Gespeichert!',msgPlaceholder:'Schreib deine Nachricht…',linkTitle:'Link-Titel',linkUrl:'Link-URL',namePh:'Dein Name oder Spitzname…',bioPh:'Ein kurzer Satz über dich…',urlPh:'https://…',emailPh:'du@email.com',addPanelTitle:'Welcher Blocktyp?',addSocial:'Soziales Netzwerk',btnColorLbl:'Buttonfarbe',btnColorSub:'Button-Hintergrund',linkColorLbl:'Linkfarbe',linkColorSub:'Link-Text',bgColorLbl:'Seitenhintergrund',bgColorSub:'Hintergrund',textColorLbl:'Text',textColorSub:'Hauptfarbe'},
 it:{f:'🇮🇹',n:'Italiano',connect:'Accedi',register:'Registrati',create:'Crea account',poweredBy:'Powered by QR-MØØN',privateMsg:'Questo profilo è temporaneamente privato.',noContent:'Nessun contenuto',tabContent:'Contenuto',tabStyle:'Stile',tabQr:'QR',nameLabel:'Nome visualizzato',bioLabel:'Bio / Slogan',urlLabel:'URL immagine',myBlocks:'I miei blocchi',addBlock:'+ Aggiungi blocco',cancel:'Annulla',profileShown:'Profilo visibile',profileHidden:'Profilo nascosto',preview:'Anteprima',template:'Modello',fontLabel:'Carattere',colors:'Colori',legal:'Note legali',remember:'Ricordami',forgotPw:'Password dimenticata?',choosePhoto:'Scegli dal telefono',pasteUrl:'…o incolla un URL',chooseVideo:'Video o GIF dal telefono',saved:'Salvato!',msgPlaceholder:'Scrivi il tuo messaggio…',linkTitle:'Titolo link',linkUrl:'URL link',namePh:'Il tuo nome o soprannome…',bioPh:'Una breve frase su di te…',urlPh:'https://…',emailPh:'tu@email.com',addPanelTitle:'Che tipo di blocco?',addSocial:'Social network'},
 pt:{f:'🇵🇹',n:'Português',connect:'Entrar',register:'Registrar',create:'Criar conta',poweredBy:'Desenvolvido por QR-MØØN',privateMsg:'Este perfil está temporariamente privado.',noContent:'Sem conteúdo ainda',tabContent:'Conteúdo',tabStyle:'Estilo',tabQr:'QR',
-typo:'Tipografia',layout:'Layout',visibility:'Visibilidade',colorAccent:'Cor principal',colorBg:'Fundo',colorText:'Texto',bgImageOpt:'Imagem de fundo (opcional)',sizeLabel:'Tamanho',alignLabel:'Alinhamento',radiusLabel:'Raio',shadowLabel:'Sombra',spacingLabel:'Espaçamento',colorLabel:'Cor',bgLabel:'Fundo',resetLabel:'Redefinir',brandColor:'marca',defaultColor:'padrão',autoplay:'Reprodução auto',scrollTop:'Topo',nameLabel:'Nome exibido',bioLabel:'Bio / Slogan',urlLabel:'URL da imagem',myBlocks:'Meus blocos',addBlock:'+ Adicionar bloco',cancel:'Cancelar',profileShown:'Perfil visível',profileHidden:'Perfil oculto',preview:'Visualizar',template:'Modelo',fontLabel:'Fonte',colors:'Cores',legal:'Aviso legal',remember:'Lembrar de mim',forgotPw:'Esqueceu a senha?',choosePhoto:'Escolher do celular',pasteUrl:'…ou cole uma URL',chooseVideo:'Vídeo ou GIF do celular',saved:'Salvo!',msgPlaceholder:'Escreva sua mensagem…',linkTitle:'Título do link',linkUrl:'URL do link',namePh:'Seu nome ou apelido…',bioPh:'Uma frase curta sobre você…',urlPh:'https://…',emailPh:'voce@email.com',addPanelTitle:'Que tipo de bloco?',addSocial:'Rede social'},
+typo:'Tipografia',layout:'Layout',visibility:'Visibilidade',colorAccent:'Cor principal',colorBg:'Fundo',colorText:'Texto',bgImageOpt:'Imagem de fundo (opcional)',sizeLabel:'Tamanho',alignLabel:'Alinhamento',radiusLabel:'Raio',shadowLabel:'Sombra',spacingLabel:'Espaçamento',colorLabel:'Cor',bgLabel:'Fundo',resetLabel:'Redefinir',brandColor:'marca',defaultColor:'padrão',autoplay:'Reprodução auto',scrollTop:'Topo',nameLabel:'Nome exibido',bioLabel:'Bio / Slogan',urlLabel:'URL da imagem',myBlocks:'Meus blocos',addBlock:'+ Adicionar bloco',cancel:'Cancelar',profileShown:'Perfil visível',profileHidden:'Perfil oculto',preview:'Visualizar',template:'Modelo',fontLabel:'Fonte',colors:'Cores',legal:'Aviso legal',remember:'Lembrar de mim',forgotPw:'Esqueceu a senha?',choosePhoto:'Escolher do celular',pasteUrl:'…ou cole uma URL',chooseVideo:'Vídeo ou GIF do celular',saved:'Salvo!',msgPlaceholder:'Escreva sua mensagem…',linkTitle:'Título do link',linkUrl:'URL do link',namePh:'Seu nome ou apelido…',bioPh:'Uma frase curta sobre você…',urlPh:'https://…',emailPh:'voce@email.com',addPanelTitle:'Que tipo de bloco?',addSocial:'Rede social',btnColorLbl:'Cor dos botões',btnColorSub:'Fundo dos botões',linkColorLbl:'Cor dos links',linkColorSub:'Texto dos links',bgColorLbl:'Fundo da página',bgColorSub:'Plano de fundo',textColorLbl:'Texto',textColorSub:'Cor principal'},
 ru:{f:'🇷🇺',n:'Русский',connect:'Войти',register:'Зарегистрироваться',create:'Создать аккаунт',poweredBy:'QR-MØØN',privateMsg:'Этот профиль временно скрыт.',noContent:'Нет контента',tabContent:'Контент',tabStyle:'Стиль',tabQr:'QR',nameLabel:'Имя',bioLabel:'Bio / Слоган',urlLabel:'URL изображения',myBlocks:'Мои блоки',addBlock:'+ Добавить блок',cancel:'Отмена',profileShown:'Профиль виден',profileHidden:'Профиль скрыт',preview:'Просмотр',template:'Шаблон',fontLabel:'Шрифт',colors:'Цвета',legal:'Правовая информация',remember:'Запомнить меня',forgotPw:'Забыли пароль?',choosePhoto:'Выбрать с телефона',pasteUrl:'…или вставить URL',chooseVideo:'Видео или GIF с телефона',saved:'Сохранено!',msgPlaceholder:'Напишите сообщение…',linkTitle:'Название ссылки',linkUrl:'URL ссылки',namePh:'Ваше имя или псевдоним…',bioPh:'Короткая фраза о вас…',urlPh:'https://…',emailPh:'вы@email.com',addPanelTitle:'Какой тип блока?',addSocial:'Соцсеть'},
 ar:{f:'🇸🇦',n:'العربية',connect:'تسجيل الدخول',register:'إنشاء حساب',create:'إنشاء حساب',poweredBy:'QR-MØØN',privateMsg:'هذا الملف خاص مؤقتاً.',noContent:'لا يوجد محتوى',tabContent:'المحتوى',tabStyle:'المظهر',tabQr:'QR',nameLabel:'الاسم',bioLabel:'نبذة',urlLabel:'رابط الصورة',myBlocks:'مقاطعي',addBlock:'+ إضافة مقطع',cancel:'إلغاء',profileShown:'الملف ظاهر',profileHidden:'الملف مخفي',preview:'معاينة',template:'قالب',fontLabel:'الخط',colors:'الألوان',legal:'قانوني',remember:'تذكرني',forgotPw:'نسيت كلمة المرور؟',choosePhoto:'اختر من الهاتف',pasteUrl:'…أو الصق رابطاً',chooseVideo:'فيديو أو GIF من الهاتف',saved:'تم الحفظ!',msgPlaceholder:'اكتب رسالتك هنا…',linkTitle:'عنوان الرابط',linkUrl:'رابط URL',namePh:'اسمك أو لقبك…',bioPh:'جملة قصيرة عنك…',urlPh:'https://…',emailPh:'you@email.com',addPanelTitle:'ما نوع المقطع؟',addSocial:'شبكة اجتماعية',rtl:true},
 zh:{f:'🇨🇳',n:'中文',connect:'登录',register:'注册',create:'创建账号',poweredBy:'QR-MØØN',privateMsg:'此主页暂时为私密状态。',noContent:'暂无内容',tabContent:'内容',tabStyle:'样式',tabQr:'QR',nameLabel:'显示名称',bioLabel:'简介',urlLabel:'图片URL',myBlocks:'我的内容',addBlock:'+ 添加内容',cancel:'取消',profileShown:'主页公开',profileHidden:'主页隐藏',preview:'预览',template:'模板',fontLabel:'字体',colors:'颜色',legal:'法律',remember:'记住我',forgotPw:'忘记密码？',choosePhoto:'从手机选择',pasteUrl:'…或粘贴URL',chooseVideo:'从手机上传视频或GIF',saved:'已保存！',msgPlaceholder:'在此输入消息…',linkTitle:'链接标题',linkUrl:'链接URL',namePh:'你的名字或昵称…',bioPh:'一句关于你的话…',urlPh:'https://…',emailPh:'you@email.com',addPanelTitle:'什么类型的内容块？',addSocial:'社交网络'},
@@ -830,7 +844,7 @@ function buildLangGrid(){
     `<div class="lang-item${LANG===k?' on':''}" onclick="switchLang('${k}')">${l.f} ${l.n}</div>`
   ).join('');
 }
-window.switchLang=k=>{saveLang(k);buildLangGrid();closeLang();applyLang();showToast(LANGS[k].f+' '+LANGS[k].n);};
+window.switchLang=k=>{saveLang(k);buildLangGrid();closeLang();applyLang();renderSheet();if(typeof renderStyleTab==='function'&&$('s-style')?.classList.contains('active'))renderStyleTab();showToast(LANGS[k].f+' '+LANGS[k].n);};
 
 function applyLang(){
   if($('btn-login'))       $('btn-login').textContent=t('connect');
@@ -850,8 +864,8 @@ function applyLang(){
   if($('lbl-dn'))          $('lbl-dn').textContent=t('nameLabel');
   if($('lbl-bio'))         $('lbl-bio').textContent=t('bioLabel');
   if($('lbl-url'))         $('lbl-url').textContent=t('urlLabel');
-  if($('p-dn'))            $('p-dn').placeholder=t('namePh');
-  if($('p-bio'))           $('p-bio').placeholder=t('bioPh');
+  if($('re-dn'))           $('re-dn').setAttribute('data-placeholder',t('namePh'));
+  if($('re-bio'))          $('re-bio').setAttribute('data-placeholder',t('bioPh'));
   if($('p-av'))            $('p-av').placeholder=t('urlPh');
   if($('a-email'))         $('a-email').placeholder=t('emailPh');
   if($('blocks-section-title')) $('blocks-section-title').textContent=`📦 ${t('myBlocks')}`;
@@ -868,6 +882,14 @@ function applyLang(){
   if($('style-lbl-tpl'))    $('style-lbl-tpl').textContent=`🎨 ${t('template')}`;
   if($('style-lbl-font'))   $('style-lbl-font').textContent=`🔤 ${t('fontLabel')}`;
   if($('style-lbl-colors')) $('style-lbl-colors').textContent=`🖌️ ${t('colors')}`;
+  if($('lbl-c1'))  $('lbl-c1').textContent=t('btnColorLbl');
+  if($('lbl-c1s')) $('lbl-c1s').textContent=t('btnColorSub');
+  if($('lbl-c4'))  $('lbl-c4').textContent=t('linkColorLbl');
+  if($('lbl-c4s')) $('lbl-c4s').textContent=t('linkColorSub');
+  if($('lbl-c2'))  $('lbl-c2').textContent=t('bgColorLbl');
+  if($('lbl-c2s')) $('lbl-c2s').textContent=t('bgColorSub');
+  if($('lbl-c3'))  $('lbl-c3').textContent=t('textColorLbl');
+  if($('lbl-c3s')) $('lbl-c3s').textContent=t('textColorSub');
   if($('lbl-legal'))        $('lbl-legal').textContent=t('legal');
   if($('flash'))            $('flash').textContent=`✅ ${t('saved')}`;
   document.documentElement.dir=LANGS[LANG]?.rtl?'rtl':'ltr';
@@ -962,10 +984,23 @@ async function saveProfile(){
 function autoSave(){syncForm();clearTimeout(S.saveTimer);S.saveTimer=setTimeout(saveProfile,1300);}
 function syncForm(){
   if(!S.profile)return;
-  S.profile.displayName=$('p-dn').value;
-  S.profile.bio=$('p-bio').value;
+  S.profile.displayName=$('re-dn')?$('re-dn').innerHTML:S.profile.displayName;
+  S.profile.bio=$('re-bio')?$('re-bio').innerHTML:S.profile.bio;
   const u=$('p-av').value.trim();if(u)S.profile.avatar=u;
 }
+window.onRichField=(key,editorId)=>{
+  if(!S.profile)return;
+  const editor=$(editorId);if(!editor)return;
+  S.profile[key]=editor.innerHTML;
+  clearTimeout(S.saveTimer);S.saveTimer=setTimeout(saveProfile,1300);
+};
+window.richFmtField=(cmd,editorId)=>{
+  const editor=$(editorId);if(!editor)return;
+  editor.focus();
+  document.execCommand(cmd,false,null);
+  const key=editorId==='re-dn'?'displayName':editorId==='re-bio'?'bio':null;
+  if(key&&S.profile){S.profile[key]=editor.innerHTML;clearTimeout(S.saveTimer);S.saveTimer=setTimeout(saveProfile,1300);}
+};
 
 window.toggleVisibility=async()=>{
   if(!S.profile)return;
@@ -1086,8 +1121,13 @@ function renderBlocks(){
       <div id="emoji-panel-${b.id}" style="display:none"></div>`;
     }
     if(b.type==='link'){
-      body=`<input class="block-inp" placeholder="${t('linkTitle')}" value="${esc(b.label)}" oninput="updateBlock('${b.id}','label',this.value)">
-      <input class="block-inp" placeholder="${t('linkUrl')}" value="${esc(b.content)}" oninput="updateBlock('${b.id}','content',this.value)" style="margin-bottom:0">`;
+      body=`<div class="fmt-bar-mini">
+        <button class="fmt-btn" onmousedown="event.preventDefault();richFmtLabel('bold','${b.id}')" title="Gras"><b>G</b></button>
+        <button class="fmt-btn" onmousedown="event.preventDefault();richFmtLabel('italic','${b.id}')" title="Italique"><i>I</i></button>
+        <button class="fmt-btn" onmousedown="event.preventDefault();richFmtLabel('underline','${b.id}')" title="Souligné"><u>U</u></button>
+      </div>
+      <div class="rich-editor-mini" id="re-label-${b.id}" contenteditable="true" data-placeholder="${t('linkTitle')}" oninput="updateBlock('${b.id}','label',this.innerHTML)">${b.label||''}</div>
+      <input class="block-inp" placeholder="${t('linkUrl')}" value="${esc(b.content)}" oninput="updateBlock('${b.id}','content',this.value)" style="margin-bottom:0;margin-top:8px">`;
     }
     if(b.type==='photo'){
       const isUrl=b.content&&(b.content.startsWith('http')||b.content.startsWith('data:'));
@@ -1142,6 +1182,13 @@ function renderBlocks(){
 window.saveRichSel=id=>{
   const sel=window.getSelection();
   if(sel&&sel.rangeCount>0)S._savedRange={id,range:sel.getRangeAt(0).cloneRange()};
+};
+window.richFmtLabel=(cmd,id)=>{
+  const editor=document.getElementById('re-label-'+id);
+  if(editor) editor.focus();
+  document.execCommand(cmd,false,null);
+  const b=S.profile.blocks.find(b=>b.id===id);
+  if(b&&editor){b.label=editor.innerHTML;autoSave();}
 };
 window.richFmt=(cmd,id)=>{
   const editor=document.getElementById('re-'+id);
@@ -1351,9 +1398,9 @@ function renderSheet(){
   const BICONS={text:'📝',link:'🔗',photo:'🖼️',video:'🎥',social:'📲'};
 
   body.innerHTML=`
-    <div class="sheet-section">Typographie</div>
+    <div class="sheet-section">${t('typo')}</div>
     <div class="sheet-row">
-      <span class="sheet-lbl">Taille</span>
+      <span class="sheet-lbl">${t('sizeLabel')}</span>
       <div class="sheet-ctrl">
         <input class="sheet-range" type="range" id="rng-fontsize" min="12" max="96" step="1" value="${p.fontSize||15}" oninput="onAdv('fontSize',+this.value);$('badge-fontsize').textContent=this.value+'px';$('num-fontsize').value=this.value">
         <span class="sheet-badge" id="badge-fontsize">${p.fontSize||15}px</span>
@@ -1361,16 +1408,16 @@ function renderSheet(){
       </div>
     </div>
     <div class="sheet-row">
-      <span class="sheet-lbl">Alignement</span>
+      <span class="sheet-lbl">${t('alignLabel')}</span>
       <div class="sheet-ctrl">
         <button class="align-btn${(p.textAlign||'left')==='left'?' on':''}" onclick="onAdv('textAlign','left');this.parentElement.querySelectorAll('.align-btn').forEach(b=>b.classList.remove('on'));this.classList.add('on')" title="Gauche">←</button>
         <button class="align-btn${(p.textAlign||'left')==='center'?' on':''}" onclick="onAdv('textAlign','center');this.parentElement.querySelectorAll('.align-btn').forEach(b=>b.classList.remove('on'));this.classList.add('on')" title="Centre">↔</button>
         <button class="align-btn${(p.textAlign||'left')==='right'?' on':''}" onclick="onAdv('textAlign','right');this.parentElement.querySelectorAll('.align-btn').forEach(b=>b.classList.remove('on'));this.classList.add('on')" title="Droite">→</button>
       </div>
     </div>
-    <div class="sheet-section">Mise en page</div>
+    <div class="sheet-section">${t('layout')}</div>
     <div class="sheet-row">
-      <span class="sheet-lbl">Arrondi</span>
+      <span class="sheet-lbl">${t('radiusLabel')}</span>
       <div class="sheet-ctrl">
         <input class="sheet-range" type="range" id="rng-radius" min="0" max="30" step="1" value="${p.btnRadius!==undefined?p.btnRadius:14}" oninput="onAdv('btnRadius',+this.value);$('badge-radius').textContent=this.value+'px';$('num-radius').value=this.value">
         <span class="sheet-badge" id="badge-radius">${p.btnRadius!==undefined?p.btnRadius:14}px</span>
@@ -1378,21 +1425,21 @@ function renderSheet(){
       </div>
     </div>
     <div class="sheet-row">
-      <span class="sheet-lbl">Ombre</span>
+      <span class="sheet-lbl">${t('shadowLabel')}</span>
       <div class="sheet-ctrl">
         <input class="sheet-range" type="range" min="0" max="3" step="1" value="${p.shadowStrength!==undefined?p.shadowStrength:1}" oninput="onAdv('shadowStrength',+this.value);$('badge-shadow').textContent=['Aucune','Légère','Forte','Max'][this.value]">
         <span class="sheet-badge" id="badge-shadow" style="min-width:52px">${['Aucune','Légère','Forte','Max'][p.shadowStrength!==undefined?p.shadowStrength:1]}</span>
       </div>
     </div>
     <div class="sheet-row">
-      <span class="sheet-lbl">Espacement</span>
+      <span class="sheet-lbl">${t('spacingLabel')}</span>
       <div class="sheet-ctrl">
         <input class="sheet-range" type="range" id="rng-spacing" min="4" max="32" step="2" value="${p.blockSpacing||12}" oninput="onAdv('blockSpacing',+this.value);$('badge-spacing').textContent=this.value+'px';$('num-spacing').value=this.value">
         <span class="sheet-badge" id="badge-spacing">${p.blockSpacing||12}px</span>
         <input class="sheet-num" id="num-spacing" type="number" min="4" max="32" value="${p.blockSpacing||12}" onchange="let v=Math.max(4,Math.min(32,+this.value||4));this.value=v;$('rng-spacing').value=v;$('badge-spacing').textContent=v+'px';onAdv('blockSpacing',v)">
       </div>
     </div>
-    <div class="sheet-section">Visibilité</div>
+    <div class="sheet-section">${t('visibility')}</div>
     <div class="block-vis-row">
       <span class="block-vis-label${p.hideProfile?' hidden':''}">👤 Profil (nom, bio, avatar)</span>
       <button class="block-vis-btn" onclick="toggleProfileVis()">${p.hideProfile?'🙈':'👁'}</button>
@@ -1404,7 +1451,7 @@ function renderSheet(){
       const _typeLabels={text:'Texte',link:'Lien',photo:'Visuel',video:'Visuel',social:'Réseau'};
       const lbl=b.type==='social'
         ? (SOCIAL_PLATFORMS[b.platform||'instagram']?.label||'Réseau')
-        : b.type==='link' && b.label ? esc(b.label.slice(0,22))
+        : b.type==='link' && b.label ? esc(b.label.replace(/<[^>]+>/g,'').slice(0,22))
         : b.type==='link' && b.content ? esc(b.content.slice(0,22))
         : _typeLabels[b.type]||'Bloc';
       const bFs=(b.style&&b.style.fontSize)||0;
@@ -1419,7 +1466,7 @@ function renderSheet(){
         <div class="block-style-panel" id="bsp-${b.id}">
           <div class="bsp-inner">
           <div class="bsp-row">
-            <span class="bsp-lbl">Taille</span>
+            <span class="bsp-lbl">${t('sizeLabel')}</span>
             <input class="bsp-range" type="range" id="rng-bsp-${b.id}" min="0" max="96" step="1" value="${bFs||0}"
               oninput="setBlockStyle('${b.id}','fontSize',+this.value||null);this.nextElementSibling.textContent=this.value>0?this.value+'px':'auto';$('num-bsp-${b.id}').value=this.value">
             <span class="bsp-val">${bFs?bFs+'px':'auto'}</span>
@@ -1427,7 +1474,7 @@ function renderSheet(){
               onchange="let v=Math.max(0,Math.min(96,+this.value||0));this.value=v;$('rng-bsp-${b.id}').value=v;$('rng-bsp-${b.id}').nextElementSibling.textContent=v>0?v+'px':'auto';setBlockStyle('${b.id}','fontSize',v||null)">
           </div>
           <div class="bsp-row">
-            <span class="bsp-lbl">Align</span>
+            <span class="bsp-lbl">${t('alignLabel')}</span>
             <div class="bsp-align">
               <button class="bsp-ab${bAlign==='left'?' on':''}" onmousedown="event.preventDefault();setBlockStyle('${b.id}','textAlign','left')">◀</button>
               <button class="bsp-ab${bAlign==='center'?' on':''}" onmousedown="event.preventDefault();setBlockStyle('${b.id}','textAlign','center')">▮</button>
@@ -1436,19 +1483,19 @@ function renderSheet(){
             </div>
           </div>
           ${b.type==='social'?`<div class="bsp-row">
-            <span class="bsp-lbl">Couleur</span>
+            <span class="bsp-lbl">${t('colorLabel')}</span>
             <input class="bsp-color-input" type="color" value="${(b.style&&b.style.color)||SOCIAL_PLATFORMS[b.platform||'instagram']?.color||'#000000'}"
               onchange="setBlockStyle('${b.id}','color',this.value)">
-            ${b.style&&b.style.color?`<button class="bsp-reset" onclick="setBlockStyle('${b.id}','color',null);renderSheet()">Réinitialiser</button>`:`<span class="bsp-val" style="text-align:left">marque</span>`}
+            ${b.style&&b.style.color?`<button class="bsp-reset" onclick="setBlockStyle('${b.id}','color',null);renderSheet()">${t('resetLabel')}</button>`:`<span class="bsp-val" style="text-align:left">${t('brandColor')}</span>`}
           </div>`:''}
           <div class="bsp-row">
-            <span class="bsp-lbl">Fond</span>
+            <span class="bsp-lbl">${t('bgLabel')}</span>
             <input class="bsp-color-input" type="color" value="${(b.style&&b.style.bgColor)||'#ffffff'}"
               onchange="setBlockStyle('${b.id}','bgColor',this.value)">
-            ${b.style&&b.style.bgColor?`<button class="bsp-reset" onclick="setBlockStyle('${b.id}','bgColor',null);renderSheet()">Réinitialiser</button>`:`<span class="bsp-val" style="text-align:left">défaut</span>`}
+            ${b.style&&b.style.bgColor?`<button class="bsp-reset" onclick="setBlockStyle('${b.id}','bgColor',null);renderSheet()">${t('resetLabel')}</button>`:`<span class="bsp-val" style="text-align:left">${t('defaultColor')}</span>`}
           </div>
           ${b.type==='video'?`<div class="bsp-row">
-            <span class="bsp-lbl">Démarrage auto</span>
+            <span class="bsp-lbl">${t('autoplay')}</span>
             <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
               <input type="checkbox" ${b.autoplay?'checked':''} onchange="const bl=S.profile.blocks.find(x=>x.id==='${b.id}');if(bl){bl.autoplay=this.checked;saveProfile();renderSheet();renderPublicPage(S.user?.uid,true)}" style="accent-color:var(--accent);width:16px;height:16px">
               <span style="font-size:12px;color:var(--text2)">${b.autoplay?'Activé':'Désactivé'}</span>
@@ -1675,8 +1722,8 @@ async function renderPublicPage(uid_,isPreview=false){
     if(b.type==='link'&&b.content){
       const bFsL=(b.style&&b.style.fontSize)||fs;
       const bAlignL=(b.style&&b.style.textAlign)||align;
-      if(b.bare)return`<div class="pub-block" style="${bStyle}"><a href="${esc(b.content)}" style="color:${linkColor};font-size:${bFsL}px;font-weight:700;text-decoration:underline;display:block;text-align:${bAlignL}" target="_blank" rel="noopener">🔗 ${esc(b.label||b.content)}</a></div>`;
-      return`<div class="pub-block" style="${bStyle}"><a href="${esc(b.content)}" style="display:block;background:${accent};color:#000;border-radius:${br}px;padding:15px 20px;text-align:center;text-decoration:none;font-size:${bFsL}px;font-weight:800;box-shadow:0 4px 20px ${accent}55" target="_blank" rel="noopener">🔗 ${esc(b.label||b.content)}</a></div>`;
+      if(b.bare)return`<div class="pub-block" style="${bStyle}"><a href="${esc(b.content)}" style="color:${linkColor};font-size:${bFsL}px;font-weight:700;text-decoration:underline;display:block;text-align:${bAlignL}" target="_blank" rel="noopener">🔗 ${b.label?sanitizeHTML(b.label):esc(b.content)}</a></div>`;
+      return`<div class="pub-block" style="${bStyle}"><a href="${esc(b.content)}" style="display:block;background:${accent};color:#000;border-radius:${br}px;padding:15px 20px;text-align:center;text-decoration:none;font-size:${bFsL}px;font-weight:800;box-shadow:0 4px 20px ${accent}55" target="_blank" rel="noopener">🔗 ${b.label?sanitizeHTML(b.label):esc(b.content)}</a></div>`;
     }
     if(b.type==='photo'&&b.content)return`<div class="pub-block" style="${bStyle}"><div style="border-radius:${br}px;overflow:hidden;background:transparent;box-shadow:${shd}"><img src="${esc(b.content)}" style="width:100%;display:block" onerror="this.parentElement.parentElement.style.display='none'"></div></div>`;
     if(b.type==='video'&&b.content){
@@ -1706,7 +1753,7 @@ async function renderPublicPage(uid_,isPreview=false){
   const _bgImgStyle=p.bgImage?`background-image:url('${p.bgImage}');background-size:cover;background-position:center;background-attachment:fixed`:'';
   $('pub-content').innerHTML=`<div style="min-height:${isPreview?'auto':'100vh'};background:${bg};${_bgImgStyle};font-family:${fontObj.css}">
     <div class="pub-wrap">
-      ${showP&&(p.avatar||p.displayName||p.bio)?`<div style="text-align:${align};margin-bottom:28px">${avatarHtml}${p.displayName||username?`<h1 class="pub-name" style="color:${txt};font-size:${Math.round(fs*1.6)}px">${esc(p.displayName||username)}</h1>`:''}${p.bio?`<p class="pub-bio" style="color:${txt};font-size:${fs}px">${esc(p.bio)}</p>`:''}</div>`:''}
+      ${showP&&(p.avatar||p.displayName||p.bio)?`<div style="text-align:${align};margin-bottom:28px">${avatarHtml}${p.displayName||username?`<h1 class="pub-name" style="color:${txt};font-size:${Math.round(fs*1.6)}px">${p.displayName?sanitizeHTML(p.displayName):esc(username)}</h1>`:''}${p.bio?`<p class="pub-bio" style="color:${txt};font-size:${fs}px">${sanitizeHTML(p.bio)}</p>`:''}</div>`:''}
       ${blocksHtml||`<div style="text-align:center;padding:50px 0;opacity:.35;color:${txt}"><div style="font-size:48px">📭</div><p style="margin-top:8px">${t('noContent')}</p></div>`}
     </div>
     <div style="padding:20px 16px 28px;text-align:center">
@@ -1803,8 +1850,8 @@ window.toggleNotifications=async()=>{
 function refreshDash(){
   if(!S.data||!S.profile)return;
   $('hdr-name').textContent='@'+(S.data.username||'');
-  $('p-dn').value=S.profile.displayName||'';
-  $('p-bio').value=S.profile.bio||'';
+  $('re-dn').innerHTML=S.profile.displayName||'';
+  $('re-bio').innerHTML=S.profile.bio||'';
   $('p-av').value=S.profile.avatar?.startsWith('http')?S.profile.avatar:'';
   if(S.profile.avatar)updateAvatarPreview(S.profile.avatar);
   updateVisUI();renderBlocks();injectAdminTab();applyLang();initNotifButton();
