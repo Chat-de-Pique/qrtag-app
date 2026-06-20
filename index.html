@@ -27,6 +27,8 @@
     *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
     body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);transition:background .3s,color .3s;overscroll-behavior:none;}
     .screen{display:none;min-height:100vh;flex-direction:column;}
+    .screen.active{animation:screenFadeIn .25s ease;}
+    @keyframes screenFadeIn{from{opacity:0}to{opacity:1}}
     .screen.active{display:flex;}
     input,textarea,button,select{font-family:inherit;}
 
@@ -407,11 +409,6 @@
     <div class="action-pill" id="vis-toggle" onclick="toggleVisibility()">
       <div class="dot"></div>
       <span id="vis-label">Lien QR actif</span>
-    </div>
-    <div class="action-spacer"></div>
-
-    <div class="action-pill" onclick="showPreview()" style="background:var(--accent);border-color:var(--accent);color:#000;font-weight:800">
-      👁 <span id="lbl-preview">Aperçu</span>
     </div>
   </div>
   <div class="tabs">
