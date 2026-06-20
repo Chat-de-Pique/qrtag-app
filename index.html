@@ -31,7 +31,8 @@
     input,textarea,button,select{font-family:inherit;}
 
     #s-splash{align-items:center;justify-content:center;flex-direction:column;background:#3a3a3a;position:relative;}
-    .splash-icon{font-size:72px;margin-bottom:4px;animation:pop .5s ease;}
+    .splash-icon{font-size:72px;margin-bottom:8px;animation:pop .5s ease;line-height:0;}
+    .splash-icon img{display:block;}
     @keyframes pop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
     .splash-title{font-size:44px;font-weight:900;color:#fff;letter-spacing:-1px;}
     .splash-sub{font-size:14px;color:rgba(255,255,255,.5);margin-top:4px;}
@@ -1688,7 +1689,7 @@ async function renderPublicPage(uid_,isPreview=false){
       <img src="data:image/png;base64,${LOGO_B64}" alt="Chat de Pique" style="width:42px;height:42px;object-fit:contain;opacity:.6;display:block;margin:0 auto 8px">
       <div style="font-size:11px;opacity:.5;line-height:2;font-family:system-ui,-apple-system,sans-serif">
         <strong>QR-MØØN par Chat de Pique Création</strong><br><span style="opacity:.4;font-size:9px">*portez votre phase</span><br>
-        <a href="https://www.instagram.com/chatdepique" target="_blank" rel="noopener" style="color:#1a1a1a;text-decoration:none;margin-right:12px">Instagram</a><a href="https://chatdepique.com" target="_blank" rel="noopener" style="color:#1a1a1a;text-decoration:none">Boutique</a><br><span style="opacity:.4;font-size:10px">*portez votre phase</span>
+        <a href="https://www.instagram.com/chatdepique" target="_blank" rel="noopener" style="color:#1a1a1a;text-decoration:none;margin-right:12px">Instagram</a><a href="https://chatdepique.com" target="_blank" rel="noopener" style="color:#1a1a1a;text-decoration:none">Boutique</a>
       </div>
     </div>`;return;
   }
