@@ -1154,7 +1154,7 @@ function renderBlocks(){
       <input class="block-inp" placeholder="${t('linkUrl')}" value="${esc(!b.content.startsWith('data:')?b.content:'')}" oninput="updateBlock('${b.id}','content',this.value)">
       ${isVid?`<video src="${esc(b.content)}" controls class="media-preview"></video>`:''}
       ${isGif?`<img src="${esc(b.content)}" class="media-preview">`:''}
-      ${isVid?`<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--border);margin-top:6px"><span style="font-size:12px;font-weight:700;color:var(--text2);flex:1">▶ Démarrage auto</span><label class="toggle-switch"><input type="checkbox" ${b.autoplay?"checked":""} onchange="const bl=S.profile.blocks.find(x=>x.id==='${b.id}');if(bl){bl.autoplay=this.checked;saveProfile();renderBlocks();setTimeout(()=>renderPublicPage(S.user?.uid,true),100)}"><span class="toggle-track"></span></label></div>`:""}`;
+      ${isVid?`<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--border);margin-top:6px"><span style="font-size:12px;font-weight:700;color:var(--text2);flex:1">▶ Démarrage auto</span><label class="toggle-switch"><input type="checkbox" ${b.autoplay?"checked":""} onchange="const bl=S.profile.blocks.find(x=>x.id==='${b.id}');if(bl){bl.autoplay=this.checked;saveProfile();}"><span class="toggle-track"></span></label></div>`:""}`;
     }
     if(b.type==='social'){
       const cur=b.platform||'instagram';
@@ -1502,13 +1502,6 @@ function renderSheet(){
               onchange="setBlockStyle('${b.id}','bgColor',this.value)">
             ${b.style&&b.style.bgColor?`<button class="bsp-reset" onclick="setBlockStyle('${b.id}','bgColor',null);renderSheet()">${t('resetLabel')}</button>`:`<span class="bsp-val" style="text-align:left">${t('defaultColor')}</span>`}
           </div>
-          ${b.type==='video'?`<div class="bsp-row">
-            <span class="bsp-lbl">${t('autoplay')}</span>
-            <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
-              <input type="checkbox" ${b.autoplay?'checked':''} onchange="const bl=S.profile.blocks.find(x=>x.id==='${b.id}');if(bl){bl.autoplay=this.checked;saveProfile();renderSheet();renderPublicPage(S.user?.uid,true)}" style="accent-color:var(--accent);width:16px;height:16px">
-              <span style="font-size:12px;color:var(--text2)">${b.autoplay?'Activé':'Désactivé'}</span>
-            </label>
-          </div>`:''}
           </div>
         </div>
       </div>`;
@@ -1770,11 +1763,18 @@ async function renderPublicPage(uid_,isPreview=false){
     </div>
   </div>`;
   // Fix autoplay : l'attribut HTML seul n'est pas toujours respecté pour du contenu
-  // injecté via innerHTML (notamment Chrome mobile/iOS Safari). On force play() en JS.
+  // injecté via innerHTML (notamment Chrome mobile/iOS Safari). On force play() en JS,
+  // avec les propriétés explicites (pas seulement les attributs HTML) et un retry
+  // une fois les métadonnées vidéo chargées (le .play() immédiat peut échouer si la
+  // source n'est pas encore prête).
   $('pub-content').querySelectorAll('video[autoplay]').forEach(v=>{
-    v.muted=true; // requis par les navigateurs pour autoriser l'autoplay
-    const p=v.play();
-    if(p&&p.catch) p.catch(()=>{}); // ignore le rejet si bloqué (politique navigateur)
+    v.muted=true;
+    v.playsInline=true;
+    v.autoplay=true;
+    const tryPlay=()=>{const pr=v.play();if(pr&&pr.catch)pr.catch(()=>{});};
+    tryPlay();
+    v.addEventListener('loadedmetadata',tryPlay,{once:true});
+    v.addEventListener('canplay',tryPlay,{once:true});
   });
 }
 
@@ -1912,6 +1912,12 @@ getRedirectResult(AUTH).then(async result=>{
   }
 }).catch(()=>{});
 
+const _splashStart=Date.now();
+const _SPLASH_MIN_MS=500;
+async function _afterSplashMinDelay(){
+  const elapsed=Date.now()-_splashStart;
+  if(elapsed<_SPLASH_MIN_MS) await new Promise(r=>setTimeout(r,_SPLASH_MIN_MS-elapsed));
+}
 if(!checkPublicRoute()){
   onAuthStateChanged(AUTH,async user=>{
     if(user){
@@ -1929,8 +1935,13 @@ if(!checkPublicRoute()){
         if(d){S.data=d;S.profile=d.profile||{...DEFAULT_PROFILE};setTimeout(updateVisUI,50);if(isAdmin()&&S.data.plan!=='app'){S.data.plan='app';setDoc(doc(DB,'users',user.uid),{plan:'app'},{merge:true}).catch(()=>{});}}
         else{const nd={username:user.displayName||user.email.split('@')[0],qrId:user.uid,email:user.email,createdAt:Date.now(),plan:isAdmin()?'app':'tshirt',visits:0,profile:{...DEFAULT_PROFILE,displayName:user.displayName||''}};await setDoc(doc(DB,'users',user.uid),nd);S.data=nd;S.profile={...DEFAULT_PROFILE};}
       }catch(e){S.profile={...DEFAULT_PROFILE};}
+      await _afterSplashMinDelay();
       showScreen('dashboard');
-    }else{S.user=null;S.profile=null;S.data=null;showScreen('auth');}
+    }else{
+      S.user=null;S.profile=null;S.data=null;
+      await _afterSplashMinDelay();
+      showScreen('auth');
+    }
   });
 }
 
