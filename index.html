@@ -555,7 +555,6 @@
     <button class="pub-back-btn" onclick="showScreen('dashboard')">← Retour</button>
   </div>
   <div id="pub-content"></div>
-  <button class="scroll-top-btn" id="scroll-top-btn" onclick="scrollToTopPublic()" title="Haut de page">↑</button>
 
   <!-- Tiroir de personnalisation (visible uniquement en aperçu) -->
   <div class="pub-sheet" id="pub-sheet" style="display:none">
@@ -583,6 +582,7 @@
 </div>
 
 <div id="toast"></div>
+<button class="scroll-top-btn" id="scroll-top-btn" onclick="scrollToTopApp()" title="Haut de page">↑</button>
 <div id="notif-blocked-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:500;align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)this.style.display='none'">
   <div style="background:var(--surface);border-radius:20px;padding:24px;max-width:360px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.4)">
     <div style="font-size:32px;margin-bottom:12px">🔔</div>
@@ -905,9 +905,9 @@ window.showScreen=id=>{
     $('s-public').classList.remove('preview-mode');
     const sheet=$('pub-sheet');
     if(sheet){sheet.style.display='none';sheet.classList.remove('open');_sheetOpen=false;}
-    const scrollBtn=$('scroll-top-btn');
-    if(scrollBtn) scrollBtn.style.display='none';
   }
+  const scrollBtn=$('scroll-top-btn');
+  if(scrollBtn) scrollBtn.style.display='none';
   if(id==='dashboard')refreshDash();
 };
 window.showToast=msg=>{const el=$('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2600);};
@@ -1794,21 +1794,22 @@ window.showPreview=()=>{
   setTimeout(renderSheet,120);
 };
 
-/* ═══ BOUTON SCROLL-TO-TOP (page publique) ═══ */
-function _publicScrollContainer(){
-  // En mode aperçu (preview-mode), le scroll se fait dans #pub-content (overflow-y:auto).
-  // En mode page publique normale (URL directe), le scroll se fait sur la fenêtre.
-  return $('s-public')?.classList.contains('preview-mode') ? $('pub-content') : window;
+/* ═══ BOUTON SCROLL-TO-TOP (toute l'app) ═══ */
+function _appScrollContainer(){
+  // En mode aperçu public (preview-mode), le scroll se fait dans #pub-content (overflow-y:auto).
+  // Partout ailleurs (dashboard, page publique normale, etc.), le scroll se fait sur la fenêtre.
+  return $('s-public')?.classList.contains('active')&&$('s-public')?.classList.contains('preview-mode') ? $('pub-content') : window;
 }
-window.scrollToTopPublic=()=>{
-  const c=_publicScrollContainer();
+window.scrollToTopApp=()=>{
+  const c=_appScrollContainer();
   if(c) c.scrollTo({top:0,behavior:'smooth'});
 };
 function _updateScrollTopBtn(){
   const btn=$('scroll-top-btn');
   if(!btn) return;
-  if(!$('s-public')?.classList.contains('active')){btn.style.display='none';return;}
-  const c=_publicScrollContainer();
+  // Pas de bouton sur le splash et l'écran de connexion (contenu jamais assez long pour scroller)
+  if($('s-splash')?.classList.contains('active')||$('s-auth')?.classList.contains('active')){btn.style.display='none';return;}
+  const c=_appScrollContainer();
   const y=c===window?window.scrollY:(c?.scrollTop||0);
   btn.style.display=y>300?'flex':'none';
 }
@@ -1914,6 +1915,14 @@ getRedirectResult(AUTH).then(async result=>{
 if(!checkPublicRoute()){
   onAuthStateChanged(AUTH,async user=>{
     if(user){
+      // Firebase peut redéclencher onAuthStateChanged (refresh de token, reconnexion réseau, etc.)
+      // sans que l'utilisateur n'ait changé. Dans ce cas, on ne doit PAS recharger S.profile
+      // depuis le serveur ni forcer showScreen('dashboard'), sous peine d'écraser des
+      // modifications locales pas encore persistées (ex: toggle autoplay coché puis perdu).
+      if(S.user&&S.user.uid===user.uid&&S.profile){
+        S.user=user; // garde le token à jour sans toucher au profil local
+        return;
+      }
       S.user=user;
       try{
         const d=await loadUser(user.uid);
@@ -1921,7 +1930,7 @@ if(!checkPublicRoute()){
         else{const nd={username:user.displayName||user.email.split('@')[0],qrId:user.uid,email:user.email,createdAt:Date.now(),plan:isAdmin()?'app':'tshirt',visits:0,profile:{...DEFAULT_PROFILE,displayName:user.displayName||''}};await setDoc(doc(DB,'users',user.uid),nd);S.data=nd;S.profile={...DEFAULT_PROFILE};}
       }catch(e){S.profile={...DEFAULT_PROFILE};}
       showScreen('dashboard');
-    }else{showScreen('auth');}
+    }else{S.user=null;S.profile=null;S.data=null;showScreen('auth');}
   });
 }
 
