@@ -555,6 +555,7 @@
     <button class="pub-back-btn" onclick="showScreen('dashboard')">← Retour</button>
   </div>
   <div id="pub-content"></div>
+  <button class="scroll-top-btn" id="scroll-top-btn" onclick="scrollToTopPublic()" title="Haut de page">↑</button>
 
   <!-- Tiroir de personnalisation (visible uniquement en aperçu) -->
   <div class="pub-sheet" id="pub-sheet" style="display:none">
@@ -904,6 +905,8 @@ window.showScreen=id=>{
     $('s-public').classList.remove('preview-mode');
     const sheet=$('pub-sheet');
     if(sheet){sheet.style.display='none';sheet.classList.remove('open');_sheetOpen=false;}
+    const scrollBtn=$('scroll-top-btn');
+    if(scrollBtn) scrollBtn.style.display='none';
   }
   if(id==='dashboard')refreshDash();
 };
@@ -1766,6 +1769,13 @@ async function renderPublicPage(uid_,isPreview=false){
       </div>
     </div>
   </div>`;
+  // Fix autoplay : l'attribut HTML seul n'est pas toujours respecté pour du contenu
+  // injecté via innerHTML (notamment Chrome mobile/iOS Safari). On force play() en JS.
+  $('pub-content').querySelectorAll('video[autoplay]').forEach(v=>{
+    v.muted=true; // requis par les navigateurs pour autoriser l'autoplay
+    const p=v.play();
+    if(p&&p.catch) p.catch(()=>{}); // ignore le rejet si bloqué (politique navigateur)
+  });
 }
 
 window.sharePublicPage=async()=>{
@@ -1783,6 +1793,28 @@ window.showPreview=()=>{
   const arrow=$('sheet-arrow');if(arrow)arrow.textContent='↑';
   setTimeout(renderSheet,120);
 };
+
+/* ═══ BOUTON SCROLL-TO-TOP (page publique) ═══ */
+function _publicScrollContainer(){
+  // En mode aperçu (preview-mode), le scroll se fait dans #pub-content (overflow-y:auto).
+  // En mode page publique normale (URL directe), le scroll se fait sur la fenêtre.
+  return $('s-public')?.classList.contains('preview-mode') ? $('pub-content') : window;
+}
+window.scrollToTopPublic=()=>{
+  const c=_publicScrollContainer();
+  if(c) c.scrollTo({top:0,behavior:'smooth'});
+};
+function _updateScrollTopBtn(){
+  const btn=$('scroll-top-btn');
+  if(!btn) return;
+  if(!$('s-public')?.classList.contains('active')){btn.style.display='none';return;}
+  const c=_publicScrollContainer();
+  const y=c===window?window.scrollY:(c?.scrollTop||0);
+  btn.style.display=y>300?'flex':'none';
+}
+window.addEventListener('scroll',_updateScrollTopBtn,{passive:true});
+const _pubContentEl=$('pub-content');
+if(_pubContentEl) _pubContentEl.addEventListener('scroll',_updateScrollTopBtn,{passive:true});
 
 /* ═══ NOTIFICATIONS PUSH (FCM) ═══ */
 
