@@ -1147,15 +1147,16 @@ function renderBlocks(){
       ${isUrl?`<img src="${esc(b.content)}" class="media-preview" onerror="this.style.display='none'">` :''}`;
     }
     if(b.type==='video'){
-      const isVid=b.content&&(b.content.startsWith('data:video/')||(b.isCloud&&b.content));
-      const isGif=b.content&&(b.content.startsWith('data:image/gif')||b.content.endsWith('.gif'));
+      const _bc=b.content||'';
+      const isVid=_bc&&(_bc.startsWith('data:video/')||b.isCloud||_bc.match(/\.(mp4|webm|mov|ogg)(\?|$)/i)||_bc.includes('cloudinary'));
+      const isGif=_bc&&(_bc.startsWith('data:image/gif')||_bc.endsWith('.gif'));
       body=`<div class="upload-zone" onclick="document.getElementById('vf-${b.id}').click()">📹 ${t('chooseVideo')} <small style="opacity:.6;font-size:11px">(max 50MB)</small></div>
       <input type="file" id="vf-${b.id}" accept="video/*,image/gif" onchange="uploadBlockVideo('${b.id}',this)">
       <div class="upload-progress" id="vprog-${b.id}"><div class="upload-progress-bar" id="vbar-${b.id}"></div></div>
-      <input class="block-inp" placeholder="${t('linkUrl')}" value="${esc(!b.content.startsWith('data:')?b.content:'')}" oninput="updateBlock('${b.id}','content',this.value)">
-      ${isVid?`<video src="${esc(b.content)}" controls class="media-preview"></video>`:''}
-      ${isGif?`<img src="${esc(b.content)}" class="media-preview">`:''}
-      ${isVid?`<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--border);margin-top:6px"><span style="font-size:12px;font-weight:700;color:var(--text2);flex:1">▶ Démarrage auto</span><label class="toggle-switch"><input type="checkbox" ${b.autoplay?"checked":""} onchange="const bl=S.profile.blocks.find(x=>x.id==='${b.id}');if(bl){bl.autoplay=this.checked;saveProfile();}"><span class="toggle-track"></span></label></div>`:""}`;
+      <input class="block-inp" placeholder="${t('linkUrl')}" value="${esc(!_bc.startsWith('data:')?_bc:'')}" oninput="updateBlock('${b.id}','content',this.value)">
+      ${isVid?`<video src="${esc(_bc)}" controls class="media-preview"></video>`:''}
+      ${isGif?`<img src="${esc(_bc)}" class="media-preview">`:''}
+      <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--border);margin-top:6px"><span style="font-size:12px;font-weight:700;color:var(--text2);flex:1">▶ Démarrage auto</span><label class="toggle-switch"><input type="checkbox" ${b.autoplay?"checked":""} onchange="const bl=S.profile.blocks.find(x=>x.id==='${b.id}');if(bl){bl.autoplay=this.checked;saveProfile();}"><span class="toggle-track"></span></label></div>`;
     }
     if(b.type==='social'){
       const cur=b.platform||'instagram';
@@ -1726,7 +1727,8 @@ async function renderPublicPage(uid_,isPreview=false){
     }
     if(b.type==='photo'&&b.content)return`<div class="pub-block" style="${bStyle}"><div style="border-radius:${br}px;overflow:hidden;background:transparent;box-shadow:${shd}"><img src="${esc(b.content)}" style="width:100%;display:block" onerror="this.parentElement.parentElement.style.display='none'"></div></div>`;
     if(b.type==='video'&&b.content){
-      if(b.content.startsWith('data:video/')||(b.isCloud&&b.content)){const _ap=b.autoplay?'autoplay muted loop':'';return`<div class="pub-block" style="${bStyle}"><video src="${esc(b.content)}" controls playsinline ${_ap} style="width:100%;border-radius:${br}px;display:block;background:#000;box-shadow:${shd}"></video></div>`;}
+      const _bvc=b.content;
+      if(_bvc.startsWith('data:video/')||b.isCloud||_bvc.match(/\.(mp4|webm|mov|ogg)(\?|$)/i)||_bvc.includes('cloudinary')){const _ap=b.autoplay?'autoplay muted loop':'';return`<div class="pub-block" style="${bStyle}"><video src="${esc(_bvc)}" controls playsinline ${_ap} style="width:100%;border-radius:${br}px;display:block;background:#000;box-shadow:${shd}"></video></div>`;}
       if(b.content.startsWith('data:image/gif')||b.content.endsWith('.gif'))return`<div class="pub-block" style="${bStyle}"><div style="border-radius:${br}px;overflow:hidden;background:#fff"><img src="${esc(b.content)}" style="width:100%;display:block"></div></div>`;
       const m=b.content.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/))([^&\n?#]+)/);
       if(m)return`<div class="pub-block" style="${bStyle}"><div style="border-radius:${br}px;overflow:hidden;position:relative;padding-top:56.25%;box-shadow:${shd}"><iframe src="https://www.youtube.com/embed/${m[1]}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:none" allowfullscreen></iframe></div></div>`;
