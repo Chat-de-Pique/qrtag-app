@@ -1052,6 +1052,7 @@ window.addBlock=type=>{
 };
 window.removeBlock=id=>{if(!confirm('Supprimer ce bloc ?'))return;S.profile.blocks=S.profile.blocks.filter(b=>b.id!==id);renderBlocks();saveProfile();};
 window.updateBlock=(id,f,v)=>{const b=S.profile.blocks.find(b=>b.id===id);if(b){b[f]=v;autoSave();}};
+window.setAutoplay=(id,checked)=>{const b=S.profile.blocks.find(b=>b.id===id);if(b){b.autoplay=checked;saveProfile();}};
 window.setAddPanel=s=>{$('add-panel').style.display=s?'block':'none';$('btn-add').style.display=s?'none':'block';};
 
 /* Réordonner (NEW) */
@@ -1161,7 +1162,7 @@ function renderBlocks(){
       <input class="block-inp" placeholder="${t('linkUrl')}" value="${esc(!_bc.startsWith('data:')?_bc:'')}" oninput="updateBlock('${b.id}','content',this.value)">
       ${isVid?`<video src="${esc(_bc)}" controls class="media-preview"></video>`:''}
       ${isGif?`<img src="${esc(_bc)}" class="media-preview">`:''}
-      <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--border);margin-top:6px"><span style="font-size:12px;font-weight:700;color:var(--text2);flex:1">▶ Démarrage auto</span><label class="toggle-switch"><input type="checkbox" ${b.autoplay?"checked":""} onchange="const bl=S.profile.blocks.find(x=>x.id==='${b.id}');if(bl){bl.autoplay=this.checked;saveProfile();}"><span class="toggle-track"></span></label></div>`;
+      <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--border);margin-top:6px"><span style="font-size:12px;font-weight:700;color:var(--text2);flex:1">▶ Démarrage auto</span><label class="toggle-switch"><input type="checkbox" ${b.autoplay?"checked":""} onchange="setAutoplay('${b.id}',this.checked)"><span class="toggle-track"></span></label></div>`;
     }
     if(b.type==='social'){
       const cur=b.platform||'instagram';
