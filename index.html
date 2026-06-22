@@ -1743,7 +1743,7 @@ async function renderPublicPage(uid_,isPreview=false){
       }
       if(b.content.startsWith('data:image/gif')||b.content.endsWith('.gif'))return`<div class="pub-block" style="${bStyle}"><div style="border-radius:${br}px;overflow:hidden;background:#fff"><img src="${esc(b.content)}" style="width:100%;display:block"></div></div>`;
       const m=b.content.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/))([^&\n?#]+)/);
-      if(m)return`<div class="pub-block" style="${bStyle}"><div style="border-radius:${br}px;overflow:hidden;position:relative;padding-top:56.25%;box-shadow:${shd}"><iframe src="https://www.youtube.com/embed/${m[1]}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:none" allowfullscreen></iframe></div></div>`;
+      if(m){const _ytParams=b.autoplay?'?autoplay=1&mute=1&loop=1&playlist='+m[1]:'';return`<div class="pub-block" style="${bStyle}"><div style="border-radius:${br}px;overflow:hidden;position:relative;padding-top:56.25%;box-shadow:${shd}"><iframe src="https://www.youtube.com/embed/${m[1]}${_ytParams}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:none" allowfullscreen allow="autoplay"></iframe></div></div>`;}
     }
     if(b.type==='social'&&b.content){
       const sp=SOCIAL_PLATFORMS[b.platform||'instagram']||SOCIAL_PLATFORMS.instagram;
