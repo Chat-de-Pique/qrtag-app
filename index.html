@@ -987,8 +987,13 @@ window.forgotPassword=async()=>{
 async function loadUser(uid_){const s=await getDoc(doc(DB,'users',uid_));return s.exists()?s.data():null;}
 async function saveProfile(){
   if(!S.user||!S.profile)return;
-  try{await setDoc(doc(DB,'users',S.user.uid),{profile:S.profile},{merge:true});showFlash();}
-  catch(e){console.warn('save:',e.code);}
+  try{
+    console.log('[saveProfile] blocks autoplay states:', S.profile.blocks.filter(b=>b.type==='video').map(b=>({id:b.id,autoplay:b.autoplay})));
+    await setDoc(doc(DB,'users',S.user.uid),{profile:S.profile},{merge:true});
+    console.log('[saveProfile] SUCCESS');
+    showFlash();
+  }
+  catch(e){console.warn('save:',e.code,e.message);}
 }
 function autoSave(){syncForm();clearTimeout(S.saveTimer);S.saveTimer=setTimeout(saveProfile,1300);}
 function syncForm(){
