@@ -1974,8 +1974,9 @@ async function renderPublicPage(uid_,isPreview=false){
 
   if(freeLayout){
     // ═══ MODE PLACEMENT LIBRE ═══
-    const cw=canvas?.offsetWidth||380;
-    const defW=Math.round(cw*0.82); // 82% de la largeur canvas par défaut
+    const pubEl=$('pub-content');
+    const cw=(pubEl?.offsetWidth||380)-32; // largeur disponible moins marges
+    const defW=Math.round(cw*0.92);
 
     const freeBlocksHtml=p.blocks.map(b=>{
       const html=renderBlock(b,p,tpl,fs,align,txt,accent,linkColor,card,br,shd,0);
