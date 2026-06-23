@@ -204,40 +204,35 @@
     .pub-block{margin-bottom:12px;}
 
     /* ═══ MODE PLACEMENT LIBRE ═══ */
-    .free-canvas{position:relative;width:100%;overflow:hidden;}
-    .free-block{position:absolute;cursor:grab;touch-action:none;user-select:none;}
-    .free-block:active{cursor:grabbing;}
-    .free-block.selected{outline:2px dashed rgba(255,214,0,.8);outline-offset:2px;}
-    /* Poignée de déplacement */
-    .free-drag-handle{position:absolute;top:-18px;left:50%;transform:translateX(-50%);
-      background:rgba(255,214,0,.9);color:#000;border-radius:10px;padding:1px 8px;
-      font-size:14px;cursor:grab;z-index:10;white-space:nowrap;display:flex;gap:6px;align-items:center;
-      box-shadow:0 2px 8px rgba(0,0,0,.3);}
+    .free-canvas{position:relative;width:100%;overflow:hidden;background:transparent;}
+    .free-block{position:absolute;touch-action:none;user-select:none;box-sizing:border-box;}
+    .free-block.selected>.free-block-inner{outline:2px dashed rgba(255,214,0,.9);outline-offset:3px;border-radius:4px;}
+    .free-block-inner{pointer-events:none;}
+    .free-block-inner a,.free-block-inner video,.free-block-inner iframe{pointer-events:auto;}
+    .free-drag-handle{position:absolute;top:-30px;left:50%;transform:translateX(-50%);
+      background:rgba(20,20,20,.92);color:#fff;border-radius:20px;padding:5px 16px;
+      font-size:18px;cursor:grab;z-index:20;white-space:nowrap;
+      box-shadow:0 2px 10px rgba(0,0,0,.5);letter-spacing:3px;}
     .free-drag-handle:active{cursor:grabbing;}
-    /* Poignée de rotation */
-    .free-rotate-handle{position:absolute;top:-18px;right:-10px;
-      width:22px;height:22px;background:rgba(100,200,255,.9);border-radius:50%;
-      cursor:crosshair;z-index:10;display:flex;align-items:center;justify-content:center;font-size:12px;
-      box-shadow:0 2px 8px rgba(0,0,0,.3);}
-    /* Poignée de resize */
-    .free-resize-handle{position:absolute;bottom:-8px;right:-8px;
-      width:18px;height:18px;background:rgba(255,100,100,.9);border-radius:4px;
-      cursor:se-resize;z-index:10;display:flex;align-items:center;justify-content:center;font-size:10px;
-      box-shadow:0 2px 8px rgba(0,0,0,.3);}
-    /* Boutons z-order */
-    .free-z-controls{position:absolute;top:-18px;left:-10px;display:flex;gap:2px;z-index:10;}
-    .free-z-btn{width:20px;height:20px;background:rgba(255,255,255,.9);border:none;border-radius:4px;
-      cursor:pointer;font-size:10px;display:flex;align-items:center;justify-content:center;
-      box-shadow:0 1px 4px rgba(0,0,0,.3);}
-    /* Barre d'outils mode libre (dans aperçu) */
-    .free-toolbar{position:sticky;top:0;z-index:200;background:rgba(0,0,0,.85);
-      backdrop-filter:blur(8px);padding:8px 12px;display:flex;align-items:center;gap:8px;
-      border-bottom:1px solid rgba(255,255,255,.1);}
+    .free-rotate-handle{position:absolute;top:-30px;right:-16px;
+      width:30px;height:30px;background:rgba(60,170,255,.95);border-radius:50%;
+      cursor:crosshair;z-index:20;display:flex;align-items:center;justify-content:center;
+      font-size:16px;box-shadow:0 2px 8px rgba(0,0,0,.4);}
+    .free-resize-handle{position:absolute;bottom:-16px;right:-16px;
+      width:30px;height:30px;background:rgba(255,80,60,.95);border-radius:50%;
+      cursor:ew-resize;z-index:20;display:flex;align-items:center;justify-content:center;
+      font-size:14px;box-shadow:0 2px 8px rgba(0,0,0,.4);}
+    .free-z-controls{position:absolute;top:-30px;left:-16px;display:flex;gap:3px;z-index:20;}
+    .free-z-btn{width:30px;height:30px;background:rgba(255,255,255,.95);border:none;border-radius:50%;
+      cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;
+      box-shadow:0 2px 8px rgba(0,0,0,.3);font-weight:900;}
+    .free-z-btn:hover{background:#FFD600;}
+    .free-toolbar{position:sticky;top:0;z-index:200;background:rgba(0,0,0,.88);
+      backdrop-filter:blur(8px);padding:8px 14px;display:flex;align-items:center;gap:8px;
+      border-bottom:1px solid rgba(255,255,255,.12);}
     .free-toolbar-btn{background:rgba(255,255,255,.15);color:#fff;border:none;border-radius:8px;
-      padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;transition:background .15s;}
-    .free-toolbar-btn:hover{background:rgba(255,255,255,.25);}
-    .free-toolbar-btn.active{background:var(--accent);color:#000;}
-    /* Toggle mode libre dans onglet style */
+      padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;}
+    .free-toolbar-btn:hover{background:rgba(255,255,255,.28);}
     .free-toggle-row{display:flex;align-items:center;justify-content:space-between;
       padding:10px 14px;background:var(--surface2);border-radius:12px;margin-bottom:10px;}
     .free-toggle-label{font-size:13px;font-weight:700;}
@@ -1166,11 +1161,12 @@ window.toggleBare=id=>{
 };
 
 const BLOCK_META={
-  text:  {icon:'📝',label:'Message',   color:'text'},
-  link:  {icon:'🔗',label:'Lien',      color:'link'},
-  photo: {icon:'🖼️',label:'Photo / GIF',color:'photo'},
-  video: {icon:'🎥',label:'Vidéo / GIF',color:'video'},
-  social:{icon:'📲',label:'Social',    color:'social'},
+  text:   {icon:'📝',label:'Message',    color:'text'},
+  link:   {icon:'🔗',label:'Lien',       color:'link'},
+  photo:  {icon:'🖼️',label:'Photo / GIF', color:'photo'},
+  video:  {icon:'🎥',label:'Vidéo / GIF', color:'video'},
+  social: {icon:'📲',label:'Social',     color:'social'},
+  gallery:{icon:'🎞️',label:'Galerie',    color:'photo'},
 };
 
 function renderBlocks(){
@@ -1489,8 +1485,11 @@ window.onCanvasHeight=(v)=>{
 };
 window.setBlockPos=(id,pos)=>{
   const b=S.profile.blocks.find(b=>b.id===id);
-  if(b){if(!b.pos)b.pos={x:5,y:0,w:90,rotate:0,zIndex:1};Object.assign(b.pos,pos);
-  clearTimeout(S.saveTimer);S.saveTimer=setTimeout(saveProfile,1200);}
+  if(b){
+    if(!b.pos)b.pos={x:10,y:0,w:300,rotate:0,zIndex:1};
+    Object.assign(b.pos,pos);
+    clearTimeout(S.saveTimer);S.saveTimer=setTimeout(saveProfile,1000);
+  }
 };
 window.setBlockZIndex=(id,dir)=>{
   const blocks=S.profile.blocks;const idx=blocks.findIndex(b=>b.id===id);
@@ -1820,136 +1819,108 @@ function renderBlock(b,p,tpl,fs,align,txt,accent,linkColor,card,br,shd,gap){
 }
 
 /* ═══ INTERACTIONS MODE PLACEMENT LIBRE ═══ */
+// ═══ GESTIONNAIRE GLOBAL UNIQUE pour le mode placement libre ═══
+// Un seul listener move/up sur le canvas — pas N listeners sur document
+const _FREE={mode:null,id:null,el:null,startPt:null,startVal:null,startAngle:null,startRot:null};
+
 function initFreeInteractions(){
   const canvas=document.getElementById('free-canvas');
-  if(!canvas)return;
+  if(!canvas||canvas._freeInit)return;
+  canvas._freeInit=true; // évite double-init
 
-  // Utilitaire : convertir coordonnées pointer → % x et px y sur le canvas
-  function getCanvasRect(){return canvas.getBoundingClientRect();}
+  function pt(e){return e.touches?e.touches[0]:e;}
+  function canvasW(){return canvas.getBoundingClientRect().width;}
+  function canvasTop(){return canvas.getBoundingClientRect().top;}
 
-  // ── DRAG (déplacement) ──
-  document.querySelectorAll('[data-drag]').forEach(handle=>{
-    const id=handle.dataset.drag;
+  // ── POINTERDOWN sur le canvas : identifie quelle poignée est touchée ──
+  canvas.addEventListener('pointerdown',e=>{
+    const handle=e.target.closest('[data-drag],[data-rotate],[data-resize]');
+    if(!handle)return;
+    e.preventDefault();e.stopPropagation();
+    canvas.setPointerCapture(e.pointerId);
+
+    const id=handle.dataset.drag||handle.dataset.rotate||handle.dataset.resize;
     const el=document.getElementById('fb-'+id);
     if(!el)return;
-    let startX,startY,startLeft,startTop,dragging=false;
 
-    function onStart(e){
-      e.preventDefault();
-      dragging=true;
-      const pt=e.touches?e.touches[0]:e;
-      startX=pt.clientX;startY=pt.clientY;
-      const r=getCanvasRect();
-      const curLeft=parseFloat(el.style.left)||0; // en %
-      const curTop=parseFloat(el.style.top)||0;   // en px
-      startLeft=curLeft;startTop=curTop;
-      el.classList.add('selected');
-      document.querySelectorAll('.free-block.selected').forEach(x=>{if(x!==el)x.classList.remove('selected');});
-    }
-    function onMove(e){
-      if(!dragging)return;
-      e.preventDefault();
-      const pt=e.touches?e.touches[0]:e;
-      const r=getCanvasRect();
-      const dx=(pt.clientX-startX)/r.width*100; // % de largeur canvas
-      const dy=pt.clientY-startY;               // px
-      const newX=Math.max(0,Math.min(90,startLeft+dx));
-      const newY=Math.max(0,startTop+dy);
-      el.style.left=newX+'%';
-      el.style.top=newY+'px';
-    }
-    function onEnd(){
-      if(!dragging)return;
-      dragging=false;
-      setBlockPos(id,{x:parseFloat(el.style.left),y:parseFloat(el.style.top)});
-    }
-    handle.addEventListener('mousedown',onStart);
-    handle.addEventListener('touchstart',onStart,{passive:false});
-    document.addEventListener('mousemove',onMove,{passive:false});
-    document.addEventListener('touchmove',onMove,{passive:false});
-    document.addEventListener('mouseup',onEnd);
-    document.addEventListener('touchend',onEnd);
-  });
+    // Désélectionner les autres
+    document.querySelectorAll('.free-block.selected').forEach(x=>x.classList.remove('selected'));
+    el.classList.add('selected');
 
-  // ── ROTATION ──
-  document.querySelectorAll('[data-rotate]').forEach(handle=>{
-    const id=handle.dataset.rotate;
-    const el=document.getElementById('fb-'+id);
-    if(!el)return;
-    let rotating=false,startAngle=0,currentRotate=0;
+    if(handle.dataset.drag){
+      _FREE.mode='drag';
+      _FREE.id=id;_FREE.el=el;
+      _FREE.startPt={x:e.clientX,y:e.clientY};
+      _FREE.startVal={
+        x:parseFloat(el.style.left)||0,   // en px
+        y:parseFloat(el.style.top)||0     // en px
+      };
+      el.style.cursor='grabbing';
 
-    function getCenterOf(el){
+    }else if(handle.dataset.rotate){
+      _FREE.mode='rotate';
+      _FREE.id=id;_FREE.el=el;
       const r=el.getBoundingClientRect();
-      return{x:r.left+r.width/2,y:r.top+r.height/2};
-    }
-    function onStart(e){
-      e.preventDefault();e.stopPropagation();
-      rotating=true;
-      const pt=e.touches?e.touches[0]:e;
-      const c=getCenterOf(el);
-      startAngle=Math.atan2(pt.clientY-c.y,pt.clientX-c.x)*(180/Math.PI);
+      const cx=r.left+r.width/2,cy=r.top+r.height/2;
+      _FREE.startAngle=Math.atan2(e.clientY-cy,e.clientX-cx)*(180/Math.PI);
       const b=S.profile.blocks.find(b=>b.id===id);
-      currentRotate=b?.pos?.rotate||0;
+      _FREE.startRot=b?.pos?.rotate||0;
+
+    }else if(handle.dataset.resize){
+      _FREE.mode='resize';
+      _FREE.id=id;_FREE.el=el;
+      _FREE.startPt={x:e.clientX};
+      _FREE.startVal={w:parseFloat(el.style.width)||300}; // px
     }
-    function onMove(e){
-      if(!rotating)return;
-      e.preventDefault();
-      const pt=e.touches?e.touches[0]:e;
-      const c=getCenterOf(el);
-      const angle=Math.atan2(pt.clientY-c.y,pt.clientX-c.x)*(180/Math.PI);
-      const delta=angle-startAngle;
-      const newRot=Math.round(currentRotate+delta);
-      el.style.transform=`rotate(${newRot}deg)`;
+  },{passive:false});
+
+  // ── POINTERMOVE : un seul handler pour tout ──
+  canvas.addEventListener('pointermove',e=>{
+    if(!_FREE.mode)return;
+    e.preventDefault();
+    const el=_FREE.el;
+    const cw=canvasW();
+
+    if(_FREE.mode==='drag'){
+      const dx=e.clientX-_FREE.startPt.x;
+      const dy=e.clientY-_FREE.startPt.y;
+      const newX=Math.max(0,Math.min(cw*0.9,_FREE.startVal.x+dx));
+      const newY=Math.max(0,_FREE.startVal.y+dy);
+      el.style.left=newX+'px';
+      el.style.top=newY+'px';
+
+    }else if(_FREE.mode==='rotate'){
+      const r=el.getBoundingClientRect();
+      const cx=r.left+r.width/2,cy=r.top+r.height/2;
+      const angle=Math.atan2(e.clientY-cy,e.clientX-cx)*(180/Math.PI);
+      const newRot=_FREE.startRot+(angle-_FREE.startAngle);
+      el.style.transform=`rotate(${newRot.toFixed(1)}deg)`;
+
+    }else if(_FREE.mode==='resize'){
+      const dx=e.clientX-_FREE.startPt.x;
+      const newW=Math.max(80,Math.min(cw,_FREE.startVal.w+dx));
+      el.style.width=newW+'px';
     }
-    function onEnd(){
-      if(!rotating)return;
-      rotating=false;
-      const rot=parseFloat(el.style.transform.replace('rotate(','').replace('deg)',''))||0;
+  },{passive:false});
+
+  // ── POINTERUP : sauvegarde + reset ──
+  canvas.addEventListener('pointerup',e=>{
+    if(!_FREE.mode)return;
+    const el=_FREE.el,id=_FREE.id;
+
+    if(_FREE.mode==='drag'){
+      el.style.cursor='';
+      setBlockPos(id,{x:parseFloat(el.style.left),y:parseFloat(el.style.top)});
+    }else if(_FREE.mode==='rotate'){
+      const rot=parseFloat(el.style.transform.match(/rotate\(([^d]+)/)?.[1]||0);
       setBlockPos(id,{rotate:rot});
-    }
-    handle.addEventListener('mousedown',onStart);
-    handle.addEventListener('touchstart',onStart,{passive:false});
-    document.addEventListener('mousemove',onMove,{passive:false});
-    document.addEventListener('touchmove',onMove,{passive:false});
-    document.addEventListener('mouseup',onEnd);
-    document.addEventListener('touchend',onEnd);
-  });
-
-  // ── RESIZE ──
-  document.querySelectorAll('[data-resize]').forEach(handle=>{
-    const id=handle.dataset.resize;
-    const el=document.getElementById('fb-'+id);
-    if(!el)return;
-    let resizing=false,startX,startW;
-
-    function onStart(e){
-      e.preventDefault();e.stopPropagation();
-      resizing=true;
-      const pt=e.touches?e.touches[0]:e;
-      startX=pt.clientX;
-      startW=parseFloat(el.style.width)||90;
-    }
-    function onMove(e){
-      if(!resizing)return;
-      e.preventDefault();
-      const pt=e.touches?e.touches[0]:e;
-      const r=getCanvasRect();
-      const dx=(pt.clientX-startX)/r.width*100;
-      const newW=Math.max(20,Math.min(100,startW+dx));
-      el.style.width=newW+'%';
-    }
-    function onEnd(){
-      if(!resizing)return;
-      resizing=false;
+    }else if(_FREE.mode==='resize'){
       setBlockPos(id,{w:parseFloat(el.style.width)});
     }
-    handle.addEventListener('mousedown',onStart);
-    handle.addEventListener('touchstart',onStart,{passive:false});
-    document.addEventListener('mousemove',onMove,{passive:false});
-    document.addEventListener('touchmove',onMove,{passive:false});
-    document.addEventListener('mouseup',onEnd);
-    document.addEventListener('touchend',onEnd);
+    _FREE.mode=null;_FREE.id=null;_FREE.el=null;
   });
+
+  canvas.addEventListener('pointercancel',()=>{_FREE.mode=null;_FREE.id=null;_FREE.el=null;});
 }
 
 async function renderPublicPage(uid_,isPreview=false){
@@ -2003,27 +1974,26 @@ async function renderPublicPage(uid_,isPreview=false){
 
   if(freeLayout){
     // ═══ MODE PLACEMENT LIBRE ═══
+    const cw=canvas?.offsetWidth||380;
+    const defW=Math.round(cw*0.82); // 82% de la largeur canvas par défaut
+
     const freeBlocksHtml=p.blocks.map(b=>{
-      const html=renderBlock(b,p,tpl,fs,align,txt,accent,linkColor,card,br,shd);
+      const html=renderBlock(b,p,tpl,fs,align,txt,accent,linkColor,card,br,shd,0);
       if(!html)return'';
-      if(!b.pos)b.pos={x:5,y:20,w:90,rotate:0,zIndex:1};
+      // Initialiser pos si premier passage
+      if(!b.pos) b.pos={x:10,y:20+p.blocks.indexOf(b)*140,w:defW,rotate:0,zIndex:p.blocks.indexOf(b)+1};
       const pos=b.pos;
-      const px=`${pos.x}%`;
-      const py=`${pos.y}px`;
-      const pw=`${pos.w}%`;
-      const rot=`rotate(${pos.rotate||0}deg)`;
-      const zi=pos.zIndex||1;
       return`<div class="free-block" id="fb-${b.id}"
-        style="left:${px};top:${py};width:${pw};transform:${rot};z-index:${zi};position:absolute;touch-action:none;"
+        style="left:${pos.x}px;top:${pos.y}px;width:${pos.w}px;transform:rotate(${pos.rotate||0}deg);z-index:${pos.zIndex||1};position:absolute;touch-action:none;box-sizing:border-box;"
         data-id="${b.id}">
-        <div class="free-drag-handle" data-drag="${b.id}">⠿ déplacer</div>
+        <div class="free-drag-handle" data-drag="${b.id}">⠿</div>
         <div class="free-rotate-handle" data-rotate="${b.id}" title="Rotation">↻</div>
-        <div class="free-resize-handle" data-resize="${b.id}" title="Redimensionner">↘</div>
+        <div class="free-resize-handle" data-resize="${b.id}" title="Largeur">↔</div>
         <div class="free-z-controls">
-          <button class="free-z-btn" onclick="setBlockZIndex('${b.id}','up')" title="Monter">↑</button>
-          <button class="free-z-btn" onclick="setBlockZIndex('${b.id}','down')" title="Descendre">↓</button>
+          <button class="free-z-btn" onclick="setBlockZIndex('${b.id}','up')" title="Devant">↑</button>
+          <button class="free-z-btn" onclick="setBlockZIndex('${b.id}','down')" title="Derrière">↓</button>
         </div>
-        ${html.replace(/^<div class="pub-block"[^>]*>/,'<div>').replace(/<\/div>$/,'')}
+        <div class="free-block-inner">${html.replace(/^<div class="pub-block"[^>]*>/,'<div>').replace(/<\/div>\s*$/,'')}</div>
       </div>`;
     }).join('');
 
