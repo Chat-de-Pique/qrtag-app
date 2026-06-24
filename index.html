@@ -92,6 +92,11 @@
     .block{background:var(--surface);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);transition:box-shadow .2s;}
     .block:hover{box-shadow:var(--shadow-lg);}
     .block-header{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1.5px solid var(--border);}
+    .block-drag-handle{font-size:18px;color:var(--muted);cursor:grab;padding:0 4px;letter-spacing:2px;flex-shrink:0;touch-action:none;user-select:none;transition:color .15s;}
+    .block-drag-handle:active{cursor:grabbing;color:var(--accent);}
+    .block.dragging{opacity:.35;background:var(--surface2);}
+    .block.drag-over-top{border-top:3px solid var(--accent);}
+    .block.drag-over-bot{border-bottom:3px solid var(--accent);}
     .block-icon{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
     .block-icon.text{background:#e8f4ff;}.block-icon.link{background:#fff0e0;}.block-icon.photo{background:#f0ffe8;}.block-icon.video{background:#fde8ff;}.block-icon.social{background:#e8f0ff;}
     body.dark .block-icon.text{background:#152030;}body.dark .block-icon.link{background:#302010;}body.dark .block-icon.photo{background:#102010;}body.dark .block-icon.video{background:#2a1030;}body.dark .block-icon.social{background:#101830;}
@@ -1246,6 +1251,7 @@ function renderBlocks(){
       ? (getBrandSVG(b.platform||'instagram', SOCIAL_PLATFORMS[b.platform||'instagram']?.color||'#666', 18) || m.icon)
       : m.icon;
     d.innerHTML=`<div class="block-header">
+      <div class="block-drag-handle" data-drag-block="${b.id}" title="Déplacer">⠿</div>
       <div class="block-icon ${m.color}">${headerIcon}</div>
       <div class="block-label">${b.type==='social'?(SOCIAL_PLATFORMS[b.platform||'instagram']?.label||m.label):m.label}</div>
       <div class="block-actions">
@@ -1258,6 +1264,68 @@ function renderBlocks(){
     </div>
     <div class="block-body">${body}</div>`;
     el.appendChild(d);
+  });
+  initBlockDrag();
+}
+
+function initBlockDrag(){
+  const list=$('blocks-list');
+  if(!list)return;
+  let dragId=null,dragEl=null;
+
+  list.addEventListener('pointerdown',e=>{
+    const handle=e.target.closest('[data-drag-block]');
+    if(!handle)return;
+    e.preventDefault();
+    dragId=handle.dataset.dragBlock;
+    dragEl=handle.closest('.block');
+    if(!dragEl)return;
+    dragEl.setPointerCapture(e.pointerId);
+    dragEl.classList.add('dragging');
+  },{passive:false});
+
+  list.addEventListener('pointermove',e=>{
+    if(!dragId||!dragEl)return;
+    e.preventDefault();
+    // Trouver le bloc sous le pointeur
+    dragEl.classList.add('dragging');
+    const els=[...list.querySelectorAll('.block:not(.dragging)')];
+    // Retirer tous les indicateurs
+    els.forEach(x=>{x.classList.remove('drag-over-top','drag-over-bot');});
+    // Trouver le bloc cible
+    const target=els.find(el=>{
+      const r=el.getBoundingClientRect();
+      return e.clientY>=r.top&&e.clientY<=r.bottom;
+    });
+    if(target){
+      const r=target.getBoundingClientRect();
+      const mid=r.top+r.height/2;
+      target.classList.add(e.clientY<mid?'drag-over-top':'drag-over-bot');
+    }
+  },{passive:false});
+
+  list.addEventListener('pointerup',e=>{
+    if(!dragId||!dragEl)return;
+    // Trouver où insérer
+    const els=[...list.querySelectorAll('.block:not(.dragging)')];
+    const target=els.find(el=>el.classList.contains('drag-over-top')||el.classList.contains('drag-over-bot'));
+    if(target){
+      const targetId=target.querySelector('[data-drag-block]')?.dataset.dragBlock;
+      const blocks=S.profile.blocks;
+      const fromIdx=blocks.findIndex(b=>b.id===dragId);
+      const toIdx=blocks.findIndex(b=>b.id===targetId);
+      if(fromIdx>=0&&toIdx>=0&&fromIdx!==toIdx){
+        const [moved]=blocks.splice(fromIdx,1);
+        const insertAt=target.classList.contains('drag-over-bot')?toIdx:toIdx;
+        blocks.splice(insertAt<fromIdx?insertAt:insertAt,0,moved);
+        saveProfile();
+      }
+    }
+    // Nettoyage
+    els.forEach(x=>{x.classList.remove('drag-over-top','drag-over-bot');});
+    dragEl.classList.remove('dragging');
+    dragId=null;dragEl=null;
+    renderBlocks();
   });
 }
 
