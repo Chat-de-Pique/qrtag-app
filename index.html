@@ -1559,11 +1559,12 @@ window.onCanvasHeight=(v)=>{
 };
 window.setBlockPos=(id,pos)=>{
   const b=S.profile.blocks.find(b=>b.id===id);
-  if(b){
-    if(!b.pos)b.pos={x:10,y:0,w:300,rotate:0,zIndex:1};
-    Object.assign(b.pos,pos);
-    clearTimeout(S.saveTimer);S.saveTimer=setTimeout(saveProfile,1000);
-  }
+  if(!b)return;
+  if(!b.pos)b.pos={x:10,y:0,w:300,rotate:0,zIndex:1};
+  Object.assign(b.pos,pos);
+  // Sauvegarder sans re-rendre (les blocs restent là où l'utilisateur les a posés)
+  clearTimeout(S.saveTimer);
+  S.saveTimer=setTimeout(saveProfile,1000);
 };
 window.setBlockZIndex=(id,dir)=>{
   const blocks=S.profile.blocks;const idx=blocks.findIndex(b=>b.id===id);
@@ -1895,106 +1896,116 @@ function renderBlock(b,p,tpl,fs,align,txt,accent,linkColor,card,br,shd,gap){
 /* ═══ INTERACTIONS MODE PLACEMENT LIBRE ═══ */
 // ═══ GESTIONNAIRE GLOBAL UNIQUE pour le mode placement libre ═══
 // Un seul listener move/up sur le canvas — pas N listeners sur document
-const _FREE={mode:null,id:null,el:null,startPt:null,startVal:null,startAngle:null,startRot:null};
-
 function initFreeInteractions(){
-  const canvas=document.getElementById('free-canvas');
-  if(!canvas||canvas._freeInit)return;
-  canvas._freeInit=true; // évite double-init
+  // Attacher les listeners directement sur chaque poignée avec pointer capture
+  // → impossible que plusieurs blocs bougent en même temps
+  document.querySelectorAll('#free-canvas .free-block').forEach(blockEl=>{
+    const id=blockEl.dataset.id;
+    if(!id||blockEl._freeAttached)return;
+    blockEl._freeAttached=true;
 
-  function pt(e){return e.touches?e.touches[0]:e;}
-  function canvasW(){return canvas.getBoundingClientRect().width;}
-  function canvasTop(){return canvas.getBoundingClientRect().top;}
+    // ── DRAG ──
+    const dragHandle=blockEl.querySelector('[data-drag]');
+    if(dragHandle){
+      let startX,startY,startLeft,startTop;
+      dragHandle.addEventListener('pointerdown',e=>{
+        e.preventDefault();e.stopPropagation();
+        dragHandle.setPointerCapture(e.pointerId);
+        startX=e.clientX;startY=e.clientY;
+        startLeft=parseFloat(blockEl.style.left)||0;
+        startTop=parseFloat(blockEl.style.top)||0;
+        // Sélection visuelle
+        document.querySelectorAll('#free-canvas .free-block').forEach(x=>x.classList.remove('selected'));
+        blockEl.classList.add('selected');
+        // Remonter en Z
+        const allZ=Array.from(document.querySelectorAll('#free-canvas .free-block'))
+          .map(x=>parseInt(x.style.zIndex)||1);
+        blockEl.style.zIndex=Math.max(...allZ)+1;
+      },{passive:false});
 
-  // ── POINTERDOWN sur le canvas : identifie quelle poignée est touchée ──
-  canvas.addEventListener('pointerdown',e=>{
-    const handle=e.target.closest('[data-drag],[data-rotate],[data-resize]');
-    if(!handle)return;
-    e.preventDefault();e.stopPropagation();
-    canvas.setPointerCapture(e.pointerId);
+      dragHandle.addEventListener('pointermove',e=>{
+        if(!dragHandle.hasPointerCapture(e.pointerId))return;
+        e.preventDefault();
+        const canvas=document.getElementById('free-canvas');
+        const cw=canvas?canvas.offsetWidth:380;
+        const newX=Math.max(0,Math.min(cw-20,startLeft+(e.clientX-startX)));
+        const newY=Math.max(0,startTop+(e.clientY-startY));
+        blockEl.style.left=newX+'px';
+        blockEl.style.top=newY+'px';
+      },{passive:false});
 
-    const id=handle.dataset.drag||handle.dataset.rotate||handle.dataset.resize;
-    const el=document.getElementById('fb-'+id);
-    if(!el)return;
-
-    // Désélectionner les autres
-    document.querySelectorAll('.free-block.selected').forEach(x=>x.classList.remove('selected'));
-    el.classList.add('selected');
-
-    if(handle.dataset.drag){
-      _FREE.mode='drag';
-      _FREE.id=id;_FREE.el=el;
-      _FREE.startPt={x:e.clientX,y:e.clientY};
-      _FREE.startVal={
-        x:parseFloat(el.style.left)||0,   // en px
-        y:parseFloat(el.style.top)||0     // en px
-      };
-      el.style.cursor='grabbing';
-
-    }else if(handle.dataset.rotate){
-      _FREE.mode='rotate';
-      _FREE.id=id;_FREE.el=el;
-      const r=el.getBoundingClientRect();
-      const cx=r.left+r.width/2,cy=r.top+r.height/2;
-      _FREE.startAngle=Math.atan2(e.clientY-cy,e.clientX-cx)*(180/Math.PI);
-      const b=S.profile.blocks.find(b=>b.id===id);
-      _FREE.startRot=b?.pos?.rotate||0;
-
-    }else if(handle.dataset.resize){
-      _FREE.mode='resize';
-      _FREE.id=id;_FREE.el=el;
-      _FREE.startPt={x:e.clientX};
-      _FREE.startVal={w:parseFloat(el.style.width)||300}; // px
+      dragHandle.addEventListener('pointerup',e=>{
+        if(!dragHandle.hasPointerCapture(e.pointerId))return;
+        dragHandle.releasePointerCapture(e.pointerId);
+        setBlockPos(id,{
+          x:parseFloat(blockEl.style.left)||0,
+          y:parseFloat(blockEl.style.top)||0,
+          zIndex:parseInt(blockEl.style.zIndex)||1
+        });
+      });
     }
-  },{passive:false});
 
-  // ── POINTERMOVE : un seul handler pour tout ──
-  canvas.addEventListener('pointermove',e=>{
-    if(!_FREE.mode)return;
-    e.preventDefault();
-    const el=_FREE.el;
-    const cw=canvasW();
+    // ── ROTATION ──
+    const rotHandle=blockEl.querySelector('[data-rotate]');
+    if(rotHandle){
+      let startAngle,startRot;
+      function getCenter(){
+        const r=blockEl.getBoundingClientRect();
+        return{x:r.left+r.width/2,y:r.top+r.height/2};
+      }
+      rotHandle.addEventListener('pointerdown',e=>{
+        e.preventDefault();e.stopPropagation();
+        rotHandle.setPointerCapture(e.pointerId);
+        const c=getCenter();
+        startAngle=Math.atan2(e.clientY-c.y,e.clientX-c.x)*(180/Math.PI);
+        const b=S.profile.blocks.find(b=>b.id===id);
+        startRot=b?.pos?.rotate||0;
+      },{passive:false});
 
-    if(_FREE.mode==='drag'){
-      const dx=e.clientX-_FREE.startPt.x;
-      const dy=e.clientY-_FREE.startPt.y;
-      const newX=Math.max(0,Math.min(cw*0.9,_FREE.startVal.x+dx));
-      const newY=Math.max(0,_FREE.startVal.y+dy);
-      el.style.left=newX+'px';
-      el.style.top=newY+'px';
+      rotHandle.addEventListener('pointermove',e=>{
+        if(!rotHandle.hasPointerCapture(e.pointerId))return;
+        e.preventDefault();
+        const c=getCenter();
+        const angle=Math.atan2(e.clientY-c.y,e.clientX-c.x)*(180/Math.PI);
+        const newRot=startRot+(angle-startAngle);
+        blockEl.style.transform=`rotate(${newRot.toFixed(1)}deg)`;
+      },{passive:false});
 
-    }else if(_FREE.mode==='rotate'){
-      const r=el.getBoundingClientRect();
-      const cx=r.left+r.width/2,cy=r.top+r.height/2;
-      const angle=Math.atan2(e.clientY-cy,e.clientX-cx)*(180/Math.PI);
-      const newRot=_FREE.startRot+(angle-_FREE.startAngle);
-      el.style.transform=`rotate(${newRot.toFixed(1)}deg)`;
-
-    }else if(_FREE.mode==='resize'){
-      const dx=e.clientX-_FREE.startPt.x;
-      const newW=Math.max(80,Math.min(cw,_FREE.startVal.w+dx));
-      el.style.width=newW+'px';
+      rotHandle.addEventListener('pointerup',e=>{
+        if(!rotHandle.hasPointerCapture(e.pointerId))return;
+        rotHandle.releasePointerCapture(e.pointerId);
+        const m=blockEl.style.transform.match(/rotate\(([-\d.]+)deg\)/);
+        setBlockPos(id,{rotate:m?parseFloat(m[1]):0});
+      });
     }
-  },{passive:false});
 
-  // ── POINTERUP : sauvegarde + reset ──
-  canvas.addEventListener('pointerup',e=>{
-    if(!_FREE.mode)return;
-    const el=_FREE.el,id=_FREE.id;
+    // ── RESIZE ──
+    const resizeHandle=blockEl.querySelector('[data-resize]');
+    if(resizeHandle){
+      let startX,startW;
+      resizeHandle.addEventListener('pointerdown',e=>{
+        e.preventDefault();e.stopPropagation();
+        resizeHandle.setPointerCapture(e.pointerId);
+        startX=e.clientX;
+        startW=parseFloat(blockEl.style.width)||300;
+      },{passive:false});
 
-    if(_FREE.mode==='drag'){
-      el.style.cursor='';
-      setBlockPos(id,{x:parseFloat(el.style.left),y:parseFloat(el.style.top)});
-    }else if(_FREE.mode==='rotate'){
-      const rot=parseFloat(el.style.transform.match(/rotate\(([^d]+)/)?.[1]||0);
-      setBlockPos(id,{rotate:rot});
-    }else if(_FREE.mode==='resize'){
-      setBlockPos(id,{w:parseFloat(el.style.width)});
+      resizeHandle.addEventListener('pointermove',e=>{
+        if(!resizeHandle.hasPointerCapture(e.pointerId))return;
+        e.preventDefault();
+        const canvas=document.getElementById('free-canvas');
+        const cw=canvas?canvas.offsetWidth:380;
+        const newW=Math.max(60,Math.min(cw,startW+(e.clientX-startX)));
+        blockEl.style.width=newW+'px';
+      },{passive:false});
+
+      resizeHandle.addEventListener('pointerup',e=>{
+        if(!resizeHandle.hasPointerCapture(e.pointerId))return;
+        resizeHandle.releasePointerCapture(e.pointerId);
+        setBlockPos(id,{w:parseFloat(blockEl.style.width)||300});
+      });
     }
-    _FREE.mode=null;_FREE.id=null;_FREE.el=null;
   });
-
-  canvas.addEventListener('pointercancel',()=>{_FREE.mode=null;_FREE.id=null;_FREE.el=null;});
 }
 
 async function renderPublicPage(uid_,isPreview=false){
