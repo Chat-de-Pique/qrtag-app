@@ -558,27 +558,6 @@
         </div>
         <div class="accordion-body" id="adv-body" style="padding:12px 0 8px"></div>
       </div>
-
-      <div class="card" style="padding:14px 16px">
-        <div class="card-title" style="margin-bottom:10px">🎨 Composition</div>
-        <div class="free-toggle-row">
-          <div>
-            <div class="free-toggle-label">✦ Mode Placement Libre</div>
-            <div style="font-size:11px;color:var(--muted);margin-top:2px">Pose les blocs où tu veux, inclins-les, superpose-les</div>
-          </div>
-          <label class="toggle-switch">
-            <input type="checkbox" id="free-layout-toggle" onchange="toggleFreeLayout(this.checked)">
-            <span class="toggle-track"></span>
-          </label>
-        </div>
-        <div id="free-canvas-height-row" style="display:none;margin-top:8px">
-          <div class="adv-row">
-            <div class="adv-row-info"><div>Hauteur du canvas</div><small id="val-canvas-height">1200px</small></div>
-            <input type="range" id="rng-canvas-height" min="600" max="3000" step="100" value="1200"
-              oninput="onCanvasHeight(+this.value)" style="width:120px">
-          </div>
-        </div>
-      </div>
     </div>
 
     <div id="tab-qr" class="tab-pane">
@@ -1540,22 +1519,37 @@ window.onAdv=(k,v)=>{
 };
 
 window.toggleFreeLayout=(checked)=>{
-  S.profile.freeLayout=checked;
-  const chr=$('free-canvas-height-row');
-  if(chr) chr.style.display=checked?'block':'none';
-  if(checked&&S.profile.blocks){
+  S.profile.freeLayout=!!checked;
+  if(checked){
+    // Positionnement initial : flux naturel (blocs empilés pleine largeur)
+    let yOff=20;
+    const gap=parseInt(S.profile.blockSpacing)||12;
     S.profile.blocks.forEach((b,i)=>{
-      if(!b.pos) b.pos={x:5,y:20+i*130,w:90,rotate:0,zIndex:i+1};
+      if(!b.pos){
+        const estH=b.type==='photo'||b.type==='video'?230:b.type==='text'?110:60;
+        b.pos={x:8,y:yOff,w:92,rotate:0,zIndex:i+1};
+        yOff+=estH+gap+44;
+      }
     });
+    // Ouvrir l'aperçu automatiquement en mode libre
+    window.showPreview();
+  }else{
+    if($('s-public')?.classList.contains('active')){
+      syncForm();renderPublicPage(S.user?.uid,true);
+    }
   }
-  if($('s-public')?.classList.contains('active')) renderPublicPage(S.user?.uid,true);
   saveProfile();
 };
-window.onCanvasHeight=(v)=>{
-  S.profile.canvasHeight=v;
-  const el=$('val-canvas-height');if(el)el.textContent=v+'px';
-  if($('s-public')?.classList.contains('active')) renderPublicPage(S.user?.uid,true);
-  clearTimeout(S.saveTimer);S.saveTimer=setTimeout(saveProfile,800);
+window.resetFreeLayout=()=>{
+  let yOff=20;
+  const gap=parseInt(S.profile.blockSpacing)||12;
+  S.profile.blocks.forEach((b,i)=>{
+    const estH=b.type==='photo'||b.type==='video'?230:b.type==='text'?110:60;
+    b.pos={x:8,y:yOff,w:92,rotate:0,zIndex:i+1};
+    yOff+=estH+gap+44;
+  });
+  saveProfile();
+  renderPublicPage(S.user?.uid,true);
 };
 window.setBlockPos=(id,pos)=>{
   const b=S.profile.blocks.find(b=>b.id===id);
@@ -2060,14 +2054,31 @@ async function renderPublicPage(uid_,isPreview=false){
   if(freeLayout){
     // ═══ MODE PLACEMENT LIBRE ═══
     const pubEl=$('pub-content');
-    const cw=(pubEl?.offsetWidth||380)-32; // largeur disponible moins marges
-    const defW=Math.round(cw*0.92);
+    const canvasW=Math.max(320,(pubEl?.offsetWidth||380))-16;
+    const defBlockW=Math.round(canvasW*0.95);
+
+    // Initialiser positions manquantes : flux naturel (empilé, pleine largeur)
+    let yOff=20;
+    const gap2=parseInt(p.blockSpacing)||12;
+    p.blocks.forEach((b,i)=>{
+      if(!b.pos){
+        const estH=b.type==='photo'||b.type==='video'?230:b.type==='text'?110:60;
+        b.pos={x:8,y:yOff,w:defBlockW,rotate:0,zIndex:i+1};
+        yOff+=estH+gap2+44;
+      } else if(b.pos.w>0&&b.pos.w<=100){
+        // Migration : anciennes valeurs en % → px
+        b.pos.w=Math.round(canvasW*b.pos.w/100);
+        b.pos.x=Math.round(canvasW*b.pos.x/100);
+      }
+    });
+
+    // Hauteur auto du canvas
+    const maxBottom=p.blocks.reduce((m,b)=>b.pos?Math.max(m,b.pos.y+300):m,600);
 
     const freeBlocksHtml=p.blocks.map(b=>{
+      if(!b.pos)return'';
       const html=renderBlock(b,p,tpl,fs,align,txt,accent,linkColor,card,br,shd,0);
       if(!html)return'';
-      // Initialiser pos si premier passage
-      if(!b.pos) b.pos={x:10,y:20+p.blocks.indexOf(b)*140,w:defW,rotate:0,zIndex:p.blocks.indexOf(b)+1};
       const pos=b.pos;
       return`<div class="free-block" id="fb-${b.id}"
         style="left:${pos.x}px;top:${pos.y}px;width:${pos.w}px;transform:rotate(${pos.rotate||0}deg);z-index:${pos.zIndex||1};position:absolute;touch-action:none;box-sizing:border-box;"
@@ -2079,22 +2090,21 @@ async function renderPublicPage(uid_,isPreview=false){
           <button class="free-z-btn" onclick="setBlockZIndex('${b.id}','up')" title="Devant">↑</button>
           <button class="free-z-btn" onclick="setBlockZIndex('${b.id}','down')" title="Derrière">↓</button>
         </div>
-        <div class="free-block-inner">${html.replace(/^<div class="pub-block"[^>]*>/,'<div>').replace(/<\/div>\s*$/,'')}</div>
+        <div class="free-block-inner">${html}</div>
       </div>`;
     }).join('');
 
     $('pub-content').innerHTML=`
       <div class="free-toolbar">
-        <span style="color:rgba(255,255,255,.6);font-size:11px;font-weight:700;letter-spacing:.5px">✦ MODE LIBRE</span>
-        <div style="flex:1"></div>
-        <button class="free-toolbar-btn" onclick="toggleFreeLayout(false);$('free-layout-toggle').checked=false">✕ Mode flux</button>
+        <span style="color:rgba(255,255,255,.5);font-size:10px;font-weight:700;letter-spacing:.5px;flex:1">✦ MODE LIBRE</span>
+        <button class="free-toolbar-btn" onclick="resetFreeLayout()" title="Remettre dans l'ordre">↺ Réinitialiser</button>
+        <button class="free-toolbar-btn" style="background:rgba(255,80,60,.2);color:#ff6b5b;margin-left:4px" onclick="toggleFreeLayout(false)">✕ Désactiver</button>
       </div>
-      <div style="background:${bg};${_bgImgStyle};font-family:${fontObj.css};min-height:${canvasH}px;position:relative;overflow:hidden;" id="free-canvas">
-        ${showP&&(p.avatar||p.displayName||p.bio)?`<div style="text-align:${align};padding:20px 16px 0;position:relative;z-index:100">${avatarHtml}${p.displayName||username?`<h1 class="pub-name" style="color:${txt};font-size:${Math.round(fs*1.6)}px">${p.displayName?sanitizeHTML(p.displayName):esc(username)}</h1>`:''}${p.bio?`<p class="pub-bio" style="color:${txt};font-size:${fs}px">${sanitizeHTML(p.bio)}</p>`:''}</div>`:''}
+      <div style="background:${bg};${_bgImgStyle};font-family:${fontObj.css};min-height:${maxBottom+80}px;position:relative;overflow:hidden;padding-top:8px;" id="free-canvas">
+        ${showP&&(p.avatar||p.displayName||p.bio)?`<div style="text-align:${align};padding:20px 16px 8px;position:relative;z-index:100">${avatarHtml}${p.displayName||username?`<h1 class="pub-name" style="color:${txt};font-size:${Math.round(fs*1.6)}px">${p.displayName?sanitizeHTML(p.displayName):esc(username)}</h1>`:''}${p.bio?`<p class="pub-bio" style="color:${txt};font-size:${fs}px">${sanitizeHTML(p.bio)}</p>`:''}</div>`:''}
         ${freeBlocksHtml}
       </div>`;
 
-    // Initialiser drag/rotation/resize après le rendu
     setTimeout(()=>initFreeInteractions(),50);
 
   } else {
