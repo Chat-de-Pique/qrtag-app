@@ -316,25 +316,42 @@
     @keyframes screenFadeIn{from{opacity:0}to{opacity:1}}
     .pub-block{margin-bottom:12px;}
     /* ═══ MODE PLACEMENT LIBRE ═══ */
-    .free-canvas{position:relative;width:100%;overflow:hidden;background:transparent;}
-    .free-block{position:absolute;touch-action:none;user-select:none;box-sizing:border-box;cursor:grab;}
-    .free-block:active{cursor:grabbing;}
-    .free-block.selected{outline:2px dashed rgba(255,214,0,.9);outline-offset:2px;border-radius:4px;}
-    .free-block-inner{pointer-events:none;}
+    /* ═══ MODE PLACEMENT LIBRE ═══ */
+    .free-outer{display:flex;justify-content:center;padding:12px 0;min-height:100%;}
+    .free-canvas{position:relative;width:100%;max-width:480px;margin:0 auto;}
+    .free-block{position:absolute;touch-action:none;user-select:none;box-sizing:border-box;cursor:move;}
+    .free-block-inner{pointer-events:none;width:100%;}
     .free-block-inner a,.free-block-inner video,.free-block-inner iframe,.free-block-inner button{pointer-events:auto;}
-    /* Barre de contrôles flottante au-dessus du bloc */
-    .free-controls{position:absolute;top:-32px;right:0;display:flex;gap:4px;z-index:20;align-items:center;opacity:0;transition:opacity .15s;pointer-events:none;}
-    .free-block.selected .free-controls,.free-block:hover .free-controls{opacity:1;pointer-events:auto;}
-    .free-rotate-handle{width:28px;height:28px;background:rgba(60,170,255,.95);border-radius:50%;
-      cursor:crosshair;display:flex;align-items:center;justify-content:center;
-      font-size:15px;box-shadow:0 2px 8px rgba(0,0,0,.4);}
-    .free-resize-handle{width:28px;height:28px;background:rgba(255,80,60,.95);border-radius:50%;
-      cursor:ew-resize;display:flex;align-items:center;justify-content:center;
-      font-size:13px;box-shadow:0 2px 8px rgba(0,0,0,.4);}
-    .free-z-btn{width:28px;height:28px;background:rgba(255,255,255,.92);border:none;border-radius:50%;
-      cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;
-      box-shadow:0 2px 8px rgba(0,0,0,.25);font-weight:900;}
-    .free-z-btn:hover{background:#FFD600;}
+    /* Contour de sélection style Canva */
+    .free-block-sel{position:absolute;inset:-1px;border:2px solid #5B4CFF;border-radius:5px;pointer-events:none;display:none;}
+    .free-block.selected .free-block-sel{display:block;}
+    /* Poignées aux coins et côtés - cercles blancs style Canva */
+    .free-h{position:absolute;background:#fff;border:2px solid #5B4CFF;border-radius:50%;
+      z-index:30;pointer-events:none;opacity:0;transition:opacity .1s;
+      display:flex;align-items:center;justify-content:center;}
+    .free-block.selected .free-h{pointer-events:auto;opacity:1;}
+    /* Coins : 10x10 */
+    .free-h.c{width:10px;height:10px;}
+    .free-h.tl{top:-5px;left:-5px;cursor:nw-resize;}
+    .free-h.tr{top:-5px;right:-5px;cursor:ne-resize;}
+    .free-h.bl{bottom:-5px;left:-5px;cursor:sw-resize;}
+    .free-h.br{bottom:-5px;right:-5px;cursor:se-resize;}
+    /* Milieux : 8x16 rectangles */
+    .free-h.m{width:8px;height:16px;border-radius:4px;}
+    .free-h.ml{top:50%;left:-5px;transform:translateY(-50%);cursor:ew-resize;}
+    .free-h.mr{top:50%;right:-5px;transform:translateY(-50%);cursor:ew-resize;}
+    .free-h.tm{left:50%;top:-5px;transform:translateX(-50%);width:16px;height:8px;cursor:ns-resize;}
+    .free-h.bm{left:50%;bottom:-5px;transform:translateX(-50%);width:16px;height:8px;cursor:ns-resize;}
+    /* Rotation : cercle avec flèche en haut, relié par une ligne */
+    .free-rot-line{position:absolute;top:-28px;left:50%;transform:translateX(-50%);
+      width:2px;height:20px;background:#5B4CFF;pointer-events:none;opacity:0;}
+    .free-block.selected .free-rot-line{opacity:1;}
+    .free-rot{position:absolute;top:-44px;left:50%;transform:translateX(-50%);
+      width:24px;height:24px;background:#fff;border:2px solid #5B4CFF;border-radius:50%;
+      cursor:crosshair;z-index:30;display:flex;align-items:center;justify-content:center;
+      font-size:14px;pointer-events:none;opacity:0;}
+    .free-block.selected .free-rot{pointer-events:auto;opacity:1;}
+    /* Barre d'outils */
     .free-toolbar{position:sticky;top:0;z-index:200;background:rgba(0,0,0,.88);
       backdrop-filter:blur(8px);padding:8px 14px;display:flex;align-items:center;gap:8px;
       border-bottom:1px solid rgba(255,255,255,.12);}
@@ -1889,97 +1906,103 @@ function renderBlock(b,p,tpl,fs,align,txt,accent,linkColor,card,br,shd,gap){
 // ═══ GESTIONNAIRE GLOBAL UNIQUE pour le mode placement libre ═══
 // Un seul listener move/up sur le canvas — pas N listeners sur document
 function initFreeInteractions(){
-  document.querySelectorAll('#free-canvas .free-block').forEach(blockEl=>{
+  const inner=document.getElementById('free-inner');
+  if(!inner)return;
+
+  // Cliquer en dehors = désélectionner
+  document.getElementById('free-canvas')?.addEventListener('pointerdown',e=>{
+    if(!e.target.closest('.free-block')) document.querySelectorAll('.free-block.selected').forEach(x=>x.classList.remove('selected'));
+  },{capture:true,passive:true});
+
+  inner.querySelectorAll('.free-block').forEach(blockEl=>{
     const id=blockEl.dataset.id;
     if(!id||blockEl._freeAttached)return;
     blockEl._freeAttached=true;
 
-    // ── DRAG : tout le bloc est draggable ──
-    let startX,startY,startLeft,startTop,isDragging=false;
-
+    // ── DRAG : tout le bloc (sauf les poignées) ──
+    let dStartX,dStartY,dLeft,dTop,dragging=false;
     blockEl.addEventListener('pointerdown',e=>{
-      // Ne pas démarrer le drag depuis les contrôles
-      if(e.target.closest('.free-controls'))return;
+      if(e.target.closest('[data-resize],[data-rotate]'))return;
       e.preventDefault();
       blockEl.setPointerCapture(e.pointerId);
-      isDragging=true;
-      startX=e.clientX;startY=e.clientY;
-      startLeft=parseFloat(blockEl.style.left)||0;
-      startTop=parseFloat(blockEl.style.top)||0;
-      document.querySelectorAll('#free-canvas .free-block').forEach(x=>x.classList.remove('selected'));
+      dragging=true;
+      dStartX=e.clientX;dStartY=e.clientY;
+      dLeft=parseFloat(blockEl.style.left)||0;
+      dTop=parseFloat(blockEl.style.top)||0;
+      document.querySelectorAll('.free-block.selected').forEach(x=>{if(x!==blockEl)x.classList.remove('selected');});
       blockEl.classList.add('selected');
-      // Remonter en premier plan
-      const allZ=[...document.querySelectorAll('#free-canvas .free-block')].map(x=>parseInt(x.style.zIndex)||1);
+      const allZ=[...inner.querySelectorAll('.free-block')].map(x=>parseInt(x.style.zIndex)||1);
       blockEl.style.zIndex=Math.max(...allZ)+1;
     },{passive:false});
-
     blockEl.addEventListener('pointermove',e=>{
-      if(!isDragging||!blockEl.hasPointerCapture(e.pointerId))return;
+      if(!dragging||!blockEl.hasPointerCapture(e.pointerId))return;
       e.preventDefault();
-      const canvas=document.getElementById('free-canvas');
-      const cw=canvas?canvas.offsetWidth:380;
-      const newX=Math.max(-blockEl.offsetWidth*0.5,Math.min(cw-20,startLeft+(e.clientX-startX)));
-      const newY=Math.max(0,startTop+(e.clientY-startY));
-      blockEl.style.left=newX+'px';
-      blockEl.style.top=newY+'px';
+      blockEl.style.left=Math.max(0,dLeft+(e.clientX-dStartX))+'px';
+      blockEl.style.top=Math.max(0,dTop+(e.clientY-dStartY))+'px';
     },{passive:false});
-
     blockEl.addEventListener('pointerup',e=>{
-      if(!isDragging||!blockEl.hasPointerCapture(e.pointerId))return;
+      if(!dragging||!blockEl.hasPointerCapture(e.pointerId))return;
       blockEl.releasePointerCapture(e.pointerId);
-      isDragging=false;
+      dragging=false;
       setBlockPos(id,{x:parseFloat(blockEl.style.left)||0,y:parseFloat(blockEl.style.top)||0,zIndex:parseInt(blockEl.style.zIndex)||1});
     });
-    blockEl.addEventListener('pointercancel',()=>{isDragging=false;});
+    blockEl.addEventListener('pointercancel',()=>{dragging=false;});
 
     // ── ROTATION ──
-    const rotHandle=blockEl.querySelector('[data-rotate]');
-    if(rotHandle){
-      let startAngle,startRot;
-      rotHandle.addEventListener('pointerdown',e=>{
+    const rotH=blockEl.querySelector('.free-rot');
+    if(rotH){
+      let rStart,rRot;
+      rotH.addEventListener('pointerdown',e=>{
         e.preventDefault();e.stopPropagation();
-        rotHandle.setPointerCapture(e.pointerId);
+        rotH.setPointerCapture(e.pointerId);
         const r=blockEl.getBoundingClientRect();
-        startAngle=Math.atan2(e.clientY-(r.top+r.height/2),e.clientX-(r.left+r.width/2))*(180/Math.PI);
-        startRot=parseFloat(blockEl.style.transform.match(/rotate\(([-\d.]+)/)?.[1])||0;
+        rStart=Math.atan2(e.clientY-(r.top+r.height/2),e.clientX-(r.left+r.width/2))*(180/Math.PI);
+        rRot=parseFloat(blockEl.style.transform.match(/rotate\(([-\d.]+)/)?.[1])||0;
       },{passive:false});
-      rotHandle.addEventListener('pointermove',e=>{
-        if(!rotHandle.hasPointerCapture(e.pointerId))return;
+      rotH.addEventListener('pointermove',e=>{
+        if(!rotH.hasPointerCapture(e.pointerId))return;
         e.preventDefault();
         const r=blockEl.getBoundingClientRect();
         const a=Math.atan2(e.clientY-(r.top+r.height/2),e.clientX-(r.left+r.width/2))*(180/Math.PI);
-        blockEl.style.transform=`rotate(${(startRot+(a-startAngle)).toFixed(1)}deg)`;
+        blockEl.style.transform=`rotate(${(rRot+(a-rStart)).toFixed(1)}deg)`;
       },{passive:false});
-      rotHandle.addEventListener('pointerup',e=>{
-        if(!rotHandle.hasPointerCapture(e.pointerId))return;
-        rotHandle.releasePointerCapture(e.pointerId);
+      rotH.addEventListener('pointerup',e=>{
+        if(!rotH.hasPointerCapture(e.pointerId))return;
+        rotH.releasePointerCapture(e.pointerId);
         const m=blockEl.style.transform.match(/rotate\(([-\d.]+)/);
         setBlockPos(id,{rotate:m?parseFloat(m[1]):0});
       });
     }
 
-    // ── RESIZE ──
-    const resizeHandle=blockEl.querySelector('[data-resize]');
-    if(resizeHandle){
-      let startX,startW;
-      resizeHandle.addEventListener('pointerdown',e=>{
+    // ── RESIZE (côtés gauche/droite et coins) ──
+    blockEl.querySelectorAll('[data-resize]').forEach(resH=>{
+      const side=resH.dataset.resize;
+      let rStartX,rW,rL;
+      resH.addEventListener('pointerdown',e=>{
         e.preventDefault();e.stopPropagation();
-        resizeHandle.setPointerCapture(e.pointerId);
-        startX=e.clientX;startW=parseFloat(blockEl.style.width)||300;
+        resH.setPointerCapture(e.pointerId);
+        rStartX=e.clientX;
+        rW=parseFloat(blockEl.style.width)||300;
+        rL=parseFloat(blockEl.style.left)||0;
       },{passive:false});
-      resizeHandle.addEventListener('pointermove',e=>{
-        if(!resizeHandle.hasPointerCapture(e.pointerId))return;
+      resH.addEventListener('pointermove',e=>{
+        if(!resH.hasPointerCapture(e.pointerId))return;
         e.preventDefault();
-        const canvas=document.getElementById('free-canvas');
-        const cw=canvas?canvas.offsetWidth:380;
-        blockEl.style.width=Math.max(80,Math.min(cw,startW+(e.clientX-startX)))+'px';
+        const dx=e.clientX-rStartX;
+        if(side==='mr'||side==='tr'||side==='br'){
+          blockEl.style.width=Math.max(60,rW+dx)+'px';
+        } else if(side==='ml'||side==='tl'||side==='bl'){
+          const newW=Math.max(60,rW-dx);
+          blockEl.style.width=newW+'px';
+          blockEl.style.left=(rL+rW-newW)+'px';
+        }
       },{passive:false});
-      resizeHandle.addEventListener('pointerup',e=>{
-        if(!resizeHandle.hasPointerCapture(e.pointerId))return;
-        resizeHandle.releasePointerCapture(e.pointerId);
-        setBlockPos(id,{w:parseFloat(blockEl.style.width)||300});
+      resH.addEventListener('pointerup',e=>{
+        if(!resH.hasPointerCapture(e.pointerId))return;
+        resH.releasePointerCapture(e.pointerId);
+        setBlockPos(id,{w:parseFloat(blockEl.style.width)||300,x:parseFloat(blockEl.style.left)||0});
       });
-    }
+    });
   });
 }
 
@@ -2035,25 +2058,24 @@ async function renderPublicPage(uid_,isPreview=false){
   if(freeLayout){
     // ═══ MODE PLACEMENT LIBRE ═══
     const pubEl=$('pub-content');
-    const canvasW=Math.max(320,(pubEl?.offsetWidth||380))-16;
-    const defBlockW=Math.round(canvasW*0.95);
+    const viewW=pubEl?.offsetWidth||390;
+    const canvasW=Math.min(480,viewW);
+    const defBlockW=canvasW-36; // padding 18px chaque côté comme pub-wrap
 
-    // Initialiser positions manquantes : flux naturel (empilé, pleine largeur)
-    let yOff=20;
+    // Positions initiales = identiques au mode normal
+    let yOff=28;
     const gap2=parseInt(p.blockSpacing)||12;
     p.blocks.forEach((b,i)=>{
       if(!b.pos){
-        const estH=b.type==='photo'||b.type==='video'?230:b.type==='text'?110:60;
-        b.pos={x:8,y:yOff,w:defBlockW,rotate:0,zIndex:i+1};
-        yOff+=estH+gap2+44;
+        const estH=b.type==='photo'||b.type==='video'?220:b.type==='text'?100:54;
+        b.pos={x:18,y:yOff,w:defBlockW,rotate:0,zIndex:i+1};
+        yOff+=estH+gap2;
       } else if(b.pos.w>0&&b.pos.w<=100){
-        // Migration : anciennes valeurs en % → px
         b.pos.w=Math.round(canvasW*b.pos.w/100);
         b.pos.x=Math.round(canvasW*b.pos.x/100);
       }
     });
 
-    // Hauteur auto du canvas
     const maxBottom=p.blocks.reduce((m,b)=>b.pos?Math.max(m,b.pos.y+300):m,600);
 
     const freeBlocksHtml=p.blocks.map(b=>{
@@ -2062,14 +2084,17 @@ async function renderPublicPage(uid_,isPreview=false){
       if(!html)return'';
       const pos=b.pos;
       return`<div class="free-block" id="fb-${b.id}"
-        style="left:${pos.x}px;top:${pos.y}px;width:${pos.w}px;transform:rotate(${pos.rotate||0}deg);z-index:${pos.zIndex||1};position:absolute;touch-action:none;box-sizing:border-box;cursor:grab;"
-        data-id="${b.id}" data-drag="${b.id}">
-        <div class="free-controls">
-          <button class="free-z-btn" onclick="setBlockZIndex('${b.id}','up')" title="Devant">↑</button>
-          <button class="free-z-btn" onclick="setBlockZIndex('${b.id}','down')" title="Derrière">↓</button>
-          <div class="free-rotate-handle" data-rotate="${b.id}" title="Rotation">↻</div>
-          <div class="free-resize-handle" data-resize="${b.id}" title="Largeur">↔</div>
-        </div>
+        style="left:${pos.x}px;top:${pos.y}px;width:${pos.w}px;transform:rotate(${pos.rotate||0}deg);z-index:${pos.zIndex||1};position:absolute;touch-action:none;box-sizing:border-box;"
+        data-id="${b.id}">
+        <div class="free-block-sel"></div>
+        <div class="free-rot-line"></div>
+        <div class="free-rot" data-rotate="${b.id}">↻</div>
+        <div class="free-h c tl" data-resize="tl" data-id="${b.id}"></div>
+        <div class="free-h c tr" data-resize="tr" data-id="${b.id}"></div>
+        <div class="free-h c bl" data-resize="bl" data-id="${b.id}"></div>
+        <div class="free-h c br" data-resize="br" data-id="${b.id}"></div>
+        <div class="free-h m ml" data-resize="ml" data-id="${b.id}"></div>
+        <div class="free-h m mr" data-resize="mr" data-id="${b.id}"></div>
         <div class="free-block-inner">${html}</div>
       </div>`;
     }).join('');
@@ -2081,8 +2106,10 @@ async function renderPublicPage(uid_,isPreview=false){
         <button class="free-toolbar-btn" style="background:rgba(255,80,60,.2);color:#ff6b5b;margin-left:4px" onclick="toggleFreeLayout(false)">✕ Désactiver</button>
       </div>
       <div style="background:${bg};${_bgImgStyle};font-family:${fontObj.css};min-height:${maxBottom+80}px;position:relative;overflow:hidden;padding-top:8px;" id="free-canvas">
-        ${showP&&(p.avatar||p.displayName||p.bio)?`<div style="text-align:${align};padding:20px 16px 8px;position:relative;z-index:100">${avatarHtml}${p.displayName||username?`<h1 class="pub-name" style="color:${txt};font-size:${Math.round(fs*1.6)}px">${p.displayName?sanitizeHTML(p.displayName):esc(username)}</h1>`:''}${p.bio?`<p class="pub-bio" style="color:${txt};font-size:${fs}px">${sanitizeHTML(p.bio)}</p>`:''}</div>`:''}
-        ${freeBlocksHtml}
+        <div style="max-width:480px;margin:0 auto;position:relative;height:${maxBottom+80}px;" id="free-inner">
+          ${showP&&(p.avatar||p.displayName||p.bio)?`<div style="text-align:${align};padding:20px 18px 8px;position:relative;z-index:100">${avatarHtml}${p.displayName||username?`<h1 class="pub-name" style="color:${txt};font-size:${Math.round(fs*1.6)}px">${p.displayName?sanitizeHTML(p.displayName):esc(username)}</h1>`:''}${p.bio?`<p class="pub-bio" style="color:${txt};font-size:${fs}px">${sanitizeHTML(p.bio)}</p>`:''}</div>`:''}
+          ${freeBlocksHtml}
+        </div>
       </div>`;
 
     setTimeout(()=>initFreeInteractions(),50);
