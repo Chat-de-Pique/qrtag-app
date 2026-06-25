@@ -321,7 +321,7 @@
     .free-canvas{position:relative;width:100%;max-width:480px;margin:0 auto;}
     .free-block{position:absolute;touch-action:none;user-select:none;box-sizing:border-box;cursor:move;}
     .free-block-inner{pointer-events:none;width:100%;}
-    .free-block-inner a,.free-block-inner video,.free-block-inner iframe,.free-block-inner button{pointer-events:auto;}
+    .free-block-inner *{pointer-events:none !important;}
     /* Contour de sélection style Canva */
     .free-block-sel{position:absolute;inset:-1px;border:2px solid #5B4CFF;border-radius:5px;pointer-events:none;display:none;}
     .free-block.selected .free-block-sel{display:block;}
@@ -1592,12 +1592,16 @@ window.setBlockPos=(id,pos)=>{
   S.saveTimer=setTimeout(saveProfile,1000);
 };
 window.setBlockZIndex=(id,dir)=>{
-  const blocks=S.profile.blocks;const idx=blocks.findIndex(b=>b.id===id);
-  if(idx<0)return;const b=blocks[idx];if(!b.pos)return;
+  const blocks=S.profile.blocks;
+  const b=blocks.find(b=>b.id===id);
+  if(!b||!b.pos)return;
   const allZ=blocks.map(x=>x.pos?.zIndex||1);
   if(dir==='up')b.pos.zIndex=Math.min(Math.max(...allZ)+1,99);
   else b.pos.zIndex=Math.max(Math.min(...allZ)-1,1);
-  saveProfile();renderPublicPage(S.user?.uid,true);
+  // Mise à jour DOM directe sans re-render (évite de perdre les positions non encore sauvegardées)
+  const el=document.getElementById('fb-'+id);
+  if(el) el.style.zIndex=b.pos.zIndex;
+  saveProfile();
 };
 
 /* ── Tiroir aperçu ── */
@@ -2056,30 +2060,53 @@ function initFreeInteractions(){
     // ── RESIZE par poignées (souris/stylet) ──
     blockEl.querySelectorAll('[data-resize]').forEach(resH=>{
       const side=resH.dataset.resize;
-      let rSX,rW,rL;
+      const isCorner=side==='tl'||side==='tr'||side==='bl'||side==='br';
+      let rSX,rSY,rW,rH,rL,rT,aspect;
       resH.addEventListener('pointerdown',e=>{
         e.preventDefault();e.stopPropagation();
         resH.setPointerCapture(e.pointerId);
-        rSX=e.clientX;
-        rW=parseFloat(blockEl.style.width)||300;
+        rSX=e.clientX;rSY=e.clientY;
+        rW=blockEl.offsetWidth;
+        rH=blockEl.offsetHeight;
+        aspect=rW/rH;
         rL=parseFloat(blockEl.style.left)||0;
+        rT=parseFloat(blockEl.style.top)||0;
       },{passive:false});
       resH.addEventListener('pointermove',e=>{
         if(!resH.hasPointerCapture(e.pointerId))return;
         e.preventDefault();
         const dx=e.clientX-rSX;
-        if(side==='mr'||side==='tr'||side==='br'){
-          blockEl.style.width=Math.max(60,rW+dx)+'px';
-        } else {
-          const nw=Math.max(60,rW-dx);
+        const dy=e.clientY-rSY;
+        if(isCorner){
+          // Homothétie : on prend le delta le plus grand et on maintient le ratio
+          const delta=(Math.abs(dx)>Math.abs(dy)?Math.abs(dx):Math.abs(dy));
+          const sign=(side==='tr'||side==='br')?1:-1;
+          const nw=Math.max(60,rW+sign*delta);
+          const nh=Math.max(30,nw/aspect);
           blockEl.style.width=nw+'px';
-          blockEl.style.left=(rL+rW-nw)+'px';
+          blockEl.style.height=nh+'px';
+          if(side==='tl'||side==='bl') blockEl.style.left=(rL+rW-nw)+'px';
+          if(side==='tl'||side==='tr') blockEl.style.top=(rT+rH-nh)+'px';
+        } else {
+          // Côtés gauche/droit : resize libre de la largeur seulement
+          if(side==='mr'){
+            blockEl.style.width=Math.max(60,rW+dx)+'px';
+          } else {
+            const nw=Math.max(60,rW-dx);
+            blockEl.style.width=nw+'px';
+            blockEl.style.left=(rL+rW-nw)+'px';
+          }
         }
       },{passive:false});
       resH.addEventListener('pointerup',e=>{
         if(!resH.hasPointerCapture(e.pointerId))return;
         resH.releasePointerCapture(e.pointerId);
-        setBlockPos(id,{w:parseFloat(blockEl.style.width)||300,x:parseFloat(blockEl.style.left)||0});
+        setBlockPos(id,{
+          w:parseFloat(blockEl.style.width)||300,
+          h:parseFloat(blockEl.style.height)||null,
+          x:parseFloat(blockEl.style.left)||0,
+          y:parseFloat(blockEl.style.top)||0
+        });
       });
     });
   });
@@ -2163,7 +2190,7 @@ async function renderPublicPage(uid_,isPreview=false){
       if(!html)return'';
       const pos=b.pos;
       return`<div class="free-block" id="fb-${b.id}"
-        style="left:${pos.x}px;top:${pos.y}px;width:${pos.w}px;transform:rotate(${pos.rotate||0}deg);z-index:${pos.zIndex||1};position:absolute;touch-action:none;box-sizing:border-box;"
+        style="left:${pos.x}px;top:${pos.y}px;width:${pos.w}px;${pos.h?`height:${pos.h}px;overflow:hidden;`:''}transform:rotate(${pos.rotate||0}deg);z-index:${pos.zIndex||1};position:absolute;touch-action:none;box-sizing:border-box;"
         data-id="${b.id}">
         <div class="free-block-sel"></div>
         <div class="free-rot-line"></div>
