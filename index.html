@@ -342,15 +342,31 @@
     .free-h.mr{top:50%;right:-5px;transform:translateY(-50%);cursor:ew-resize;}
     .free-h.tm{left:50%;top:-5px;transform:translateX(-50%);width:16px;height:8px;cursor:ns-resize;}
     .free-h.bm{left:50%;bottom:-5px;transform:translateX(-50%);width:16px;height:8px;cursor:ns-resize;}
-    /* Rotation : cercle avec flèche en haut, relié par une ligne */
+    /* Zone de touch élargie (min 44px recommandé iOS/Android) */
+    .free-h::after{content:'';position:absolute;inset:-14px;}
+    /* Rotation */
     .free-rot-line{position:absolute;top:-28px;left:50%;transform:translateX(-50%);
       width:2px;height:20px;background:#5B4CFF;pointer-events:none;opacity:0;}
     .free-block.selected .free-rot-line{opacity:1;}
     .free-rot{position:absolute;top:-44px;left:50%;transform:translateX(-50%);
-      width:24px;height:24px;background:#fff;border:2px solid #5B4CFF;border-radius:50%;
+      width:28px;height:28px;background:#fff;border:2px solid #5B4CFF;border-radius:50%;
       cursor:crosshair;z-index:30;display:flex;align-items:center;justify-content:center;
-      font-size:14px;pointer-events:none;opacity:0;}
+      font-size:15px;pointer-events:none;opacity:0;}
+    .free-rot::after{content:'';position:absolute;inset:-10px;}
     .free-block.selected .free-rot{pointer-events:auto;opacity:1;}
+    /* Hint tactile */
+    .free-touch-hint{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);
+      background:rgba(0,0,0,.75);color:#fff;font-size:11px;padding:7px 16px;
+      border-radius:20px;white-space:nowrap;z-index:500;pointer-events:none;
+      animation:fadeHint 4s ease forwards;}
+    @keyframes fadeHint{0%{opacity:0}15%{opacity:1}70%{opacity:1}100%{opacity:0}}
+    /* Boutons z-order (devant/derrière) */
+    .free-z-ctrl{position:absolute;top:-44px;right:0;display:flex;gap:3px;z-index:30;opacity:0;pointer-events:none;}
+    .free-block.selected .free-z-ctrl{opacity:1;pointer-events:auto;}
+    .free-z-btn{width:28px;height:28px;background:#fff;border:2px solid #5B4CFF;border-radius:50%;
+      cursor:pointer;font-size:13px;font-weight:900;display:flex;align-items:center;justify-content:center;
+      box-shadow:0 2px 6px rgba(0,0,0,.25);}
+    .free-z-btn:hover{background:#5B4CFF;color:#fff;}
     /* Barre d'outils */
     .free-toolbar{position:sticky;top:0;z-index:200;background:rgba(0,0,0,.88);
       backdrop-filter:blur(8px);padding:8px 14px;display:flex;align-items:center;gap:8px;
@@ -1885,6 +1901,11 @@ function renderBlock(b,p,tpl,fs,align,txt,accent,linkColor,card,br,shd,gap){
     if(_bvc.startsWith('data:image/gif')||_bvc.endsWith('.gif'))return`<div class="pub-block" style="${bStyle}"><div style="border-radius:${br}px;overflow:hidden;background:#fff"><img src="${esc(_bvc)}" style="width:100%;display:block"></div></div>`;
     const m=_bvc.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/))([^&\n?#]+)/);
     if(m){const _ytParams=b.autoplay?`?autoplay=1&mute=1&loop=1&playlist=${m[1]}&enablejsapi=1`:'?enablejsapi=1';return`<div class="pub-block" style="${bStyle}"><div style="border-radius:${br}px;overflow:hidden;position:relative;padding-top:56.25%;box-shadow:${shd}"><iframe src="https://www.youtube-nocookie.com/embed/${m[1]}${_ytParams}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:none" allowfullscreen allow="autoplay; fullscreen; encrypted-media; picture-in-picture"></iframe></div></div>`;}
+    // Fallback : toute autre URL vidéo — on tente un <video> natif, sinon un lien
+    if(_bvc.startsWith('http')){
+      const _auto=b.autoplay?' autoplay':'';
+      return`<div class="pub-block" style="${bStyle}"><video src="${esc(_bvc)}" controls muted playsinline preload="auto"${_auto} style="width:100%;border-radius:${br}px;display:block;background:#000;box-shadow:${shd}" onerror="this.outerHTML='<a href=\\'${esc(_bvc)}\\' target=\\'_blank\\' rel=\\'noopener\\' style=\\'display:block;background:${accent};color:#000;border-radius:${br}px;padding:15px 20px;text-align:center;text-decoration:none;font-weight:800;box-shadow:0 4px 20px ${accent}55\\'>▶ Voir la vidéo</a>'"></video></div>`;
+    }
   }
   if(b.type==='social'&&b.content){
     const sp=SOCIAL_PLATFORMS[b.platform||'instagram']||SOCIAL_PLATFORMS.instagram;
@@ -1909,9 +1930,10 @@ function initFreeInteractions(){
   const inner=document.getElementById('free-inner');
   if(!inner)return;
 
-  // Cliquer en dehors = désélectionner
+  // Désélectionner en cliquant/tapant en dehors
   document.getElementById('free-canvas')?.addEventListener('pointerdown',e=>{
-    if(!e.target.closest('.free-block')) document.querySelectorAll('.free-block.selected').forEach(x=>x.classList.remove('selected'));
+    if(!e.target.closest('.free-block'))
+      inner.querySelectorAll('.free-block.selected').forEach(x=>x.classList.remove('selected'));
   },{capture:true,passive:true});
 
   inner.querySelectorAll('.free-block').forEach(blockEl=>{
@@ -1919,36 +1941,93 @@ function initFreeInteractions(){
     if(!id||blockEl._freeAttached)return;
     blockEl._freeAttached=true;
 
-    // ── DRAG : tout le bloc (sauf les poignées) ──
-    let dStartX,dStartY,dLeft,dTop,dragging=false;
-    blockEl.addEventListener('pointerdown',e=>{
-      if(e.target.closest('[data-resize],[data-rotate]'))return;
-      e.preventDefault();
-      blockEl.setPointerCapture(e.pointerId);
-      dragging=true;
-      dStartX=e.clientX;dStartY=e.clientY;
-      dLeft=parseFloat(blockEl.style.left)||0;
-      dTop=parseFloat(blockEl.style.top)||0;
-      document.querySelectorAll('.free-block.selected').forEach(x=>{if(x!==blockEl)x.classList.remove('selected');});
+    // Pointeurs actifs sur ce bloc (multi-touch)
+    const ptrs=new Map(); // pointerId → {x, y}
+    const drag={startX:0,startY:0,startLeft:0,startTop:0};
+    const pinch={startDist:0,startW:0,startAngle:0,startRot:0,startMidLeft:0,startMidTop:0};
+
+    function pts(){return[...ptrs.values()];}
+    function dist2(a,b){return Math.hypot(b.x-a.x,b.y-a.y);}
+    function ang2(a,b){return Math.atan2(b.y-a.y,b.x-a.x)*180/Math.PI;}
+
+    function select(){
+      inner.querySelectorAll('.free-block.selected').forEach(x=>{if(x!==blockEl)x.classList.remove('selected');});
       blockEl.classList.add('selected');
       const allZ=[...inner.querySelectorAll('.free-block')].map(x=>parseInt(x.style.zIndex)||1);
       blockEl.style.zIndex=Math.max(...allZ)+1;
-    },{passive:false});
-    blockEl.addEventListener('pointermove',e=>{
-      if(!dragging||!blockEl.hasPointerCapture(e.pointerId))return;
-      e.preventDefault();
-      blockEl.style.left=Math.max(0,dLeft+(e.clientX-dStartX))+'px';
-      blockEl.style.top=Math.max(0,dTop+(e.clientY-dStartY))+'px';
-    },{passive:false});
-    blockEl.addEventListener('pointerup',e=>{
-      if(!dragging||!blockEl.hasPointerCapture(e.pointerId))return;
-      blockEl.releasePointerCapture(e.pointerId);
-      dragging=false;
-      setBlockPos(id,{x:parseFloat(blockEl.style.left)||0,y:parseFloat(blockEl.style.top)||0,zIndex:parseInt(blockEl.style.zIndex)||1});
-    });
-    blockEl.addEventListener('pointercancel',()=>{dragging=false;});
+    }
 
-    // ── ROTATION ──
+    blockEl.addEventListener('pointerdown',e=>{
+      if(e.target.closest('.free-rot'))return;
+      e.preventDefault();
+      blockEl.setPointerCapture(e.pointerId);
+      ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
+      select();
+
+      if(ptrs.size===1){
+        // 1 doigt : préparer drag
+        drag.startX=e.clientX;drag.startY=e.clientY;
+        drag.startLeft=parseFloat(blockEl.style.left)||0;
+        drag.startTop=parseFloat(blockEl.style.top)||0;
+      } else if(ptrs.size===2){
+        // 2 doigts : préparer pinch + rotation
+        const[p1,p2]=pts();
+        pinch.startDist=dist2(p1,p2);
+        pinch.startW=parseFloat(blockEl.style.width)||300;
+        pinch.startAngle=ang2(p1,p2);
+        pinch.startRot=parseFloat(blockEl.style.transform.match(/rotate\(([-\d.]+)/)?.[1])||0;
+      }
+    },{passive:false});
+
+    blockEl.addEventListener('pointermove',e=>{
+      if(!ptrs.has(e.pointerId))return;
+      e.preventDefault();
+      ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
+
+      if(ptrs.size===1){
+        // 1 doigt : déplacer
+        const dx=e.clientX-drag.startX;
+        const dy=e.clientY-drag.startY;
+        blockEl.style.left=(drag.startLeft+dx)+'px';
+        blockEl.style.top=Math.max(0,drag.startTop+dy)+'px';
+      } else if(ptrs.size===2){
+        // 2 doigts : redimensionner + pivoter
+        const[p1,p2]=pts();
+        const newDist=dist2(p1,p2);
+        const newAngle=ang2(p1,p2);
+        // Redimensionner proportionnellement
+        const newW=Math.max(60,pinch.startW*(newDist/pinch.startDist));
+        blockEl.style.width=newW+'px';
+        // Rotation
+        const deltaAngle=newAngle-pinch.startAngle;
+        blockEl.style.transform=`rotate(${(pinch.startRot+deltaAngle).toFixed(1)}deg)`;
+      }
+    },{passive:false});
+
+    function onEnd(e){
+      ptrs.delete(e.pointerId);
+      blockEl.releasePointerCapture(e.pointerId);
+      if(ptrs.size===0){
+        // Tout sauvegardé d'un coup à la fin
+        setBlockPos(id,{
+          x:parseFloat(blockEl.style.left)||0,
+          y:parseFloat(blockEl.style.top)||0,
+          w:parseFloat(blockEl.style.width)||300,
+          rotate:parseFloat(blockEl.style.transform.match(/rotate\(([-\d.]+)/)?.[1])||0,
+          zIndex:parseInt(blockEl.style.zIndex)||1
+        });
+      } else if(ptrs.size===1){
+        // Retour à 1 doigt après pinch : reprendre le drag depuis là
+        const[p]=pts();
+        drag.startX=p.x;drag.startY=p.y;
+        drag.startLeft=parseFloat(blockEl.style.left)||0;
+        drag.startTop=parseFloat(blockEl.style.top)||0;
+      }
+    }
+    blockEl.addEventListener('pointerup',onEnd);
+    blockEl.addEventListener('pointercancel',e=>{ptrs.delete(e.pointerId);});
+
+    // ── ROTATION (poignée pour souris/stylet, 2 doigts pour touch) ──
     const rotH=blockEl.querySelector('.free-rot');
     if(rotH){
       let rStart,rRot;
@@ -1974,27 +2053,27 @@ function initFreeInteractions(){
       });
     }
 
-    // ── RESIZE (côtés gauche/droite et coins) ──
+    // ── RESIZE par poignées (souris/stylet) ──
     blockEl.querySelectorAll('[data-resize]').forEach(resH=>{
       const side=resH.dataset.resize;
-      let rStartX,rW,rL;
+      let rSX,rW,rL;
       resH.addEventListener('pointerdown',e=>{
         e.preventDefault();e.stopPropagation();
         resH.setPointerCapture(e.pointerId);
-        rStartX=e.clientX;
+        rSX=e.clientX;
         rW=parseFloat(blockEl.style.width)||300;
         rL=parseFloat(blockEl.style.left)||0;
       },{passive:false});
       resH.addEventListener('pointermove',e=>{
         if(!resH.hasPointerCapture(e.pointerId))return;
         e.preventDefault();
-        const dx=e.clientX-rStartX;
+        const dx=e.clientX-rSX;
         if(side==='mr'||side==='tr'||side==='br'){
           blockEl.style.width=Math.max(60,rW+dx)+'px';
-        } else if(side==='ml'||side==='tl'||side==='bl'){
-          const newW=Math.max(60,rW-dx);
-          blockEl.style.width=newW+'px';
-          blockEl.style.left=(rL+rW-newW)+'px';
+        } else {
+          const nw=Math.max(60,rW-dx);
+          blockEl.style.width=nw+'px';
+          blockEl.style.left=(rL+rW-nw)+'px';
         }
       },{passive:false});
       resH.addEventListener('pointerup',e=>{
@@ -2089,6 +2168,10 @@ async function renderPublicPage(uid_,isPreview=false){
         <div class="free-block-sel"></div>
         <div class="free-rot-line"></div>
         <div class="free-rot" data-rotate="${b.id}">↻</div>
+        <div class="free-z-ctrl">
+          <button class="free-z-btn" onclick="setBlockZIndex('${b.id}','up')" title="Devant">↑</button>
+          <button class="free-z-btn" onclick="setBlockZIndex('${b.id}','down')" title="Derrière">↓</button>
+        </div>
         <div class="free-h c tl" data-resize="tl" data-id="${b.id}"></div>
         <div class="free-h c tr" data-resize="tr" data-id="${b.id}"></div>
         <div class="free-h c bl" data-resize="bl" data-id="${b.id}"></div>
@@ -2113,6 +2196,15 @@ async function renderPublicPage(uid_,isPreview=false){
       </div>`;
 
     setTimeout(()=>initFreeInteractions(),50);
+    // Hint tactile (une seule fois par session)
+    if(!sessionStorage.getItem('freeHintShown')){
+      sessionStorage.setItem('freeHintShown','1');
+      const hint=document.createElement('div');
+      hint.className='free-touch-hint';
+      hint.textContent='👆 Glisse pour déplacer • 🤏 Pince à 2 doigts pour redimensionner/pivoter';
+      document.body.appendChild(hint);
+      setTimeout(()=>hint.remove(),4200);
+    }
 
   } else {
     // ═══ MODE FLUX NORMAL ═══
