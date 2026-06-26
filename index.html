@@ -1862,36 +1862,54 @@ const LOGO_B64='iVBORw0KGgoAAAANSUhEUgAAAPAAAADwCAYAAAA+VemSAAA51UlEQVR42u2deXyU
 function renderBlock(b,p,tpl,fs,align,txt,accent,linkColor,card,br,shd,gap){
   const _bg=b.style&&b.style.bgColor;
   const bStyle=`margin-bottom:${gap||0}${_bg?`;background:${_bg};border-radius:${br}px;padding:10px`:''}`;
+
   if(b.type==='text'&&b.content){
     const htmlContent=parseFmt(b.content);
     const bFsv=(b.style&&b.style.fontSize)||fs;
     const bAlignv=(b.style&&b.style.textAlign)||align;
     const pStyle=`color:${txt};font-size:${bFsv}px;line-height:1.7;text-align:${bAlignv};word-break:break-word`;
+    // bare = pas de fond → pas d'ombre sur le conteneur
     if(b.bare)return`<div class="pub-block" style="${bStyle}"><div style="${pStyle}">${htmlContent}</div></div>`;
+    // carte avec fond → ombre sur la carte
     return`<div class="pub-block" style="${bStyle}"><div style="background:${card};border-radius:${br}px;padding:16px 18px;box-shadow:${shd}"><div style="${pStyle}">${htmlContent}</div></div></div>`;
   }
+
   if(b.type==='link'&&b.content){
     const bFsL=(b.style&&b.style.fontSize)||fs;
     const bAlignL=(b.style&&b.style.textAlign)||align;
+    // bare = lien texte → pas d'ombre
     if(b.bare)return`<div class="pub-block" style="${bStyle}"><a href="${esc(b.content)}" style="color:${linkColor};font-size:${bFsL}px;font-weight:700;text-decoration:underline;display:block;text-align:${bAlignL}" target="_blank" rel="noopener">🔗 ${b.label?sanitizeHTML(b.label):esc(b.content)}</a></div>`;
+    // bouton avec fond → ombre sur le bouton
     return`<div class="pub-block" style="${bStyle}"><a href="${esc(b.content)}" style="display:block;background:${accent};color:#000;border-radius:${br}px;padding:15px 20px;text-align:center;text-decoration:none;font-size:${bFsL}px;font-weight:800;box-shadow:0 4px 20px ${accent}55" target="_blank" rel="noopener">🔗 ${b.label?sanitizeHTML(b.label):esc(b.content)}</a></div>`;
   }
-  if(b.type==='photo'&&b.content)return`<div class="pub-block" style="${bStyle}"><div style="border-radius:${br}px;overflow:hidden;background:transparent;box-shadow:${shd}"><img src="${esc(b.content)}" style="width:100%;display:block" onerror="this.parentElement.parentElement.style.display='none'"></div></div>`;
+
+  if(b.type==='photo'&&b.content){
+    // photo = fond opaque → ombre sur l'image elle-même, pas sur le conteneur transparent
+    return`<div class="pub-block" style="${bStyle}"><div style="border-radius:${br}px;overflow:hidden;box-shadow:${shd}"><img src="${esc(b.content)}" style="width:100%;display:block;border-radius:${br}px" onerror="this.parentElement.parentElement.style.display='none'"></div></div>`;
+  }
+
   if(b.type==='video'&&b.content){
     const _bvc=b.content;
     if(_bvc.startsWith('data:video/')||b.isCloud||_bvc.match(/\.(mp4|webm|mov|ogg)(\?|$)/i)||_bvc.includes('cloudinary')){
       const _loop=b.autoplay?' loop':'';const _auto=b.autoplay?' autoplay':'';
+      // vidéo = fond noir → ombre sur la vidéo
       return`<div class="pub-block" style="${bStyle}"><video src="${esc(_bvc)}" controls muted playsinline preload="auto"${_auto}${_loop} style="width:100%;border-radius:${br}px;display:block;background:#000;box-shadow:${shd}"></video></div>`;
     }
-    if(_bvc.startsWith('data:image/gif')||_bvc.endsWith('.gif'))return`<div class="pub-block" style="${bStyle}"><div style="border-radius:${br}px;overflow:hidden;background:#fff"><img src="${esc(_bvc)}" style="width:100%;display:block"></div></div>`;
+    if(_bvc.startsWith('data:image/gif')||_bvc.endsWith('.gif')){
+      return`<div class="pub-block" style="${bStyle}"><div style="border-radius:${br}px;overflow:hidden;box-shadow:${shd}"><img src="${esc(_bvc)}" style="width:100%;display:block"></div></div>`;
+    }
     const m=_bvc.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/))([^&\n?#]+)/);
-    if(m){const _ytParams=b.autoplay?`?autoplay=1&mute=1&loop=1&playlist=${m[1]}&enablejsapi=1`:'?enablejsapi=1';return`<div class="pub-block" style="${bStyle}"><div style="border-radius:${br}px;overflow:hidden;position:relative;padding-top:56.25%;box-shadow:${shd}"><iframe src="https://www.youtube-nocookie.com/embed/${m[1]}${_ytParams}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:none" allowfullscreen allow="autoplay; fullscreen; encrypted-media; picture-in-picture"></iframe></div></div>`;}
-    // Fallback : toute autre URL — on tente un <video> natif
+    if(m){
+      const _ytParams=b.autoplay?`?autoplay=1&mute=1&loop=1&playlist=${m[1]}&enablejsapi=1`:'?enablejsapi=1';
+      // iframe = fond visible → ombre
+      return`<div class="pub-block" style="${bStyle}"><div style="border-radius:${br}px;overflow:hidden;position:relative;padding-top:56.25%;box-shadow:${shd}"><iframe src="https://www.youtube-nocookie.com/embed/${m[1]}${_ytParams}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:none" allowfullscreen allow="autoplay; fullscreen; encrypted-media; picture-in-picture"></iframe></div></div>`;
+    }
     if(_bvc.startsWith('http')){
       const _auto=b.autoplay?' autoplay':'';
       return`<div class="pub-block" style="${bStyle}"><video src="${esc(_bvc)}" controls muted playsinline preload="auto"${_auto} style="width:100%;border-radius:${br}px;display:block;background:#000;box-shadow:${shd}"></video></div>`;
     }
   }
+
   if(b.type==='social'&&b.content){
     const sp=SOCIAL_PLATFORMS[b.platform||'instagram']||SOCIAL_PLATFORMS.instagram;
     const _spColor=(b.style&&b.style.color)||sp.color;
@@ -1902,9 +1920,12 @@ function renderBlock(b,p,tpl,fs,align,txt,accent,linkColor,card,br,shd,gap){
     const _iconColor=b.bare?_spColor:(_spLight?'#000000':'#ffffff');
     const _brandSVG=getBrandSVG(b.platform||'instagram',_iconColor,_iconSize);
     const svgIcon=_brandSVG||`<span style="font-size:${_iconSize}px">${sp.icon}</span>`;
+    // bare = icône sans fond → pas d'ombre
     if(b.bare)return`<div class="pub-block" style="${bStyle}"><a href="${esc(b.content)}" style="color:${_spColor};font-size:${bFsS}px;font-weight:700;text-decoration:underline;display:flex;align-items:center;gap:7px;justify-content:${bAlignS==='center'?'center':bAlignS==='right'?'flex-end':'flex-start'}" target="_blank" rel="noopener">${svgIcon} ${esc(sp.label)}</a></div>`;
+    // bouton coloré → ombre sur le bouton
     return`<div class="pub-block" style="${bStyle}"><a href="${esc(b.content)}" style="display:flex;align-items:center;justify-content:center;gap:9px;background:${_bg||_spColor};color:${_spLight?'#000':'#fff'};border-radius:${br}px;padding:14px 20px;text-decoration:none;font-size:${bFsS}px;font-weight:800;box-shadow:0 4px 20px ${_spColor}66" target="_blank" rel="noopener">${svgIcon} ${esc(sp.label)}</a></div>`;
   }
+
   return'';
 }
 
