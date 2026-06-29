@@ -1,9 +1,79 @@
 <!DOCTYPE html>
+<!--
+===================================================================================
+CORRECTIONS APPLIQUÉES — QR-MØØN (audit 2026-06)
+===================================================================================
+
+1. DOMPurify intégré   → sanitizeHTML() utilise DOMPurify si disponible
+2. parseFmt()          → sanitise APRÈS le markdown (ordre corrigé)
+3. Drag-and-drop       → toIdx recalculé après splice, insertAt corrigé
+4. isAdmin()           → async, vérifie Firebase Custom Claims en priorité
+5. viewport            → user-scalable=no retiré (conformité WCAG)
+6. Open Graph          → balises og: et twitter: ajoutées
+7. saveProfile()       → indicateur visuel ✓ Sauvegardé / ⚠ Erreur
+8. qrcode-generator    → supprimé, getQRModuleCount rendu autonome
+
+===================================================================================
+RÈGLES FIRESTORE À APPLIQUER (Firebase Console → Firestore → Règles)
+===================================================================================
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /users/{userId} {
+      // Lecture publique si le profil est visible
+      allow read: if resource.data.profile.showProfile == true
+                  || (request.auth != null && request.auth.uid == userId);
+      // Écriture uniquement par le propriétaire
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    match /inviteCodes/{code} {
+      allow read: if request.auth != null;
+      // Écriture réservée aux admins (Custom Claim)
+      allow write: if request.auth != null && request.auth.token.admin == true;
+    }
+
+    // Tout le reste refusé
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
+
+===================================================================================
+CLOUD FUNCTION À DÉPLOYER (Firebase Admin SDK) — setAdminClaim.js
+===================================================================================
+
+const functions = require('firebase-functions');
+const admin = require('firebase-admin');
+admin.initializeApp();
+
+// Se déclenche à chaque création de compte
+exports.setAdminClaim = functions.auth.user().onCreate(async (user) => {
+  const ADMIN_EMAIL = 'chatdepique@gmail.com'; // email admin côté serveur uniquement
+  if (user.email && user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
+    await admin.auth().setCustomUserClaims(user.uid, { admin: true });
+    console.log('Admin claim set for:', user.email);
+  }
+});
+
+===================================================================================
+-->
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#FFD600">
+  <!-- Open Graph / partage réseaux sociaux -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="QR-MØØN">
+  <meta property="og:description" content="Créez votre page de liens personnalisée avec un QR code unique.">
+  <meta property="og:image" content="/icon-512.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="QR-MØØN">
+  <meta name="twitter:description" content="Créez votre page de liens personnalisée avec un QR code unique.">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <link rel="manifest" href="manifest.json">
@@ -673,9 +743,10 @@
   </div>
 </div>
 <button class="fab-preview" onclick="showPreview()">👁 <span id="fab-preview-lbl">Aperçu</span></button>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.5/purify.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://unpkg.com/qr-code-styling@1.6.0-rc.1/lib/qr-code-styling.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
+<!-- qrcode-generator supprimé : remplacé par getQRModuleCount via QRCodeStyling -->
 <script type="module">
 import{initializeApp}from'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
 import{getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,signOut,onAuthStateChanged,GoogleAuthProvider,signInWithRedirect,getRedirectResult,sendPasswordResetEmail,setPersistence,browserLocalPersistence,browserSessionPersistence}from'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
@@ -834,10 +905,15 @@ const QR_STYLES={
 
 // ── Post-traitement canvas : remplace l'œil central par 3 barres horizontales ──
 function getQRModuleCount(data,ec){
-  const q=qrcode(0,ec); // 0 = auto-détection de version, identique à qr-code-styling
-  q.addData(data);
-  q.make();
-  return q.getModuleCount();
+  // Calcul autonome du nombre de modules QR sans librairie externe
+  // Version QR = f(longueur des données, correction d'erreur)
+  const ecLevels={L:1,M:0,Q:3,H:2};
+  const ecIdx=ecLevels[ec]??0;
+  const len=new TextEncoder().encode(data).length;
+  // Table officielle ISO 18004 : capacités par version pour mode Byte
+  const caps=[[],[17,14,11,7],[32,26,20,14],[53,42,32,24],[78,62,46,34],[106,84,60,44],[134,106,74,58],[154,122,86,64],[192,152,108,84],[230,180,130,98],[271,213,151,119],[321,251,177,137],[367,287,203,155],[458,331,241,177],[520,362,258,194],[586,412,292,220],[644,450,322,250],[718,504,364,280],[792,560,394,310],[858,624,442,338],[929,666,482,382],[1003,711,509,403],[1091,779,565,439],[1171,857,611,461],[1273,911,661,511],[1367,997,715,535],[1465,1059,751,593],[1528,1125,805,625],[1628,1190,868,658],[1732,1264,908,698],[1840,1370,982,742],[1952,1452,1030,790],[2068,1538,1112,842],[2188,1628,1168,898],[2303,1722,1228,958],[2431,1809,1283,983],[2563,1911,1351,1051],[2699,1989,1423,1093],[2809,2099,1499,1139],[2953,2213,1579,1219]];
+  for(let v=1;v<=40;v++){if(caps[v]&&caps[v][ecIdx]>=len)return v*4+17;}
+  return 177; // version 40 max
 }
 function roundRectPath(ctx,x,y,w,h,r){
   ctx.beginPath();
@@ -1057,13 +1133,29 @@ window.forgotPassword=async()=>{
 async function loadUser(uid_){const s=await getDoc(doc(DB,'users',uid_));return s.exists()?s.data():null;}
 async function saveProfile(){
   if(!S.user||!S.profile)return;
+  showSaveStatus('saving');
   try{
-    console.log('[saveProfile] blocks autoplay states:', S.profile.blocks.filter(b=>b.type==='video').map(b=>({id:b.id,autoplay:b.autoplay})));
     await setDoc(doc(DB,'users',S.user.uid),{profile:S.profile},{merge:true});
-    console.log('[saveProfile] SUCCESS');
     showFlash();
+    showSaveStatus('saved');
   }
-  catch(e){console.warn('save:',e.code,e.message);}
+  catch(e){
+    console.warn('save:',e.code,e.message);
+    showSaveStatus('error');
+  }
+}
+function showSaveStatus(state){
+  let el=document.getElementById('save-status-indicator');
+  if(!el){
+    el=document.createElement('div');
+    el.id='save-status-indicator';
+    el.style.cssText='position:fixed;bottom:1rem;right:1rem;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:500;z-index:9999;transition:opacity .4s;pointer-events:none;';
+    document.body.appendChild(el);
+  }
+  clearTimeout(el._t);
+  if(state==='saving'){el.textContent='⏳ Sauvegarde…';el.style.cssText+=';background:#222;color:#fff;opacity:1;';}
+  else if(state==='saved'){el.textContent='✓ Sauvegardé';el.style.cssText+=';background:#1a7a1a;color:#fff;opacity:1;';el._t=setTimeout(()=>{el.style.opacity='0';},2000);}
+  else if(state==='error'){el.textContent='⚠ Erreur de sauvegarde';el.style.cssText+=';background:#a02020;color:#fff;opacity:1;';}
 }
 function autoSave(){syncForm();clearTimeout(S.saveTimer);S.saveTimer=setTimeout(saveProfile,1300);}
 function syncForm(){
@@ -1311,11 +1403,14 @@ function initBlockDrag(){
       const targetId=target.querySelector('[data-drag-block]')?.dataset.dragBlock;
       const blocks=S.profile.blocks;
       const fromIdx=blocks.findIndex(b=>b.id===dragId);
-      const toIdx=blocks.findIndex(b=>b.id===targetId);
+      let toIdx=blocks.findIndex(b=>b.id===targetId);
       if(fromIdx>=0&&toIdx>=0&&fromIdx!==toIdx){
         const [moved]=blocks.splice(fromIdx,1);
-        const insertAt=target.classList.contains('drag-over-bot')?toIdx:toIdx;
-        blocks.splice(insertAt<fromIdx?insertAt:insertAt,0,moved);
+        // Recalculer toIdx après le splice (les indices ont bougé)
+        toIdx=blocks.findIndex(b=>b.id===targetId);
+        // Insérer avant ou après selon la position du curseur
+        const insertAt=target.classList.contains('drag-over-bot')?toIdx+1:toIdx;
+        blocks.splice(insertAt,0,moved);
         saveProfile();
       }
     }
@@ -1388,16 +1483,24 @@ window.richFont=(fontFamily,id)=>{
 };
 // Sanitise le HTML avant affichage public (sécurité)
 function sanitizeHTML(html){
-  return (html||'')
+  if(typeof DOMPurify==='undefined') return (html||'')
     .replace(/<script[^>]*>.*?<\/script>/gi,'')
     .replace(/\son\w+\s*=/gi,' data-blocked=')
     .replace(/javascript:/gi,'');
+  return DOMPurify.sanitize(html||'',{
+    ALLOWED_TAGS:['b','i','u','strong','em','span','br','p','a'],
+    ALLOWED_ATTR:['style','href','target','rel'],
+    ALLOW_DATA_ATTR:false,
+    FORBID_SCRIPTS:true,
+  });
 }
 function parseFmt(s){
-  // Rétrocompatibilité : convertir ancien markdown en HTML
-  return sanitizeHTML(s)
-    .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
-    .replace(/_(.*?)_/g,'<em>$1</em>');
+  // Rétrocompatibilité : convertir ancien markdown en HTML — sanitiser EN DERNIER
+  return sanitizeHTML(
+    (s||'')
+      .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
+      .replace(/_(.*?)_/g,'<em>$1</em>')
+  );
 }
 
 window.openEmoji=id=>{
@@ -1825,15 +1928,23 @@ window.downloadQR=async()=>{
 };
 window.copyQrUrl=()=>{const url=getPublicUrl();if(navigator.clipboard){navigator.clipboard.writeText(url).then(()=>showToast('📋 URL copiée !'));}else showToast(url);};
 
-function isAdmin(){return S.user?.email?.toLowerCase()===ADMIN_EMAIL.toLowerCase();}
-function injectAdminTab(){const b=$('tab-admin-btn');if(b)b.style.display=isAdmin()?'block':'none';}
+async function isAdmin(){
+  if(!S.user)return false;
+  try{
+    const token=await S.user.getIdTokenResult(true);
+    if(token.claims.admin===true)return true;
+  }catch(e){}
+  // Fallback temporaire : email check (à retirer une fois les Custom Claims configurés)
+  return S.user.email?.toLowerCase()===ADMIN_EMAIL.toLowerCase();
+}
+async function injectAdminTab(){const b=$('tab-admin-btn');if(b)b.style.display=await isAdmin()?'block':'none';}
 function makeCode(){const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let s='QRT-';for(let i=0;i<8;i++)s+=c[Math.floor(Math.random()*c.length)];return s;}
 window.adminGenCode=async()=>{const code=makeCode();try{await setDoc(doc(DB,'inviteCodes',code),{used:false,createdAt:Date.now(),usedBy:null});showToast('🎟️ '+code);loadAdminData();}catch(e){showToast('❌ '+e.message);}};
 window.adminCopy=code=>navigator.clipboard?.writeText(code).then(()=>showToast('📋 Copié !'));
 window.adminDel=async code=>{if(!confirm('Supprimer '+code+' ?'))return;try{await deleteDoc(doc(DB,'inviteCodes',code));loadAdminData();}catch(e){showToast('❌ Erreur');}};
 window.adminSetPlan=async(uid_,plan)=>{try{await setDoc(doc(DB,'users',uid_),{plan},{merge:true});showToast(plan==='app'?'📱 App activée':'👕 T-shirt activé');loadAdminData();}catch(e){showToast('❌ Erreur');}};
 
-async function loadAdminData(){if(!isAdmin())return;await Promise.all([loadCodes(),loadUsers()]);}
+async function loadAdminData(){if(!await isAdmin())return;await Promise.all([loadCodes(),loadUsers()]);}
 async function loadCodes(){
   const el=$('codes-list'),stats=$('admin-stats');if(!el)return;
   try{
@@ -2386,7 +2497,7 @@ function refreshDash(){
   $('p-av').value=S.profile.avatar?.startsWith('http')?S.profile.avatar:'';
   if(S.profile.avatar)updateAvatarPreview(S.profile.avatar);
   updateVisUI();renderBlocks();injectAdminTab();applyLang();initNotifButton();
-  if(isAdmin()&&S.data.plan!=='app'){S.data.plan='app';setDoc(doc(DB,'users',S.user.uid),{plan:'app'},{merge:true}).catch(()=>{});}
+  isAdmin().then(adm=>{if(adm&&S.data.plan!=='app'){S.data.plan='app';setDoc(doc(DB,'users',S.user.uid),{plan:'app'},{merge:true}).catch(()=>{});}});
 }
 
 function checkPublicRoute(){
@@ -2428,8 +2539,8 @@ if(!checkPublicRoute()){
       S.user=user;
       try{
         const d=await loadUser(user.uid);
-        if(d){S.data=d;S.profile=d.profile||{...DEFAULT_PROFILE};setTimeout(updateVisUI,50);if(isAdmin()&&S.data.plan!=='app'){S.data.plan='app';setDoc(doc(DB,'users',user.uid),{plan:'app'},{merge:true}).catch(()=>{});}}
-        else{const nd={username:user.displayName||user.email.split('@')[0],qrId:user.uid,email:user.email,createdAt:Date.now(),plan:isAdmin()?'app':'tshirt',visits:0,profile:{...DEFAULT_PROFILE,displayName:user.displayName||''}};await setDoc(doc(DB,'users',user.uid),nd);S.data=nd;S.profile={...DEFAULT_PROFILE};}
+        if(d){S.data=d;S.profile=d.profile||{...DEFAULT_PROFILE};setTimeout(updateVisUI,50);isAdmin().then(adm=>{if(adm&&S.data.plan!=='app'){S.data.plan='app';setDoc(doc(DB,'users',user.uid),{plan:'app'},{merge:true}).catch(()=>{});}});}
+        else{const nd={username:user.displayName||user.email.split('@')[0],qrId:user.uid,email:user.email,createdAt:Date.now(),plan:'tshirt'/* plan admin mis à jour async via isAdmin() */,visits:0,profile:{...DEFAULT_PROFILE,displayName:user.displayName||''}};await setDoc(doc(DB,'users',user.uid),nd);S.data=nd;S.profile={...DEFAULT_PROFILE};}
       }catch(e){S.profile={...DEFAULT_PROFILE};}
       await _afterSplashMinDelay();
       showScreen('dashboard');
