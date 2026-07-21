@@ -128,6 +128,27 @@
     .upload-progress-bar{height:100%;background:var(--accent);border-radius:2px;transition:width .3s;}
     .media-preview{width:100%;border-radius:10px;margin-top:4px;display:block;background:#fff;max-height:200px;object-fit:cover;}
     video.media-preview{max-height:160px;background:#000;}
+    /* ═══ GALERIE / DIAPORAMA ═══ */
+    .gallery-thumbs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;}
+    .gallery-thumb-wrap{position:relative;width:64px;height:64px;flex-shrink:0;}
+    .gallery-thumb{width:64px;height:64px;object-fit:cover;border-radius:8px;display:block;}
+    .gallery-thumb-del{position:absolute;top:-5px;right:-5px;width:18px;height:18px;border-radius:50%;background:#e00;color:#fff;border:none;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+    /* Diaporama public */
+    .pub-gallery{position:relative;overflow:hidden;background:#000;user-select:none;}
+    .pub-gallery-track{display:flex;will-change:transform;}
+    .pub-gallery-track.no-anim{transition:none;}
+    .pub-gallery-track.animating{transition:transform .4s ease;}
+    .pub-gallery-track.fade-mode{display:block;}
+    .pub-gallery-track.fade-mode .pub-gallery-slide{position:absolute;inset:0;opacity:0;transition:opacity .5s ease;pointer-events:none;}
+    .pub-gallery-track.fade-mode .pub-gallery-slide.active{opacity:1;position:relative;pointer-events:auto;}
+    .pub-gallery-slide{flex-shrink:0;width:100%;}
+    .pub-gallery-slide img{width:100%;display:block;object-fit:cover;max-height:420px;}
+    .pub-gallery-btn{position:absolute;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.45);color:#fff;border:none;width:38px;height:38px;border-radius:50%;font-size:20px;cursor:pointer;z-index:10;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
+    .pub-gallery-btn.prev{left:8px;}
+    .pub-gallery-btn.next{right:8px;}
+    .pub-gallery-dots{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:10;}
+    .pub-gallery-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.45);cursor:pointer;transition:background .2s,transform .2s;}
+    .pub-gallery-dot.active{background:#fff;transform:scale(1.25);}
     .tpl-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:4px;}
     .tpl-card{border-radius:12px;padding:16px 8px;text-align:center;border:2.5px solid transparent;cursor:pointer;transition:all .15s;}
     .tpl-card.on{border-color:var(--accent);box-shadow:0 0 0 3px rgba(255,214,0,.2);}
@@ -299,6 +320,19 @@
     .toggle-switch input:checked+.toggle-track{background:var(--accent)}
     .toggle-switch input:checked+.toggle-track::after{transform:translateX(18px)}
     .scroll-top-btn{position:fixed;bottom:24px;right:16px;width:40px;height:40px;border-radius:50%;background:rgba(0,0,0,.5);color:#fff;border:none;font-size:18px;cursor:pointer;display:none;align-items:center;justify-content:center;z-index:50;backdrop-filter:blur(4px);box-shadow:0 2px 12px rgba(0,0,0,.3);}
+    /* ═══ PAGES MULTIPLES ═══ */
+    .page-tabs{display:flex;gap:6px;padding:10px 14px 0;overflow-x:auto;border-bottom:1.5px solid var(--border);margin-bottom:0;}
+    .page-tab{padding:6px 14px;border-radius:10px 10px 0 0;font-size:12px;font-weight:700;cursor:pointer;border:none;background:var(--surface2);color:var(--muted);white-space:nowrap;transition:all .15s;}
+    .page-tab.active{background:var(--accent);color:#000;}
+    .page-tab-add{padding:6px 10px;border-radius:10px 10px 0 0;font-size:14px;cursor:pointer;border:none;background:transparent;color:var(--muted);}
+    .page-tab-add:hover{color:var(--accent);}
+    /* Navigation pages publique */
+    .pub-page-nav{display:flex;align-items:center;justify-content:center;gap:12px;padding:18px 16px 8px;}
+    .pub-page-dot{width:9px;height:9px;border-radius:50%;background:var(--muted,#aaa);cursor:pointer;transition:all .2s;}
+    .pub-page-dot.active{background:currentColor;transform:scale(1.3);}
+    .pub-page-arrow{background:none;border:none;font-size:22px;cursor:pointer;color:inherit;padding:4px 8px;opacity:.6;}
+    .pub-page-arrow:hover{opacity:1;}
+    .pub-page-indicator{font-size:12px;font-weight:700;opacity:.5;}
     .accordion-hdr{display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:10px 0;border-bottom:2px solid var(--border);user-select:none;}
     .accordion-hdr .card-title{margin-bottom:0;}
     .accordion-arrow{font-size:13px;color:var(--muted);transition:transform .25s;}
@@ -377,7 +411,7 @@
     /* ═══ LOGO AUTH ═══ */
     .auth-logo .logo-chip{display:inline-flex;align-items:center;justify-content:center;width:82px;height:82px;background:#1a1a1a;border-radius:13px;margin-bottom:14px;}
     /* ═══ SCROLL TOP ═══ */
-    .scroll-top-btn{position:fixed;bottom:24px;right:16px;width:40px;height:40px;border-radius:50%;background:rgba(0,0,0,.5);color:#fff;border:none;font-size:18px;cursor:pointer;display:none;align-items:center;justify-content:center;z-index:50;backdrop-filter:blur(4px);box-shadow:0 2px 12px rgba(0,0,0,.3);}
+
     /* ═══ RICH EDITOR MINI ═══ */
     .rich-editor:focus{border-color:var(--accent);}
     .rich-editor:empty::before{content:attr(data-placeholder);color:var(--muted);pointer-events:none;}
@@ -524,6 +558,7 @@
       </div>
 
       <div id="blocks-section-title" class="card-title" style="margin-bottom:8px">📦 Mes blocs de contenu</div>
+      <div class="page-tabs" id="page-tabs"></div>
       <div class="blocks-container" id="blocks-list"></div>
       <div id="add-panel" style="display:none" class="card">
         <div class="card-title" id="add-panel-title">Quel type de bloc ?</div>
@@ -532,6 +567,8 @@
           <div class="add-block-item" onclick="addBlock('link')"><div class="abi-icon">🔗</div><div class="abi-label" id="lbl-add-link">Lien cliquable</div></div>
           <div class="add-block-item" onclick="addBlock('photo')"><div class="abi-icon">🖼️</div><div class="abi-label" id="lbl-add-photo">Photo / GIF</div></div>
           <div class="add-block-item" onclick="addBlock('video')"><div class="abi-icon">🎥</div><div class="abi-label" id="lbl-add-video">Vidéo / GIF</div></div>
+          <div class="add-block-item" onclick="addBlock('gallery')"><div class="abi-icon">🎞️</div><div class="abi-label" id="lbl-add-gallery">Galerie / Diaporama</div></div>
+          <div class="add-block-item" onclick="addBlock('question')"><div class="abi-icon">❓</div><div class="abi-label" id="lbl-add-question">Question</div></div>
           <div class="add-block-item" onclick="addBlock('social')" style="grid-column:span 2"><div class="abi-icon">📲</div><div class="abi-label" id="lbl-add-social">Réseau social</div></div>
         </div>
         <button class="btn btn-g" id="cancel-btn" onclick="setAddPanel(false)" style="margin-top:10px">Annuler</button>
@@ -892,7 +929,7 @@ async function renderStyledQR(container,url,styleId,size,withLogo){
   container.appendChild(canvas);
   return canvas;
 }
-const DEFAULT_PROFILE={displayName:'',bio:'',avatar:'',template:'blanc',font:'sans',primaryColor:'#FFD600',bgColor:'#ffffff',textColor:'#1a1a1a',blocks:[],showProfile:true,fontSize:15,textAlign:'left',btnRadius:14,shadowStrength:1,blockSpacing:12,qrStyle:'classic',freeLayout:false};
+const DEFAULT_PROFILE={displayName:'',bio:'',avatar:'',template:'blanc',font:'sans',primaryColor:'#FFD600',bgColor:'#ffffff',textColor:'#1a1a1a',blocks:[],pages:null,showProfile:true,fontSize:15,textAlign:'left',btnRadius:14,shadowStrength:1,blockSpacing:12,qrStyle:'classic',freeLayout:false};
 
 const S={user:null,data:null,profile:null,saveTimer:null,qrObj:null,dark:false};
 const $=id=>document.getElementById(id);
@@ -1116,7 +1153,11 @@ window.setTab=tab=>{
 
 /* BLOCS */
 window.addBlock=type=>{
-  const defaults={social:{platform:'instagram',content:''}};
+  const defaults={
+    social:{platform:'instagram',content:''},
+    question:{question:'',choices:[{text:'',page:0},{text:'',page:1}],freeText:false},
+    gallery:{images:[],transition:'slide',autoplay:false,delay:3}
+  };
   S.profile.blocks.push({id:uid(),type,...(defaults[type]||{content:'',label:''})});
   setAddPanel(false);renderBlocks();saveProfile();
 };
@@ -1235,6 +1276,50 @@ function renderBlocks(){
       ${isGif?`<img src="${esc(_bc)}" class="media-preview">`:''}
       <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--border);margin-top:6px"><span style="font-size:12px;font-weight:700;color:var(--text2);flex:1">▶ Démarrage auto</span><label class="toggle-switch"><input type="checkbox" ${b.autoplay?"checked":""} onchange="setAutoplay('${b.id}',this.checked)"><span class="toggle-track"></span></label></div>`;
     }
+    if(b.type==='gallery'){
+      const imgs=b.images||[];
+      const thumbs=imgs.map((img,i)=>`<div class="gallery-thumb-wrap"><img src="${esc(img)}" class="gallery-thumb"><button class="gallery-thumb-del" onclick="removeGalleryImage('${b.id}',${i})">✕</button></div>`).join('');
+      body=`<div class="gallery-thumbs">${thumbs}</div>
+      <div class="upload-zone" onclick="document.getElementById('gf-${b.id}').click()">🖼️ Ajouter des photos</div>
+      <input type="file" id="gf-${b.id}" accept="image/*" multiple onchange="uploadGalleryImages('${b.id}',this)">
+      <div class="upload-progress" id="gprog-${b.id}"><div class="upload-progress-bar" id="gbar-${b.id}"></div></div>
+      <div style="display:flex;gap:12px;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">
+        <div style="flex:1"><div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:4px">TRANSITION</div>
+          <select class="block-inp" onchange="updateBlock('${b.id}','transition',this.value)" style="margin-bottom:0">
+            <option value="slide" ${(b.transition||'slide')==='slide'?'selected':''}>→ Slide</option>
+            <option value="fade" ${b.transition==='fade'?'selected':''}>✦ Fondu</option>
+          </select></div>
+        <div style="flex:1"><div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:4px">AUTOPLAY</div>
+          <label class="toggle-switch" style="margin-top:4px"><input type="checkbox" ${b.autoplay?'checked':''} onchange="setAutoplay('${b.id}',this.checked)"><span class="toggle-track"></span></label></div>
+        <div style="flex:1"><div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:4px">DURÉE (s)</div>
+          <input type="number" class="block-inp" min="1" max="30" value="${b.delay||3}" onchange="updateBlock('${b.id}','delay',+this.value)" style="margin-bottom:0"></div>
+      </div>`;
+    }
+    if(b.type==='question'){
+      const choices=b.choices||[{text:'',page:0},{text:'',page:1}];
+      const pages=S.profile.pages||[{name:'Page 1'}];
+      const pageOpts=pages.map((pg,i)=>`<option value="${i}">📄 ${pg.name}</option>`).join('');
+      const choiceRows=choices.map((c,ci)=>`
+        <div class="q-choice-row">
+          <span style="font-size:12px;font-weight:700;color:var(--muted);min-width:18px">${ci+1}.</span>
+          <input class="block-inp" placeholder="Libellé…" value="${esc(c.text)}"
+            oninput="updateQChoice('${b.id}',${ci},'text',this.value)" style="margin-bottom:0;flex:1">
+          <select class="block-inp" style="margin-bottom:0;max-width:110px"
+            onchange="updateQChoice('${b.id}',${ci},'page',+this.value)">
+            ${pageOpts.replace(`value="${c.page}"`,`value="${c.page}" selected`)}
+          </select>
+          ${choices.length>2?`<button class="q-choice-del" onclick="removeQChoice('${b.id}',${ci})">✕</button>`:''}
+        </div>`).join('');
+      body=`<input class="block-inp" placeholder="Votre question…" value="${esc(b.question||'')}"
+          oninput="updateBlock('${b.id}','question',this.value)" style="font-weight:700">
+        <div style="font-size:11px;font-weight:700;color:var(--muted);margin:8px 0 4px">CHOIX → PAGE</div>
+        ${choiceRows}
+        ${choices.length<4?`<button class="btn btn-g" onclick="addQChoice('${b.id}')" style="width:auto;padding:6px 14px;margin-top:4px;font-size:12px">＋ Ajouter un choix</button>`:''}
+        <div style="display:flex;align-items:center;gap:8px;margin-top:10px;padding-top:8px;border-top:1px solid var(--border)">
+          <span style="font-size:12px;font-weight:700;color:var(--muted);flex:1">Champ texte libre</span>
+          <label class="toggle-switch"><input type="checkbox" ${b.freeText?'checked':''} onchange="updateBlock('${b.id}','freeText',this.checked)"><span class="toggle-track"></span></label>
+        </div>`;
+    }
     if(b.type==='social'){
       const cur=b.platform||'instagram';
       const platformBtns=Object.entries(SOCIAL_PLATFORMS).map(([k,v])=>{
@@ -1311,11 +1396,14 @@ function initBlockDrag(){
       const targetId=target.querySelector('[data-drag-block]')?.dataset.dragBlock;
       const blocks=S.profile.blocks;
       const fromIdx=blocks.findIndex(b=>b.id===dragId);
-      const toIdx=blocks.findIndex(b=>b.id===targetId);
+      let toIdx=blocks.findIndex(b=>b.id===targetId);
       if(fromIdx>=0&&toIdx>=0&&fromIdx!==toIdx){
         const [moved]=blocks.splice(fromIdx,1);
-        const insertAt=target.classList.contains('drag-over-bot')?toIdx:toIdx;
-        blocks.splice(insertAt<fromIdx?insertAt:insertAt,0,moved);
+        // Recalculer toIdx après le splice (les index ont décalé)
+        toIdx=blocks.findIndex(b=>b.id===targetId);
+        const wantsAfter=target.classList.contains('drag-over-bot');
+        const insertAt=wantsAfter?toIdx+1:toIdx;
+        blocks.splice(insertAt,0,moved);
         saveProfile();
       }
     }
@@ -1478,6 +1566,106 @@ window.uploadBlockPhoto=async(id,input)=>{
   try{showProg('prog-'+id,'bar-'+id,60);const url=await uploadToCloudinary(file);showProg('prog-'+id,'bar-'+id,100);hideProg('prog-'+id);const b=S.profile.blocks.find(b=>b.id===id);if(b){b.content=url;b.isCloud=true;}renderBlocks();await saveProfile();showToast('🖼️ Photo ajoutée !');}
   catch(e){showToast('❌ Erreur upload');hideProg('prog-'+id);}
 };
+
+/* ═══ GALERIE / DIAPORAMA ═══ */
+window.uploadGalleryImages=async(id,input)=>{
+  if(!input.files.length)return;
+  const b=S.profile.blocks.find(b=>b.id===id);
+  if(!b)return;
+  if(!b.images)b.images=[];
+  const bar=$('gbar-'+id),prog=$('gprog-'+id);
+  if(prog)prog.style.display='block';
+  const files=[...input.files];
+  for(let i=0;i<files.length;i++){
+    try{
+      const form=new FormData();
+      form.append('file',files[i]);
+      form.append('upload_preset','qrtag_unsigned');
+      if(bar)bar.style.width=Math.round((i/files.length)*100)+'%';
+      const r=await fetch('https://api.cloudinary.com/v1_1/drs1losxr/image/upload',{method:'POST',body:form});
+      const data=await r.json();
+      if(data.secure_url)b.images.push(data.secure_url);
+    }catch(e){showToast('❌ Erreur upload');}
+  }
+  if(prog)prog.style.display='none';
+  input.value='';
+  saveProfile();
+  renderBlocks();
+};
+
+/* ═══ BLOC QUESTION ═══ */
+window.updateQChoice=(id,idx,field,val)=>{
+  const b=S.profile.blocks.find(b=>b.id===id);if(!b)return;
+  if(!b.choices)b.choices=[{text:'',page:0},{text:'',page:1}];
+  b.choices[idx][field]=val;
+  autoSave();
+};
+window.addQChoice=(id)=>{
+  const b=S.profile.blocks.find(b=>b.id===id);if(!b)return;
+  if(!b.choices)b.choices=[];
+  if(b.choices.length>=4)return;
+  b.choices.push({text:'',page:0});
+  saveProfile();renderBlocks();
+};
+window.removeQChoice=(id,idx)=>{
+  const b=S.profile.blocks.find(b=>b.id===id);if(!b)return;
+  if(b.choices.length<=2)return;
+  b.choices.splice(idx,1);
+  saveProfile();renderBlocks();
+};
+// Navigation publique par choix
+window.qChoose=(pageIdx)=>{
+  window._pubPageIdx=pageIdx;
+  renderPublicPage(S._pubUid,S._pubIsPreview);
+};
+window.qSubmitText=(id,inputId)=>{
+  const val=document.getElementById(inputId)?.value?.trim();
+  if(!val)return;
+  const b=S._pubProfile?.profile?.blocks?.find(b=>b.id===id);
+  if(!b||!b.choices)return;
+  // Chercher une réponse qui correspond (insensible à la casse)
+  const match=b.choices.find(c=>c.text&&val.toLowerCase().includes(c.text.toLowerCase()));
+  if(match)qChoose(match.page);
+  else if(b.choices[b.choices.length-1])qChoose(b.choices[b.choices.length-1].page);
+};
+
+window.removeGalleryImage=(id,idx)=>{
+  const b=S.profile.blocks.find(b=>b.id===id);
+  if(!b||!b.images)return;
+  b.images.splice(idx,1);
+  saveProfile();renderBlocks();
+};
+// Navigation publique du diaporama
+window.galleryGo=(gid,dir)=>{
+  const el=document.getElementById('pg-'+gid);
+  if(!el)return;
+  const slides=el.querySelectorAll('.pub-gallery-slide');
+  if(!slides.length)return;
+  const isFade=el.querySelector('.pub-gallery-track')?.classList.contains('fade-mode');
+  let cur=parseInt(el.dataset.cur||0);
+  let next=(cur+dir+slides.length)%slides.length;
+  if(isFade){
+    slides[cur].classList.remove('active');
+    slides[next].classList.add('active');
+  } else {
+    const track=el.querySelector('.pub-gallery-track');
+    if(!track)return;
+    track.classList.remove('no-anim');
+    track.classList.add('animating');
+    track.style.transform=`translateX(-${next*100}%)`;
+    track.addEventListener('transitionend',()=>track.classList.remove('animating'),{once:true});
+  }
+  el.dataset.cur=next;
+  // Dots
+  el.querySelectorAll('.pub-gallery-dot').forEach((d,i)=>d.classList.toggle('active',i===next));
+};
+window.galleryJump=(gid,idx)=>{
+  const el=document.getElementById('pg-'+gid);
+  if(!el)return;
+  const cur=parseInt(el.dataset.cur||0);
+  galleryGo(gid,idx-cur);
+};
+
 window.uploadBlockVideo=async(id,input)=>{
   const file=input.files[0];if(!file)return;showProg('vprog-'+id,'vbar-'+id,10);showToast('⏳ Upload en cours…');
   try{showProg('vprog-'+id,'vbar-'+id,50);const url=await uploadToCloudinary(file);showProg('vprog-'+id,'vbar-'+id,100);hideProg('vprog-'+id);const b=S.profile.blocks.find(b=>b.id===id);if(b){b.content=url;b.isCloud=true;}renderBlocks();await saveProfile();showToast('🎥 Vidéo ajoutée !');}
@@ -1825,15 +2013,27 @@ window.downloadQR=async()=>{
 };
 window.copyQrUrl=()=>{const url=getPublicUrl();if(navigator.clipboard){navigator.clipboard.writeText(url).then(()=>showToast('📋 URL copiée !'));}else showToast(url);};
 
-function isAdmin(){return S.user?.email?.toLowerCase()===ADMIN_EMAIL.toLowerCase();}
-function injectAdminTab(){const b=$('tab-admin-btn');if(b)b.style.display=isAdmin()?'block':'none';}
+// ⚠️ SÉCURITÉ : cette vérification est actuellement côté client (email check),
+// donc contournable depuis la console navigateur (S.user.email peut être lu mais pas falsifié
+// car il vient de Firebase Auth — mais les RULES Firestore actuelles ne vérifient PAS
+// le rôle admin, donc un utilisateur malveillant pourrait tenter d'écrire plan:'app' directement
+// en base. À sécuriser via Firebase Custom Claims + règles Firestore strictes (voir transmission.md).
+async function isAdmin(){
+  if(!S.user)return false;
+  try{
+    const token=await S.user.getIdTokenResult();
+    if(token.claims.admin===true)return true;
+  }catch(e){}
+  return S.user.email?.toLowerCase()===ADMIN_EMAIL.toLowerCase();
+}
+async function injectAdminTab(){const b=$('tab-admin-btn');if(b)b.style.display=await isAdmin()?'block':'none';}
 function makeCode(){const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let s='QRT-';for(let i=0;i<8;i++)s+=c[Math.floor(Math.random()*c.length)];return s;}
 window.adminGenCode=async()=>{const code=makeCode();try{await setDoc(doc(DB,'inviteCodes',code),{used:false,createdAt:Date.now(),usedBy:null});showToast('🎟️ '+code);loadAdminData();}catch(e){showToast('❌ '+e.message);}};
 window.adminCopy=code=>navigator.clipboard?.writeText(code).then(()=>showToast('📋 Copié !'));
 window.adminDel=async code=>{if(!confirm('Supprimer '+code+' ?'))return;try{await deleteDoc(doc(DB,'inviteCodes',code));loadAdminData();}catch(e){showToast('❌ Erreur');}};
 window.adminSetPlan=async(uid_,plan)=>{try{await setDoc(doc(DB,'users',uid_),{plan},{merge:true});showToast(plan==='app'?'📱 App activée':'👕 T-shirt activé');loadAdminData();}catch(e){showToast('❌ Erreur');}};
 
-async function loadAdminData(){if(!isAdmin())return;await Promise.all([loadCodes(),loadUsers()]);}
+async function loadAdminData(){if(!await isAdmin())return;await Promise.all([loadCodes(),loadUsers()]);}
 async function loadCodes(){
   const el=$('codes-list'),stats=$('admin-stats');if(!el)return;
   try{
@@ -1868,8 +2068,11 @@ function renderBlock(b,p,tpl,fs,align,txt,accent,linkColor,card,br,shd,gap,shdDr
     const bFsv=(b.style&&b.style.fontSize)||fs;
     const bAlignv=(b.style&&b.style.textAlign)||align;
     const pStyle=`color:${txt};font-size:${bFsv}px;line-height:1.7;text-align:${bAlignv};word-break:break-word`;
-    // bare = pas de fond → pas d'ombre sur le conteneur
-    if(b.bare)return`<div class="pub-block" style="${bStyle}"><div style="${pStyle}">${htmlContent}</div></div>`;
+    // bare = pas de fond → drop-shadow sur le texte lui-même (ombre des lettres)
+    if(b.bare){
+      const _dropStyle=shdDrop&&shdDrop!=='none'?`filter:${shdDrop}`:'';
+      return`<div class="pub-block" style="${bStyle}"><div style="${pStyle};${_dropStyle}">${htmlContent}</div></div>`;
+    }
     // carte avec fond → ombre sur la carte
     return`<div class="pub-block" style="${bStyle}"><div style="background:${card};border-radius:${br}px;padding:16px 18px;box-shadow:${shd}"><div style="${pStyle}">${htmlContent}</div></div></div>`;
   }
@@ -1877,8 +2080,11 @@ function renderBlock(b,p,tpl,fs,align,txt,accent,linkColor,card,br,shd,gap,shdDr
   if(b.type==='link'&&b.content){
     const bFsL=(b.style&&b.style.fontSize)||fs;
     const bAlignL=(b.style&&b.style.textAlign)||align;
-    // bare = lien texte → pas d'ombre
-    if(b.bare)return`<div class="pub-block" style="${bStyle}"><a href="${esc(b.content)}" style="color:${linkColor};font-size:${bFsL}px;font-weight:700;text-decoration:underline;display:block;text-align:${bAlignL}" target="_blank" rel="noopener">🔗 ${b.label?sanitizeHTML(b.label):esc(b.content)}</a></div>`;
+    // bare = lien texte → drop-shadow sur le texte du lien
+    if(b.bare){
+      const _dropStyle=shdDrop&&shdDrop!=='none'?`filter:${shdDrop}`:'';
+      return`<div class="pub-block" style="${bStyle}"><a href="${esc(b.content)}" style="color:${linkColor};font-size:${bFsL}px;font-weight:700;text-decoration:underline;display:block;text-align:${bAlignL};${_dropStyle}" target="_blank" rel="noopener">🔗 ${b.label?sanitizeHTML(b.label):esc(b.content)}</a></div>`;
+    }
     // bouton avec fond → ombre sur le bouton
     return`<div class="pub-block" style="${bStyle}"><a href="${esc(b.content)}" style="display:block;background:${accent};color:#000;border-radius:${br}px;padding:15px 20px;text-align:center;text-decoration:none;font-size:${bFsL}px;font-weight:800;box-shadow:0 4px 20px ${accent}55" target="_blank" rel="noopener">🔗 ${b.label?sanitizeHTML(b.label):esc(b.content)}</a></div>`;
   }
@@ -1911,6 +2117,43 @@ function renderBlock(b,p,tpl,fs,align,txt,accent,linkColor,card,br,shd,gap,shdDr
     }
   }
 
+  if(b.type==='question'){
+    const q=b.question||'';
+    const choices=b.choices||[];
+    const choiceBtns=choices.map((c,i)=>`
+      <button class="pub-question-btn" onclick="qChoose(${c.page})"
+        style="color:${accent};border-color:${accent}">
+        <span style="width:22px;height:22px;border-radius:50%;background:${accent};color:#000;font-size:12px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0">${i+1}</span>
+        ${esc(c.text)||`Choix ${i+1}`}
+      </button>`).join('');
+    const freeInput=b.freeText?`
+      <input id="qi-${b.id}" class="pub-question-input" placeholder="Votre réponse…" style="color:${txt};border-color:${accent}">
+      <button class="pub-question-btn" onclick="qSubmitText('${b.id}','qi-${b.id}')"
+        style="color:${accent};border-color:${accent};justify-content:center">
+        Valider →
+      </button>`:'';
+    return`<div class="pub-block" style="${bStyle}">
+      <div class="pub-question" style="background:${card};box-shadow:${shd};border-radius:${br}px">
+        <div class="pub-question-text" style="color:${txt}">${sanitizeHTML(q)}</div>
+        <div class="pub-question-choices">${choiceBtns}${freeInput}</div>
+      </div>
+    </div>`;
+  }
+
+  if(b.type==='gallery'&&b.images?.length){
+    const gid=b.id;
+    const isFade=b.transition==='fade';
+    const slides=b.images.map((img,i)=>`<div class="pub-gallery-slide${i===0?' active':''}" style="flex-shrink:0;width:100%"><img src="${esc(img)}" style="width:100%;display:block;object-fit:cover;max-height:420px;border-radius:0"></div>`).join('');
+    const dots=b.images.map((_,i)=>`<div class="pub-gallery-dot${i===0?' active':''}" onclick="galleryJump('${gid}',${i})"></div>`).join('');
+    const autoplayAttr=b.autoplay?`data-autoplay="${b.delay||3}"`:'' ;
+    const trackCls=isFade?'pub-gallery-track fade-mode':'pub-gallery-track no-anim';
+    const trackStyle=isFade?'':'transform:translateX(0%)';
+    return`<div class="pub-block" style="${bStyle}"><div class="pub-gallery" id="pg-${gid}" data-cur="0" ${autoplayAttr} style="border-radius:${br}px;overflow:hidden;box-shadow:${shd}">
+      <div class="${trackCls}" style="${trackStyle}">${slides}</div>
+      ${b.images.length>1?`<button class="pub-gallery-btn prev" onclick="galleryGo('${gid}',-1)">‹</button><button class="pub-gallery-btn next" onclick="galleryGo('${gid}',1)">›</button><div class="pub-gallery-dots">${dots}</div>`:''}
+    </div></div>`;
+  }
+
   if(b.type==='social'&&b.content){
     const sp=SOCIAL_PLATFORMS[b.platform||'instagram']||SOCIAL_PLATFORMS.instagram;
     const _spColor=(b.style&&b.style.color)||sp.color;
@@ -1921,8 +2164,11 @@ function renderBlock(b,p,tpl,fs,align,txt,accent,linkColor,card,br,shd,gap,shdDr
     const _iconColor=b.bare?_spColor:(_spLight?'#000000':'#ffffff');
     const _brandSVG=getBrandSVG(b.platform||'instagram',_iconColor,_iconSize);
     const svgIcon=_brandSVG||`<span style="font-size:${_iconSize}px">${sp.icon}</span>`;
-    // bare = icône sans fond → pas d'ombre
-    if(b.bare)return`<div class="pub-block" style="${bStyle}"><a href="${esc(b.content)}" style="color:${_spColor};font-size:${bFsS}px;font-weight:700;text-decoration:underline;display:flex;align-items:center;gap:7px;justify-content:${bAlignS==='center'?'center':bAlignS==='right'?'flex-end':'flex-start'}" target="_blank" rel="noopener">${svgIcon} ${esc(sp.label)}</a></div>`;
+    // bare = icône sans fond → drop-shadow sur l'icône/texte
+    if(b.bare){
+      const _dropStyle=shdDrop&&shdDrop!=='none'?`filter:${shdDrop}`:'';
+      return`<div class="pub-block" style="${bStyle}"><a href="${esc(b.content)}" style="color:${_spColor};font-size:${bFsS}px;font-weight:700;text-decoration:underline;display:flex;align-items:center;gap:7px;justify-content:${bAlignS==='center'?'center':bAlignS==='right'?'flex-end':'flex-start'};${_dropStyle}" target="_blank" rel="noopener">${svgIcon} ${esc(sp.label)}</a></div>`;
+    }
     // bouton coloré → ombre sur le bouton
     return`<div class="pub-block" style="${bStyle}"><a href="${esc(b.content)}" style="display:flex;align-items:center;justify-content:center;gap:9px;background:${_bg||_spColor};color:${_spLight?'#000':'#fff'};border-radius:${br}px;padding:14px 20px;text-decoration:none;font-size:${bFsS}px;font-weight:800;box-shadow:0 4px 20px ${_spColor}66" target="_blank" rel="noopener">${svgIcon} ${esc(sp.label)}</a></div>`;
   }
@@ -2081,9 +2327,11 @@ function initFreeInteractions(){
         const dx=e.clientX-rSX;
         const dy=e.clientY-rSY;
         if(isCorner){
-          // Coins : resize proportionnel sur la largeur uniquement (hauteur suit le contenu)
-          const sign=(side==='tr'||side==='br')?1:-1;
-          const nw=Math.max(60,rW+sign*Math.abs(dx>dy?dx:dy));
+          // Chaque coin a sa propre logique de delta directionnel :
+          // tr/br : tirer vers la droite (+dx) agrandit
+          // tl/bl : tirer vers la gauche (-dx) agrandit
+          const dirX=(side==='tr'||side==='br')?dx:-dx;
+          const nw=Math.max(60,rW+dirX);
           blockEl.style.width=nw+'px';
           if(side==='tl'||side==='bl') blockEl.style.left=(rL+rW-nw)+'px';
         } else {
@@ -2121,6 +2369,10 @@ async function renderPublicPage(uid_,isPreview=false){
     else{const s=await getDoc(doc(DB,'users',uid_));if(!s.exists())throw 0;pd=s.data();}
   }catch(e){$('pub-content').innerHTML='<div style="text-align:center;padding:80px">Profil introuvable</div>';return;}
   const{profile:p,username}=pd;
+  // Sauvegarder le contexte pour pubPageGo (navigation entre pages)
+  S._pubUid=uid_;S._pubIsPreview=isPreview;S._pubProfile=p;
+  // Réinitialiser l'index de page si on change de profil
+  if(S._lastPubUid!==uid_){window._pubPageIdx=0;S._lastPubUid=uid_;}
   if(!isPreview){
     try{updateDoc(doc(DB,'users',uid_),{visits:increment(1)}).catch(()=>{});}catch(e){}
     // Notifier le propriétaire du profil via Netlify Function
@@ -2156,7 +2408,19 @@ async function renderPublicPage(uid_,isPreview=false){
   const shdDrop = ['none','drop-shadow(0 4px 12px rgba(0,0,0,.18))','drop-shadow(0 6px 20px rgba(0,0,0,.32))','drop-shadow(0 8px 28px rgba(0,0,0,.48))'][p.shadowStrength!==undefined?p.shadowStrength:1];
   const gap     = (p.blockSpacing||12)+'px';
   const avatarHtml=(showP&&p.avatar)?`<img src="${esc(p.avatar)}" class="pub-avatar" style="border:3px solid ${accent};background:#fff" onerror="this.style.display='none'">` :'';
-  const blocksHtml=(p.blocks||[]).filter(b=>!b.hidden).map(b=>renderBlock(b,p,tpl,fs,align,txt,accent,linkColor,card,br,shd,gap,shdDrop)).join('');
+  // Support multi-pages : utiliser la page courante si disponible
+  const pages=p.pages&&p.pages.length?p.pages:null;
+  if(pages&&!window._pubPageIdx)window._pubPageIdx=0;
+  const activePage=pages?pages[Math.min(window._pubPageIdx||0,pages.length-1)]:null;
+  const activeBlocks=activePage?activePage.blocks:(p.blocks||[]);
+  const blocksHtml=activeBlocks.filter(b=>!b.hidden).map(b=>renderBlock(b,p,tpl,fs,align,txt,accent,linkColor,card,br,shd,gap,shdDrop)).join('');
+  // Navigation entre pages (publique)
+  const pageNavHtml=pages&&pages.length>1?`<div class="pub-page-nav" style="color:${txt}">
+    <button class="pub-page-arrow" onclick="pubPageGo(-1)" style="color:${txt}">‹</button>
+    ${pages.map((_,i)=>`<div class="pub-page-dot${i===(window._pubPageIdx||0)?' active':''}" onclick="pubPageGo(${i-(window._pubPageIdx||0)})" style="background:${i===(window._pubPageIdx||0)?txt:''}"></div>`).join('')}
+    <button class="pub-page-arrow" onclick="pubPageGo(1)" style="color:${txt}">›</button>
+    <span class="pub-page-indicator" style="color:${txt}">${(window._pubPageIdx||0)+1} / ${pages.length}</span>
+  </div>`:'';
   const _bgImgStyle=p.bgImage?`background-image:url('${p.bgImage}');background-size:cover;background-position:center;background-attachment:fixed`:'';
   const freeLayout=!!(p.freeLayout)&&isPreview; // mode libre uniquement en aperçu/édition
 
@@ -2241,6 +2505,7 @@ async function renderPublicPage(uid_,isPreview=false){
     </div>`:''}
     <div class="pub-wrap">
       ${showP&&(p.avatar||p.displayName||p.bio)?`<div style="text-align:${align};margin-bottom:28px">${avatarHtml}${p.displayName||username?`<h1 class="pub-name" style="color:${txt};font-size:${Math.round(fs*1.6)}px">${p.displayName?sanitizeHTML(p.displayName):esc(username)}</h1>`:''}${p.bio?`<p class="pub-bio" style="color:${txt};font-size:${fs}px">${sanitizeHTML(p.bio)}</p>`:''}</div>`:''}
+      ${pageNavHtml||''}
       ${blocksHtml||`<div style="text-align:center;padding:50px 0;opacity:.35;color:${txt}"><div style="font-size:48px">📭</div><p style="margin-top:8px">${t('noContent')}</p></div>`}
     </div>
     <div style="padding:20px 16px 28px;text-align:center">
@@ -2270,8 +2535,23 @@ async function renderPublicPage(uid_,isPreview=false){
       v.play().catch(e=>{console.log('[autoplay] refusé:',e.message);});
     },300);
   });
+
+  // Autoplay diaporama galerie
+  $('pub-content').querySelectorAll('.pub-gallery[data-autoplay]').forEach(el=>{
+    const delay=parseInt(el.dataset.autoplay||3)*1000;
+    // Nettoyer l'éventuel timer précédent
+    if(el._galleryTimer)clearInterval(el._galleryTimer);
+    el._galleryTimer=setInterval(()=>window.galleryGo(el.id.replace('pg-',''),1),delay);
+  });
 }
 
+window.pubPageGo=(dir)=>{
+  if(!S._pubProfile)return;
+  const pages=S._pubProfile.pages;
+  if(!pages||pages.length<=1)return;
+  window._pubPageIdx=Math.max(0,Math.min(pages.length-1,(window._pubPageIdx||0)+dir));
+  renderPublicPage(S._pubUid,S._pubIsPreview);
+};
 window.sharePublicPage=async()=>{
   if(!S.user)return;const url=getPublicUrl();
   if(navigator.share){try{await navigator.share({title:'Mon QR-MØØN',url});return;}catch(e){}}
@@ -2376,6 +2656,44 @@ window.toggleNotifications=async()=>{
   }
 };
 
+function migrateToPages(profile){
+  if(profile.pages&&profile.pages.length) return;
+  profile.pages=[{id:'p1',name:'Page 1',blocks:profile.blocks||[]}];
+  profile.blocks=profile.pages[0].blocks;
+}
+function currentPageIdx(){return S._pageIdx||0;}
+function switchPage(idx){
+  S._pageIdx=idx;
+  S.profile.blocks=S.profile.pages[idx].blocks;
+  renderBlocks();renderPageTabs();
+  if($('s-public')?.classList.contains('active'))renderPublicPage(S.user?.uid,true);
+}
+window.addPage=()=>{
+  const name=`Page ${S.profile.pages.length+1}`;
+  const newPage={id:uid(),name,blocks:[]};
+  S.profile.pages.push(newPage);
+  saveProfile();
+  switchPage(S.profile.pages.length-1);
+};
+window.renamePage=(idx)=>{
+  const p=S.profile.pages[idx];if(!p)return;
+  const n=prompt('Nom de la page :',p.name);
+  if(n&&n.trim()){p.name=n.trim();saveProfile();renderPageTabs();}
+};
+window.deletePage=(idx)=>{
+  if(S.profile.pages.length<=1){showToast('❌ Impossible de supprimer la dernière page');return;}
+  if(!confirm(`Supprimer "${S.profile.pages[idx].name}" et tout son contenu ?`))return;
+  S.profile.pages.splice(idx,1);
+  const newIdx=Math.min(currentPageIdx(),S.profile.pages.length-1);
+  saveProfile();switchPage(newIdx);
+};
+function renderPageTabs(){
+  const el=$('page-tabs');if(!el)return;
+  const cur=currentPageIdx();
+  el.innerHTML=S.profile.pages.map((p,i)=>`
+    <button class="page-tab${i===cur?' active':''}" onclick="switchPage(${i})" ondblclick="renamePage(${i})">${p.name}</button>
+  `).join('')+`<button class="page-tab-add" onclick="addPage()" title="Nouvelle page">＋</button>`;
+}
 function refreshDash(){
   if(!S.data||!S.profile)return;
   $('hdr-name').textContent='@'+(S.data.username||'');
@@ -2383,8 +2701,11 @@ function refreshDash(){
   $('re-bio').innerHTML=S.profile.bio||'';
   $('p-av').value=S.profile.avatar?.startsWith('http')?S.profile.avatar:'';
   if(S.profile.avatar)updateAvatarPreview(S.profile.avatar);
-  updateVisUI();renderBlocks();injectAdminTab();applyLang();initNotifButton();
-  if(isAdmin()&&S.data.plan!=='app'){S.data.plan='app';setDoc(doc(DB,'users',S.user.uid),{plan:'app'},{merge:true}).catch(()=>{});}
+  // Migration vers le système de pages
+  migrateToPages(S.profile);
+  S.profile.blocks=S.profile.pages[currentPageIdx()].blocks;
+  updateVisUI();renderBlocks();renderPageTabs();injectAdminTab();applyLang();initNotifButton();
+  isAdmin().then(adm=>{if(adm&&S.data.plan!=='app'){S.data.plan='app';setDoc(doc(DB,'users',S.user.uid),{plan:'app'},{merge:true}).catch(()=>{});}});
 }
 
 function checkPublicRoute(){
@@ -2426,8 +2747,8 @@ if(!checkPublicRoute()){
       S.user=user;
       try{
         const d=await loadUser(user.uid);
-        if(d){S.data=d;S.profile=d.profile||{...DEFAULT_PROFILE};setTimeout(updateVisUI,50);if(isAdmin()&&S.data.plan!=='app'){S.data.plan='app';setDoc(doc(DB,'users',user.uid),{plan:'app'},{merge:true}).catch(()=>{});}}
-        else{const nd={username:user.displayName||user.email.split('@')[0],qrId:user.uid,email:user.email,createdAt:Date.now(),plan:isAdmin()?'app':'tshirt',visits:0,profile:{...DEFAULT_PROFILE,displayName:user.displayName||''}};await setDoc(doc(DB,'users',user.uid),nd);S.data=nd;S.profile={...DEFAULT_PROFILE};}
+        if(d){S.data=d;S.profile=d.profile||{...DEFAULT_PROFILE};setTimeout(updateVisUI,50);isAdmin().then(adm=>{if(adm&&S.data.plan!=='app'){S.data.plan='app';setDoc(doc(DB,'users',user.uid),{plan:'app'},{merge:true}).catch(()=>{});}});}
+        else{const isAdm=await isAdmin();const nd={username:user.displayName||user.email.split('@')[0],qrId:user.uid,email:user.email,createdAt:Date.now(),plan:isAdm?'app':'tshirt',visits:0,profile:{...DEFAULT_PROFILE,displayName:user.displayName||''}};await setDoc(doc(DB,'users',user.uid),nd);S.data=nd;S.profile={...DEFAULT_PROFILE};}
       }catch(e){S.profile={...DEFAULT_PROFILE};}
       await _afterSplashMinDelay();
       showScreen('dashboard');
