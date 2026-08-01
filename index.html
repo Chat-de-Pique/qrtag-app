@@ -326,13 +326,21 @@
     .page-tab.active{background:var(--accent);color:#000;}
     .page-tab-add{padding:6px 10px;border-radius:10px 10px 0 0;font-size:14px;cursor:pointer;border:none;background:transparent;color:var(--muted);}
     .page-tab-add:hover{color:var(--accent);}
-    /* Navigation pages publique */
-    .pub-page-nav{display:flex;align-items:center;justify-content:center;gap:12px;padding:18px 16px 8px;}
-    .pub-page-dot{width:9px;height:9px;border-radius:50%;background:var(--muted,#aaa);cursor:pointer;transition:all .2s;}
-    .pub-page-dot.active{background:currentColor;transform:scale(1.3);}
-    .pub-page-arrow{background:none;border:none;font-size:22px;cursor:pointer;color:inherit;padding:4px 8px;opacity:.6;}
-    .pub-page-arrow:hover{opacity:1;}
-    .pub-page-indicator{font-size:12px;font-weight:700;opacity:.5;}
+    /* ═══ BLOC QUESTION ═══ */
+    .pub-question{padding:20px 18px;}
+    .pub-question-text{font-size:18px;font-weight:800;margin-bottom:16px;line-height:1.4;word-break:break-word;}
+    .pub-question-choices{display:flex;flex-direction:column;gap:10px;}
+    .pub-question-btn{width:100%;padding:14px 18px;border-radius:12px;border:2px solid currentColor;background:transparent;font-size:15px;font-weight:700;cursor:pointer;transition:all .18s;text-align:left;display:flex;align-items:center;gap:10px;font-family:inherit;}
+    .pub-question-btn:hover,.pub-question-btn:active{opacity:.85;transform:scale(.98);}
+    .pub-question-input{width:100%;padding:12px 16px;border-radius:12px;border:2px solid var(--border,#ddd);font-size:15px;background:transparent;color:inherit;box-sizing:border-box;outline:none;margin-bottom:10px;font-family:inherit;}
+    .pub-question-input:focus{border-color:currentColor;}
+    /* ═══ BOUTON PAGE SUIVANTE ═══ */
+    .pub-nextpage-btn{padding:12px 32px;border-radius:30px;border:none;font-size:14px;font-weight:800;cursor:pointer;transition:transform .15s;font-family:inherit;}
+    .pub-nextpage-btn:active{transform:scale(.95);}
+    /* ═══ ÉDITEUR RICHE — CHAMP QUESTION (dashboard) ═══ */
+    .q-text-editor{min-height:52px;padding:10px 12px;background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-weight:700;line-height:1.5;outline:none;transition:border .2s;word-break:break-word;cursor:text;}
+    .q-text-editor:focus{border-color:var(--accent);}
+    .q-text-editor:empty::before{content:attr(data-placeholder);color:var(--muted);font-weight:400;pointer-events:none;}
     .accordion-hdr{display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:10px 0;border-bottom:2px solid var(--border);user-select:none;}
     .accordion-hdr .card-title{margin-bottom:0;}
     .accordion-arrow{font-size:13px;color:var(--muted);transition:transform .25s;}
@@ -569,6 +577,7 @@
           <div class="add-block-item" onclick="addBlock('video')"><div class="abi-icon">🎥</div><div class="abi-label" id="lbl-add-video">Vidéo / GIF</div></div>
           <div class="add-block-item" onclick="addBlock('gallery')"><div class="abi-icon">🎞️</div><div class="abi-label" id="lbl-add-gallery">Galerie / Diaporama</div></div>
           <div class="add-block-item" onclick="addBlock('question')"><div class="abi-icon">❓</div><div class="abi-label" id="lbl-add-question">Question</div></div>
+          <div class="add-block-item" onclick="addBlock('nextpage')"><div class="abi-icon">➡️</div><div class="abi-label" id="lbl-add-nextpage">Page suivante</div></div>
           <div class="add-block-item" onclick="addBlock('social')" style="grid-column:span 2"><div class="abi-icon">📲</div><div class="abi-label" id="lbl-add-social">Réseau social</div></div>
         </div>
         <button class="btn btn-g" id="cancel-btn" onclick="setAddPanel(false)" style="margin-top:10px">Annuler</button>
@@ -1156,7 +1165,8 @@ window.addBlock=type=>{
   const defaults={
     social:{platform:'instagram',content:''},
     question:{question:'',choices:[{text:'',page:0},{text:'',page:1}],freeText:false},
-    gallery:{images:[],transition:'slide',autoplay:false,delay:3}
+    gallery:{images:[],transition:'slide',autoplay:false,delay:3},
+    nextpage:{label:'Suite →',targetPage:0,enabled:true}
   };
   S.profile.blocks.push({id:uid(),type,...(defaults[type]||{content:'',label:''})});
   setAddPanel(false);renderBlocks();saveProfile();
@@ -1211,12 +1221,14 @@ window.toggleBare=id=>{
 };
 
 const BLOCK_META={
-  text:   {icon:'📝',label:'Message',    color:'text'},
-  link:   {icon:'🔗',label:'Lien',       color:'link'},
-  photo:  {icon:'🖼️',label:'Photo / GIF', color:'photo'},
-  video:  {icon:'🎥',label:'Vidéo / GIF', color:'video'},
-  social: {icon:'📲',label:'Social',     color:'social'},
-  gallery:{icon:'🎞️',label:'Galerie',    color:'photo'},
+  text:    {icon:'📝',label:'Message',      color:'text'},
+  link:    {icon:'🔗',label:'Lien',         color:'link'},
+  photo:   {icon:'🖼️',label:'Photo / GIF',  color:'photo'},
+  video:   {icon:'🎥',label:'Vidéo / GIF',  color:'video'},
+  social:  {icon:'📲',label:'Social',       color:'social'},
+  gallery: {icon:'🎞️',label:'Galerie',      color:'photo'},
+  question:{icon:'❓',label:'Question',     color:'link'},
+  nextpage:{icon:'➡️',label:'Page suivante',color:'link'},
 };
 
 function renderBlocks(){
@@ -1310,14 +1322,37 @@ function renderBlocks(){
           </select>
           ${choices.length>2?`<button class="q-choice-del" onclick="removeQChoice('${b.id}',${ci})">✕</button>`:''}
         </div>`).join('');
-      body=`<input class="block-inp" placeholder="Votre question…" value="${esc(b.question||'')}"
-          oninput="updateBlock('${b.id}','question',this.value)" style="font-weight:700">
+      body=`<div class="fmt-bar-mini">
+          <button class="fmt-btn" onmousedown="event.preventDefault();richFmtQuestion('bold','${b.id}')" title="Gras"><b>G</b></button>
+          <button class="fmt-btn" onmousedown="event.preventDefault();richFmtQuestion('italic','${b.id}')" title="Italique"><i>I</i></button>
+          <button class="fmt-btn" onmousedown="event.preventDefault();richFmtQuestion('underline','${b.id}')" title="Souligné"><u>U</u></button>
+        </div>
+        <div class="q-text-editor" id="qtext-${b.id}" contenteditable="true" data-placeholder="Votre question…"
+          oninput="updateBlock('${b.id}','question',this.innerHTML)">${b.question||''}</div>
         <div style="font-size:11px;font-weight:700;color:var(--muted);margin:8px 0 4px">CHOIX → PAGE</div>
         ${choiceRows}
         ${choices.length<4?`<button class="btn btn-g" onclick="addQChoice('${b.id}')" style="width:auto;padding:6px 14px;margin-top:4px;font-size:12px">＋ Ajouter un choix</button>`:''}
         <div style="display:flex;align-items:center;gap:8px;margin-top:10px;padding-top:8px;border-top:1px solid var(--border)">
           <span style="font-size:12px;font-weight:700;color:var(--muted);flex:1">Champ texte libre</span>
           <label class="toggle-switch"><input type="checkbox" ${b.freeText?'checked':''} onchange="updateBlock('${b.id}','freeText',this.checked)"><span class="toggle-track"></span></label>
+        </div>`;
+    }
+    if(b.type==='nextpage'){
+      const pages=S.profile.pages||[{name:'Page 1'}];
+      const curPageIdx=currentPageIdx();
+      const targetOpts=pages.map((pg,i)=>`<option value="${i}">📄 ${pg.name}</option>`).join('');
+      const defaultTarget=b.targetPage!==undefined?b.targetPage:Math.min(curPageIdx+1,pages.length-1);
+      body=`<input class="block-inp" placeholder="Texte du bouton (ex: Suite →)" value="${esc(b.label||'')}"
+          oninput="updateBlock('${b.id}','label',this.value)">
+        <div style="display:flex;align-items:center;gap:8px;margin-top:6px">
+          <span style="font-size:12px;font-weight:700;color:var(--muted);white-space:nowrap">Va vers</span>
+          <select class="block-inp" style="margin-bottom:0" onchange="updateBlock('${b.id}','targetPage',+this.value)">
+            ${targetOpts.replace(`value="${defaultTarget}"`,`value="${defaultTarget}" selected`)}
+          </select>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:10px;padding-top:8px;border-top:1px solid var(--border)">
+          <span style="font-size:12px;font-weight:700;color:var(--muted);flex:1">Activer ce bouton</span>
+          <label class="toggle-switch"><input type="checkbox" ${b.enabled!==false?'checked':''} onchange="updateBlock('${b.id}','enabled',this.checked)"><span class="toggle-track"></span></label>
         </div>`;
     }
     if(b.type==='social'){
@@ -1427,6 +1462,13 @@ window.richFmtLabel=(cmd,id)=>{
   document.execCommand(cmd,false,null);
   const b=S.profile.blocks.find(b=>b.id===id);
   if(b&&editor){b.label=editor.innerHTML;autoSave();}
+};
+window.richFmtQuestion=(cmd,id)=>{
+  const editor=document.getElementById('qtext-'+id);
+  if(editor) editor.focus();
+  document.execCommand(cmd,false,null);
+  const b=S.profile.blocks.find(b=>b.id===id);
+  if(b&&editor){b.question=editor.innerHTML;autoSave();}
 };
 window.richFmt=(cmd,id)=>{
   const editor=document.getElementById('re-'+id);
@@ -1578,16 +1620,13 @@ window.uploadGalleryImages=async(id,input)=>{
   const files=[...input.files];
   for(let i=0;i<files.length;i++){
     try{
-      const form=new FormData();
-      form.append('file',files[i]);
-      form.append('upload_preset','qrtag_unsigned');
       if(bar)bar.style.width=Math.round((i/files.length)*100)+'%';
-      const r=await fetch('https://api.cloudinary.com/v1_1/drs1losxr/image/upload',{method:'POST',body:form});
-      const data=await r.json();
-      if(data.secure_url)b.images.push(data.secure_url);
-    }catch(e){showToast('❌ Erreur upload');}
+      const url=await uploadToCloudinary(files[i]);
+      b.images.push(url);
+    }catch(e){showToast('❌ Erreur upload : '+e.message);}
   }
-  if(prog)prog.style.display='none';
+  if(bar)bar.style.width='100%';
+  if(prog)setTimeout(()=>prog.style.display='none',400);
   input.value='';
   saveProfile();
   renderBlocks();
@@ -2140,6 +2179,17 @@ function renderBlock(b,p,tpl,fs,align,txt,accent,linkColor,card,br,shd,gap,shdDr
     </div>`;
   }
 
+  if(b.type==='nextpage'&&b.enabled!==false){
+    const targetIdx=b.targetPage!==undefined?b.targetPage:0;
+    const label=b.label||'Suite →';
+    return`<div class="pub-block" style="${bStyle};text-align:center">
+      <button class="pub-nextpage-btn" onclick="qChoose(${targetIdx})"
+        style="background:${accent};color:#000;box-shadow:${shd}">
+        ${esc(label)}
+      </button>
+    </div>`;
+  }
+
   if(b.type==='gallery'&&b.images?.length){
     const gid=b.id;
     const isFade=b.transition==='fade';
@@ -2369,7 +2419,7 @@ async function renderPublicPage(uid_,isPreview=false){
     else{const s=await getDoc(doc(DB,'users',uid_));if(!s.exists())throw 0;pd=s.data();}
   }catch(e){$('pub-content').innerHTML='<div style="text-align:center;padding:80px">Profil introuvable</div>';return;}
   const{profile:p,username}=pd;
-  // Sauvegarder le contexte pour pubPageGo (navigation entre pages)
+  // Sauvegarder le contexte pour qChoose (navigation entre pages via question/bouton dédié)
   S._pubUid=uid_;S._pubIsPreview=isPreview;S._pubProfile=p;
   // Réinitialiser l'index de page si on change de profil
   if(S._lastPubUid!==uid_){window._pubPageIdx=0;S._lastPubUid=uid_;}
@@ -2414,13 +2464,9 @@ async function renderPublicPage(uid_,isPreview=false){
   const activePage=pages?pages[Math.min(window._pubPageIdx||0,pages.length-1)]:null;
   const activeBlocks=activePage?activePage.blocks:(p.blocks||[]);
   const blocksHtml=activeBlocks.filter(b=>!b.hidden).map(b=>renderBlock(b,p,tpl,fs,align,txt,accent,linkColor,card,br,shd,gap,shdDrop)).join('');
-  // Navigation entre pages (publique)
-  const pageNavHtml=pages&&pages.length>1?`<div class="pub-page-nav" style="color:${txt}">
-    <button class="pub-page-arrow" onclick="pubPageGo(-1)" style="color:${txt}">‹</button>
-    ${pages.map((_,i)=>`<div class="pub-page-dot${i===(window._pubPageIdx||0)?' active':''}" onclick="pubPageGo(${i-(window._pubPageIdx||0)})" style="background:${i===(window._pubPageIdx||0)?txt:''}"></div>`).join('')}
-    <button class="pub-page-arrow" onclick="pubPageGo(1)" style="color:${txt}">›</button>
-    <span class="pub-page-indicator" style="color:${txt}">${(window._pubPageIdx||0)+1} / ${pages.length}</span>
-  </div>`:'';
+  // Pas de navigation libre entre pages : le passage de page se fait uniquement
+  // via un bloc "Bouton page suivante" (activable) ou via les choix du bloc Question.
+  const pageNavHtml='';
   const _bgImgStyle=p.bgImage?`background-image:url('${p.bgImage}');background-size:cover;background-position:center;background-attachment:fixed`:'';
   const freeLayout=!!(p.freeLayout)&&isPreview; // mode libre uniquement en aperçu/édition
 
@@ -2545,13 +2591,6 @@ async function renderPublicPage(uid_,isPreview=false){
   });
 }
 
-window.pubPageGo=(dir)=>{
-  if(!S._pubProfile)return;
-  const pages=S._pubProfile.pages;
-  if(!pages||pages.length<=1)return;
-  window._pubPageIdx=Math.max(0,Math.min(pages.length-1,(window._pubPageIdx||0)+dir));
-  renderPublicPage(S._pubUid,S._pubIsPreview);
-};
 window.sharePublicPage=async()=>{
   if(!S.user)return;const url=getPublicUrl();
   if(navigator.share){try{await navigator.share({title:'Mon QR-MØØN',url});return;}catch(e){}}
@@ -2662,7 +2701,7 @@ function migrateToPages(profile){
   profile.blocks=profile.pages[0].blocks;
 }
 function currentPageIdx(){return S._pageIdx||0;}
-function switchPage(idx){
+window.switchPage=idx=>{
   S._pageIdx=idx;
   S.profile.blocks=S.profile.pages[idx].blocks;
   renderBlocks();renderPageTabs();
